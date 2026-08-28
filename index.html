@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>TMC Live Monitor - Shopee Ops</title>
+  <style>
+    :root {
+      --bg-color: #0b0f19;
+      --card-bg: #151d30;
+      --card-border: #1e293b;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --primary-orange: #ff5722;
+      --status-ok: #10b981;
+      --status-warn: #f59e0b;
+      --status-crit: #ef4444;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
+    body { background-color: var(--bg-color); color: var(--text-main); min-height: 100vh; padding: 24px; overflow-x: hidden; }
+
+    /* Header */
+    header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--card-border); padding-bottom: 16px; margin-bottom: 24px; }
+    .title-group { display: flex; align-items: center; gap: 16px; }
+    .badge-hub { background: var(--primary-orange); color: white; padding: 6px 14px; border-radius: 8px; font-weight: 800; font-size: 1.1rem; letter-spacing: 1px; }
+    h1 { font-size: 1.8rem; font-weight: 700; letter-spacing: 0.5px; }
+    .clock-group { text-align: right; }
+    #live-clock { font-size: 1.8rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+    .sound-btn { background: #334155; border: 1px solid #475569; color: #fff; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: 600; margin-top: 6px; transition: 0.2s; }
+    .sound-btn.active { background: #059669; border-color: #10b981; }
+
+    /* KPIs */
+    .kpi-container { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 28px; }
+    .kpi-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px; padding: 20px; text-align: center; }
+    .kpi-title { font-size: 0.9rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
+    .kpi-val { font-size: 3.2rem; font-weight: 800; margin-top: 8px; font-variant-numeric: tabular-nums; }
+    .crit-val { color: var(--status-crit); }
+
+    /* Tabela de Monitoramento */
+    .table-container { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px; overflow: hidden; }
+    table { width: 100%; border-collapse: collapse; text-align: left; }
+    th { background: #0f172a; padding: 16px 20px; font-size: 0.85rem; text-transform: uppercase; color: var(--text-muted); letter-spacing: 1px; border-bottom: 1px solid var(--card-border); }
+    td { padding: 18px 20px; font-size: 1.15rem; font-weight: 600; border-bottom: 1px solid rgba(255,255,255,0.05); }
+
+    /* Status e Efeitos */
+    .tag { display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px; border-radius: 6px; font-size: 0.85rem; font-weight: 700; text-transform: uppercase; }
+    .tag-ok { background: rgba(16, 185, 129, 0.15); color: var(--status-ok); border: 1px solid var(--status-ok); }
+    .tag-warn { background: rgba(245, 158, 11, 0.15); color: var(--status-warn); border: 1px solid var(--status-warn); }
+    .tag-crit { background: rgba(239, 68, 68, 0.2); color: var(--status-crit); border: 1px solid var(--status-crit); }
+
+    .pulse-crit { animation: alertPulse 1.5s infinite; background: rgba(239, 68, 68, 0.08); }
+    @keyframes alertPulse {
+      0% { box-shadow: inset 0 0 0 0 rgba(239, 68, 68, 0.4); }
+      50% { box-shadow: inset 0 0 20px 0 rgba(239, 68, 68, 0.6); background: rgba(239, 68, 68, 0.15); }
+      100% { box-shadow: inset 0 0 0 0 rgba(239, 68, 68, 0.4); }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="title-group">
+      <div class="badge-hub">HUB LRJ-19</div>
+      <h1>TEMPO DE CARREGAMENTO & SAÍDA (TMC)</h1>
+    </div>
+    <div class="clock-group">
+      <div id="live-clock">--:--:--</div>
+      <button class="sound-btn" id="btn-sound" onclick="toggleAudio()">🔊 Habilitar Áudio de Alerta</button>
+    </div>
+  </header>
+
+  <div class="kpi-container">
+    <div class="kpi-card">
+      <div class="kpi-title">Veículos Carregando no Pátio</div>
+      <div class="kpi-val" id="kpi-total">0</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-title">Média de Tempo no Carro</div>
+      <div class="kpi-val" id="kpi-media">00:00</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-title">Em Alerta Crítico (> 15 min)</div>
+      <div class="kpi-val crit-val" id="kpi-crit">0</div>
+    </div>
+  </div>
+
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th>Rota</th>
+          <th>ID Motorista</th>
+          <th>Início Carregamento (Ei)</th>
+          <th>Tempo Decorrido (TMC)</th>
+          <th>Status Operacional</th>
+        </tr>
+      </thead>
+      <tbody id="grid-body">
+        <!-- Inserido dinamicamente via JS -->
+      </tbody>
+    </table>
+  </div>
+
+  <script>
+    // Cole aqui a URL do seu Google Apps Script implantado
+    const API_URL = "https://script.google.com/macros/s/AKfycbwQbxVH1ofEHUNdj5bUu8Es3gfbHkTpOeSY1NdjazRTMR5iZGj2uvgwfyRVF6hhxF-2/exec";
+
+    let audioContext = null;
+    let audioEnabled = false;
+    let localData = [];
+
+    // Sintetizador Web Audio API para não depender de arquivos externos
+    function playBeep() {
+      if (!audioEnabled) return;
+      if (!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      const osc = audioContext.createOscillator();
+      const gain = audioContext.createGain();
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(880, audioContext.currentTime); // Tom sonoro alto
+      gain.gain.setValueAtTime(0.3, audioContext.currentTime);
+      osc.connect(gain);
+      gain.connect(audioContext.destination);
+      osc.start();
+      osc.stop(audioContext.currentTime + 0.4);
+    }
+
+    function toggleAudio() {
+      if (!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      audioEnabled = !audioEnabled;
+      const btn = document.getElementById("btn-sound");
+      if (audioEnabled) {
+        btn.classList.add("active");
+        btn.innerText = "🔊 Áudio Ativado";
+        playBeep();
+      } else {
+        btn.classList.remove("active");
+        btn.innerText = "🔇 Áudio Desativado";
+      }
+    }
+
+    // Relógio em tempo real
+    setInterval(() => {
+      const now = new Date();
+      document.getElementById("live-clock").innerText = now.toLocaleTimeString('pt-BR');
+    }, 1000);
+
+    // Converte HH:mm:ss em segundos decorridos até agora
+    function getElapsedSeconds(timeStr) {
+      const parts = timeStr.split(":");
+      const now = new Date();
+      const target = new Date();
+      target.setHours(parseInt(parts[0], 10), parseInt(parts[1], 10), parseInt(parts[2] || 0, 10), 0);
+      return Math.max(0, Math.floor((now - target) / 1000));
+    }
+
+    function formatMinSec(seconds) {
+      const m = Math.floor(seconds / 60);
+      const s = seconds % 60;
+      return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+    }
+
+    async function fetchData() {
+      try {
+        const res = await fetch(API_URL);
+        localData = await res.json();
+      } catch (err) {
+        console.warn("Aguardando conexão com a planilha...", err);
+      }
+    }
+
+    function renderView() {
+      const tbody = document.getElementById("grid-body");
+      if (!localData.length) {
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color: var(--text-muted); padding: 40px;">Nenhum veículo em processo de carregamento no momento.</td></tr>`;
+        document.getElementById("kpi-total").innerText = 0;
+        document.getElementById("kpi-media").innerText = "00:00";
+        document.getElementById("kpi-crit").innerText = 0;
+        return;
+      }
+
+      // Calcula tempos e ordena os mais atrasados para o topo
+      const processed = localData.map(item => {
+        const secs = getElapsedSeconds(item.validationEi);
+        return { ...item, elapsedSecs: secs };
+      }).sort((a, b) => b.elapsedSecs - a.elapsedSecs);
+
+      let totalSecs = 0;
+      let critCount = 0;
+      let html = "";
+
+      processed.forEach(item => {
+        totalSecs += item.elapsedSecs;
+        const mins = item.elapsedSecs / 60;
+        let statusTag = "";
+        let rowClass = "";
+
+        if (mins >= 15) {
+          critCount++;
+          rowClass = "pulse-crit";
+          statusTag = `<span class="tag tag-crit">● Crítico (> 15 min)</span>`;
+        } else if (mins >= 10) {
+          statusTag = `<span class="tag tag-warn">● Atenção (10-15m)</span>`;
+        } else {
+          statusTag = `<span class="tag tag-ok">● Regular (&lt; 10m)</span>`;
+        }
+
+        html += `
+          <tr class="${rowClass}">
+            <td style="font-weight: 800; color: #fff;">${item.rota}</td>
+            <td>${item.idDriver}</td>
+            <td style="color: var(--text-muted);">${item.validationEi}</td>
+            <td style="font-size: 1.3rem; font-variant-numeric: tabular-nums;">${formatMinSec(item.elapsedSecs)} min</td>
+            <td>${statusTag}</td>
+          </tr>
+        `;
+      });
+
+      tbody.innerHTML = html;
+      document.getElementById("kpi-total").innerText = processed.length;
+      document.getElementById("kpi-crit").innerText = critCount;
+      document.getElementById("kpi-media").innerText = formatMinSec(Math.round(totalSecs / processed.length));
+
+      // Se houver carro crítico, dispara o aviso sonoro
+      if (critCount > 0) playBeep();
+    }
+
+    // Busca novos dados na planilha a cada 10s
+    fetchData();
+    setInterval(fetchData, 10000);
+
+    // Atualiza contadores de tela e animações a cada 1s sem travar a interface
+    setInterval(renderView, 1000);
+  </script>
+</body>
+</html>
