@@ -2,10 +2,10 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Shopee LRJ-19 - Live Ops & Analytics</title>
+  <title>Shopee LRJ-19 - Central de Operações & Inteligência Logística</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@700;800&family=JetBrains+Mono:wght@600;700;800&family=Inter:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@700;800&family=JetBrains+Mono:wght@600;700;800&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <style>
     :root {
       --bg: #060911;
@@ -29,45 +29,29 @@
     .hub-badge { font-family: 'Chakra Petch', sans-serif; background: var(--shopee); color: #fff; font-size: 1.15rem; font-weight: 800; padding: 6px 14px; border-radius: 6px; letter-spacing: 1px; }
     .nav-tabs { display: flex; gap: 8px; }
     .tab-btn { background: #131a2e; border: 1px solid #202b47; color: #94a3b8; padding: 9px 18px; border-radius: 8px; font-weight: 800; font-size: 0.85rem; cursor: pointer; transition: 0.15s ease-out; }
-    .tab-btn.active { background: #1e293b; color: #38bdf8; border-color: #38bdf8; box-shadow: 0 0 10px rgba(56,189,248,0.25); }
+    .tab-btn.active { background: #1e293b; color: #38bdf8; border-color: #38bdf8; box-shadow: 0 0 12px rgba(56,189,248,0.25); }
     .clock-display { font-family: 'JetBrains Mono', monospace; font-size: 1.35rem; font-weight: 800; color: #38bdf8; }
 
     .view-panel { display: none; }
     .view-panel.active { display: block; }
 
-    /* KPIs */
+    /* KPI Cards */
     .kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin-bottom: 16px; }
-    .kpi-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 10px; padding: 12px; text-align: center; }
+    .kpi-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 10px; padding: 14px; text-align: center; }
     .kpi-label { font-size: 0.7rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.8px; }
-    .kpi-val { font-family: 'Chakra Petch', sans-serif; font-size: 2rem; font-weight: 800; margin-top: 2px; }
+    .kpi-val { font-family: 'Chakra Petch', sans-serif; font-size: 2.1rem; font-weight: 800; margin-top: 3px; }
     .crit-txt { color: var(--crit); }
     .blue-txt { color: var(--blue); }
     .green-txt { color: var(--ok); }
 
-    /* Board Table */
+    /* Table Operacional */
     .board-box { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px; overflow: hidden; }
     table { width: 100%; border-collapse: collapse; text-align: left; }
     th { background: #080c14; padding: 12px 16px; font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); border-bottom: 1px solid var(--card-border); }
     td { padding: 10px 16px; font-size: 0.95rem; border-bottom: 1px solid rgba(255,255,255,0.03); }
-    
-    /* Correção de quebra da Rota */
-    .flight-gate {
-      font-family: 'Chakra Petch', sans-serif;
-      font-size: 1.25rem;
-      font-weight: 800;
-      color: #fbbf24;
-      background: #1c1917;
-      padding: 4px 10px;
-      border-radius: 6px;
-      display: inline-block;
-      border: 1px solid #451a03;
-      white-space: nowrap;
-      min-width: 65px;
-      text-align: center;
-    }
+    .flight-gate { font-family: 'Chakra Petch', sans-serif; font-size: 1.25rem; font-weight: 800; color: #fbbf24; background: #1c1917; padding: 4px 10px; border-radius: 6px; display: inline-block; border: 1px solid #451a03; white-space: nowrap; min-width: 65px; text-align: center; }
     .mono-time { font-family: 'JetBrains Mono', monospace; font-weight: 700; }
 
-    /* Tags Status */
     .status-badge { font-family: 'Chakra Petch', sans-serif; font-size: 0.75rem; font-weight: 800; padding: 4px 10px; border-radius: 5px; text-transform: uppercase; display: inline-flex; align-items: center; white-space: nowrap; }
     .tag-ok { background: rgba(16,185,129,0.15); color: var(--ok); border: 1px solid var(--ok); }
     .tag-warn { background: rgba(245,158,11,0.15); color: var(--warn); border: 1px solid var(--warn); }
@@ -77,21 +61,33 @@
       100% { box-shadow: 0 0 14px var(--crit); opacity: 1; }
     }
 
-    /* Analytics Layout */
-    .filter-bar { display: flex; gap: 12px; margin-bottom: 16px; background: var(--card-bg); border: 1px solid var(--card-border); padding: 10px 16px; border-radius: 10px; align-items: center; flex-wrap: wrap; }
-    .filter-select { background: #080c14; border: 1px solid #202b47; color: #f1f5f9; padding: 6px 12px; border-radius: 6px; font-weight: 700; font-size: 0.85rem; outline: none; }
-    
-    .analytics-grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 14px; }
+    /* Filters Bar */
+    .filter-bar { display: flex; gap: 12px; margin-bottom: 16px; background: var(--card-bg); border: 1px solid var(--card-border); padding: 12px 18px; border-radius: 10px; align-items: center; flex-wrap: wrap; }
+    .filter-select { background: #080c14; border: 1px solid #202b47; color: #f1f5f9; padding: 8px 14px; border-radius: 6px; font-weight: 700; font-size: 0.85rem; outline: none; cursor: pointer; }
+
+    /* Grid Analytics */
+    .analytics-grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 16px; }
     .col-4 { grid-column: span 4; }
     .col-6 { grid-column: span 6; }
     .col-8 { grid-column: span 8; }
     .col-12 { grid-column: span 12; }
 
-    .chart-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px; padding: 16px 20px; }
+    .chart-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px; padding: 18px 20px; display: flex; flex-direction: column; justify-content: space-between; }
     .chart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-    .chart-title { font-size: 0.8rem; font-weight: 800; color: #cbd5e1; text-transform: uppercase; letter-spacing: 0.5px; }
-    .chart-badge { background: #1a233a; color: var(--blue); font-size: 0.7rem; font-weight: 700; padding: 2px 6px; border-radius: 4px; }
-    .canvas-holder { position: relative; width: 100%; height: 240px; }
+    .chart-title { font-size: 0.82rem; font-weight: 800; color: #cbd5e1; text-transform: uppercase; letter-spacing: 0.6px; }
+    .chart-badge { background: #1a233a; color: var(--blue); font-size: 0.7rem; font-weight: 700; padding: 3px 7px; border-radius: 4px; }
+    .canvas-holder { position: relative; width: 100%; height: 230px; }
+
+    /* Ranking Ofensores List */
+    .ranking-list { display: flex; flex-direction: column; gap: 10px; max-height: 290px; overflow-y: auto; padding-right: 6px; }
+    .ranking-item { display: flex; align-items: center; justify-content: space-between; background: #080c14; border: 1px solid #1a233a; padding: 10px 14px; border-radius: 8px; }
+    .rank-pos { font-family: 'Chakra Petch', sans-serif; font-size: 1.1rem; font-weight: 800; width: 28px; color: var(--warn); }
+    .rank-info { flex: 1; margin: 0 12px; }
+    .rank-name { font-weight: 700; color: #fff; font-size: 0.9rem; }
+    .rank-meta { font-size: 0.75rem; color: var(--text-muted); margin-top: 2px; }
+    .rank-bar-bg { width: 100%; height: 5px; background: #1a233a; border-radius: 3px; margin-top: 6px; overflow: hidden; }
+    .rank-bar-fill { height: 100%; background: var(--crit); border-radius: 3px; }
+    .rank-val { font-family: 'JetBrains Mono', monospace; font-size: 1.1rem; font-weight: 800; color: var(--crit); }
   </style>
 </head>
 <body>
@@ -101,7 +97,7 @@
       <div class="hub-badge">HUB LRJ-19</div>
       <div class="nav-tabs">
         <button id="tab-btn-ops" class="tab-btn active" onclick="setTab('ops')">✈️ MONITOR OPERACIONAL (TV)</button>
-        <button id="tab-btn-analytics" class="tab-btn" onclick="setTab('analytics')">📊 DASHBOARD EXECUTIVO & ANÁLISES</button>
+        <button id="tab-btn-analytics" class="tab-btn" onclick="setTab('analytics')">📊 DASHBOARD EXECUTIVO GERAL</button>
       </div>
     </div>
     <div style="display: flex; align-items: center; gap: 14px;">
@@ -110,7 +106,9 @@
     </div>
   </header>
 
-  <!-- ABA 1: OPERACIONAL -->
+  <!-- ============================================== -->
+  <!-- ABA 1: MONITOR OPERACIONAL (PÁTIO AO VIVO)     -->
+  <!-- ============================================== -->
   <div id="panel-ops" class="view-panel active">
     <div class="kpi-row">
       <div class="kpi-card">
@@ -131,7 +129,7 @@
       </div>
       <div class="kpi-card">
         <div class="kpi-label">Finalizados Hoje / Início Rota</div>
-        <div class="kpi-val" id="kpi-today-summary" style="font-size: 1.4rem; padding-top: 4px;">0 rotas | --:--</div>
+        <div class="kpi-val" id="kpi-today-summary" style="font-size: 1.35rem; padding-top: 4px;">0 rotas | --:--</div>
       </div>
     </div>
 
@@ -139,7 +137,7 @@
       <table>
         <thead>
           <tr>
-            <th style="width: 100px;">Rota</th>
+            <th style="width: 95px;">Rota</th>
             <th>Motorista</th>
             <th>Modal</th>
             <th>Transportadora</th>
@@ -149,16 +147,18 @@
           </tr>
         </thead>
         <tbody id="ops-table-body">
-          <tr><td colspan="7" style="text-align:center; color: var(--text-muted); padding: 30px;">Carregando operação...</td></tr>
+          <tr><td colspan="7" style="text-align:center; color: var(--text-muted); padding: 30px;">Carregando operação ao vivo...</td></tr>
         </tbody>
       </table>
     </div>
   </div>
 
-  <!-- ABA 2: GERENCIAL -->
+  <!-- ============================================== -->
+  <!-- ABA 2: VISÃO GERENCIAL / ANALYTICS GERAL       -->
+  <!-- ============================================== -->
   <div id="panel-analytics" class="view-panel">
     <div class="filter-bar">
-      <span style="font-size: 0.75rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">🔍 Filtros:</span>
+      <span style="font-size: 0.75rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">🔍 Filtros Executivos:</span>
       <select id="filtro-data" class="filter-select" onchange="runAnalytics()"><option value="ALL">Todas as Datas</option></select>
       <select id="filtro-modal" class="filter-select" onchange="runAnalytics()"><option value="ALL">Todos os Modais</option></select>
       <select id="filtro-transp" class="filter-select" onchange="runAnalytics()"><option value="ALL">Todas as Transportadoras</option></select>
@@ -166,7 +166,7 @@
 
     <div class="kpi-row">
       <div class="kpi-card">
-        <div class="kpi-label">Total Carros Filtrados</div>
+        <div class="kpi-label">Total Carros Analisados</div>
         <div class="kpi-val blue-txt" id="mgr-kpi-total">0</div>
       </div>
       <div class="kpi-card">
@@ -174,35 +174,61 @@
         <div class="kpi-val" id="mgr-kpi-tmc">0.0 min</div>
       </div>
       <div class="kpi-card">
-        <div class="kpi-label">Aderência SLA (&lt; 10 min)</div>
+        <div class="kpi-label">Aderência ao SLA (&lt; 10 min)</div>
         <div class="kpi-val green-txt" id="mgr-kpi-sla">0.0%</div>
       </div>
       <div class="kpi-card">
-        <div class="kpi-label">Modal Mais Rápido</div>
+        <div class="kpi-label">Modal Mais Rápido (Melhor TMC)</div>
         <div class="kpi-val" id="mgr-kpi-fastest" style="font-size: 1.4rem; padding-top: 6px; color: #fbbf24;">--</div>
       </div>
     </div>
 
     <div class="analytics-grid">
+      <!-- 1. Distribuição SLA -->
       <div class="chart-card col-4">
-        <div class="chart-header"><div class="chart-title">Distribuição de SLA</div><span class="chart-badge">Volume</span></div>
+        <div class="chart-header">
+          <div class="chart-title">Distribuição de SLA</div>
+          <span class="chart-badge">Volume</span>
+        </div>
         <div class="canvas-holder"><canvas id="chartFaixas"></canvas></div>
       </div>
+
+      <!-- 2. Curva de Escoamento Contínua (Área Gradiente) -->
       <div class="chart-card col-8">
-        <div class="chart-header"><div class="chart-title">Carros Finalizados por Horário</div><span class="chart-badge">Volume / Hora</span></div>
+        <div class="chart-header">
+          <div class="chart-title">Curva de Carregamento por Horário</div>
+          <span class="chart-badge">Fluxo / Hora</span>
+        </div>
         <div class="canvas-holder"><canvas id="chartHoras"></canvas></div>
       </div>
+
+      <!-- 3. TMC Médio por Modal (Barras com Meta 10m) -->
       <div class="chart-card col-6">
-        <div class="chart-header"><div class="chart-title">TMC Médio por Modal (Minutos)</div><span class="chart-badge">Agilidade</span></div>
+        <div class="chart-header">
+          <div class="chart-title">TMC Médio por Modal (Minutos)</div>
+          <span class="chart-badge">Agilidade</span>
+        </div>
         <div class="canvas-holder"><canvas id="chartModal"></canvas></div>
       </div>
+
+      <!-- 4. TMC Médio por Transportadora -->
       <div class="chart-card col-6">
-        <div class="chart-header"><div class="chart-title">TMC Médio por Transportadora</div><span class="chart-badge">Performance</span></div>
+        <div class="chart-header">
+          <div class="chart-title">TMC Médio por Transportadora (Minutos)</div>
+          <span class="chart-badge">Performance</span>
+        </div>
         <div class="canvas-holder"><canvas id="chartTransp"></canvas></div>
       </div>
+
+      <!-- 5. Ranking dos Top 6 Motoristas Ofensores -->
       <div class="chart-card col-12">
-        <div class="chart-header"><div class="chart-title">Top 8 Motoristas com Maior TMC Médio (Mais Demorados)</div><span class="chart-badge">Ofensores</span></div>
-        <div class="canvas-holder" style="height: 220px;"><canvas id="chartDrivers"></canvas></div>
+        <div class="chart-header">
+          <div class="chart-title">Ranking de Ofensores - Top Motoristas com Maior TMC Médio</div>
+          <span class="chart-badge" style="background:#451a03; color:#fca5a5;">Meta: &le; 10 min</span>
+        </div>
+        <div class="ranking-list" id="ranking-drivers-container">
+          <!-- Renderizado via JS -->
+        </div>
       </div>
     </div>
   </div>
@@ -217,7 +243,6 @@
     let activeTab = 'ops';
     let charts = {};
 
-    // Função de limpeza e padronização dos modais
     function cleanModal(m) {
       if (!m) return "OUTROS";
       const u = String(m).toUpperCase().trim();
@@ -281,9 +306,9 @@
         const res = await fetch(API_URL);
         const raw = await res.json();
         
-        // Padroniza modais na base recebida
         dataset = raw.map(d => ({
           ...d,
+          data: String(d.data || "").trim(),
           modal: cleanModal(d.modal)
         }));
 
@@ -291,14 +316,14 @@
         if (activeTab === 'ops') renderOps();
         else runAnalytics();
       } catch (err) {
-        console.warn("Sincronizando...", err);
+        console.warn("Sincronizando base...", err);
       }
     }
 
     function renderOps() {
       const now = getNowSec();
       const allDates = [...new Set(dataset.map(d => d.data).filter(Boolean))];
-      const targetDate = allDates[allDates.length - 1];
+      const targetDate = allDates[allDates.length - 1]; // Pega o dia mais recente ativo
 
       const patio = [];
       let totalSec = 0, critCount = 0, finishedCount = 0;
@@ -318,7 +343,7 @@
             const elap = Math.max(0, now - ei);
             patio.push({ ...d, elap });
             totalSec += elap;
-            if (elap >= 600) critCount++; // Crítico >= 10 minutos (600s)
+            if (elap >= 600) critCount++; // Crítico >= 10m
           }
         }
       });
@@ -348,8 +373,6 @@
       let html = "";
       patio.forEach(car => {
         const mins = car.elap / 60;
-        
-        // Novo SLA: Crítico > 10m | Atenção 7-10m | Regular < 7m
         let badge = mins >= 10 ? `<span class="status-badge tag-crit">🔴 CRÍTICO (>10M)</span>` :
                     mins >= 7  ? `<span class="status-badge tag-warn">🟡 ATENÇÃO (7-10M)</span>` :
                                  `<span class="status-badge tag-ok">🟢 REGULAR (&lt;7M)</span>`;
@@ -371,25 +394,30 @@
     }
 
     function buildFilters() {
-      const dates = [...new Set(dataset.map(d => d.data).filter(Boolean))];
-      const modais = [...new Set(dataset.map(d => d.modal).filter(Boolean))];
-      const transps = [...new Set(dataset.map(d => d.transportadora).filter(Boolean))];
+      const dates = [...new Set(dataset.map(d => d.data).filter(Boolean))].sort().reverse();
+      const modais = [...new Set(dataset.map(d => d.modal).filter(Boolean))].sort();
+      const transps = [...new Set(dataset.map(d => d.transportadora).filter(Boolean))].sort();
 
-      populateDropdown("filtro-data", dates);
-      populateDropdown("filtro-modal", modais);
-      populateDropdown("filtro-transp", transps);
+      updateDropdown("filtro-data", dates);
+      updateDropdown("filtro-modal", modais);
+      updateDropdown("filtro-transp", transps);
     }
 
-    function populateDropdown(id, items) {
+    function updateDropdown(id, items) {
       const el = document.getElementById(id);
-      if (el.options.length > 1) return;
+      const curVal = el.value;
+      el.innerHTML = `<option value="ALL">Todas as ${id === 'filtro-data' ? 'Datas' : id === 'filtro-modal' ? 'Modais' : 'Transportadoras'}</option>`;
       items.forEach(it => {
         const opt = document.createElement("option");
         opt.value = it; opt.innerText = it;
         el.appendChild(opt);
       });
+      if (items.includes(curVal)) el.value = curVal;
     }
 
+    // ==============================================
+    // MOTOR ANALYTICS EXECUTIVO
+    // ==============================================
     function runAnalytics() {
       const selD = document.getElementById("filtro-data").value;
       const selM = document.getElementById("filtro-modal").value;
@@ -401,7 +429,7 @@
                (selT === 'ALL' || d.transportadora === selT);
       });
 
-      const faixas = { "< 7m": 0, "7-10m": 0, "10-15m": 0, "> 15m": 0 };
+      const faixas = { "< 7m (Ideal)": 0, "7-10m (Alerta)": 0, "10-15m (Crítico)": 0, "> 15m (Gargalo)": 0 };
       const horas = {}, modais = {}, transps = {}, drivers = {};
       let totalSec = 0, count = 0, onTime = 0;
 
@@ -413,12 +441,12 @@
           const tmcMin = (co - ei) / 60;
           totalSec += (co - ei);
           count++;
-          if (tmcMin <= 10) onTime++; // SLA meta <= 10 min
+          if (tmcMin <= 10) onTime++; // SLA meta <= 10m
 
-          if (tmcMin < 7) faixas["< 7m"]++;
-          else if (tmcMin <= 10) faixas["7-10m"]++;
-          else if (tmcMin <= 15) faixas["10-15m"]++;
-          else faixas["> 15m"]++;
+          if (tmcMin < 7) faixas["< 7m (Ideal)"]++;
+          else if (tmcMin <= 10) faixas["7-10m (Alerta)"]++;
+          else if (tmcMin <= 15) faixas["10-15m (Crítico)"]++;
+          else faixas["> 15m (Gargalo)"]++;
 
           const hBlock = d.checkOut.split(":")[0] + "h";
           horas[hBlock] = (horas[hBlock] || 0) + 1;
@@ -429,7 +457,7 @@
           if (!transps[d.transportadora]) transps[d.transportadora] = [];
           transps[d.transportadora].push(tmcMin);
 
-          const dKey = `${d.driverNome} (${d.modal})`;
+          const dKey = `${d.driverNome} • ${d.modal}`;
           if (!drivers[dKey]) drivers[dKey] = [];
           drivers[dKey].push(tmcMin);
         }
@@ -446,39 +474,84 @@
       });
       document.getElementById("mgr-kpi-fastest").innerText = fastest;
 
-      createDoughnut('chartFaixas', Object.keys(faixas), Object.values(faixas));
-      createBar('chartHoras', Object.keys(horas).sort(), Object.keys(horas).sort().map(k => horas[k]), '#38bdf8');
-      createAvgBar('chartModal', modais, '#ff5722');
-      createAvgBar('chartTransp', transps, '#8b5cf6');
-      createDriversBar('chartDrivers', drivers);
+      renderDonutSLA(faixas);
+      renderAreaFlow(horas);
+      renderAvgBar('chartModal', modais, '#ff5722');
+      renderAvgBar('chartTransp', transps, '#8b5cf6');
+      renderRankingList(drivers);
     }
 
-    function createDoughnut(id, labels, values) {
-      if (charts[id]) charts[id].destroy();
-      charts[id] = new Chart(document.getElementById(id), {
+    function renderDonutSLA(faixas) {
+      const ctx = document.getElementById("chartFaixas").getContext('2d');
+      if (charts["chartFaixas"]) charts["chartFaixas"].destroy();
+
+      charts["chartFaixas"] = new Chart(ctx, {
         type: 'doughnut',
         data: {
-          labels: labels,
-          datasets: [{ data: values, backgroundColor: ['#10b981', '#f59e0b', '#f97316', '#ef4444'], borderColor: '#0d1322', borderWidth: 2 }]
+          labels: Object.keys(faixas),
+          datasets: [{
+            data: Object.values(faixas),
+            backgroundColor: ['#10b981', '#f59e0b', '#f97316', '#ef4444'],
+            borderColor: '#0d1322',
+            borderWidth: 3
+          }]
         },
         options: {
           responsive: true, maintainAspectRatio: false,
           plugins: {
-            legend: { position: 'right', labels: { color: '#cbd5e1', font: { weight: 700 } } },
-            datalabels: { color: '#fff', font: { weight: '800', size: 11 }, formatter: v => v > 0 ? v : '' }
+            legend: { position: 'right', labels: { color: '#cbd5e1', font: { weight: 700, size: 10 } } },
+            datalabels: {
+              color: '#fff',
+              font: { weight: '800', size: 12 },
+              formatter: (val, ctx) => {
+                const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
+                return (val > 0 && total > 0) ? `${Math.round((val/total)*100)}%` : '';
+              }
+            }
           }
         }
       });
     }
 
-    function createBar(id, labels, values, color) {
-      if (charts[id]) charts[id].destroy();
-      charts[id] = new Chart(document.getElementById(id), {
-        type: 'bar',
-        data: { labels: labels, datasets: [{ data: values, backgroundColor: color, borderRadius: 6, maxBarThickness: 42 }] },
+    function renderAreaFlow(horas) {
+      const sortedH = Object.keys(horas).sort();
+      const vals = sortedH.map(k => horas[k]);
+
+      const ctx = document.getElementById("chartHoras").getContext('2d');
+      if (charts["chartHoras"]) charts["chartHoras"].destroy();
+
+      const gradient = ctx.createLinearGradient(0, 0, 0, 200);
+      gradient.addColorStop(0, 'rgba(56, 189, 248, 0.4)');
+      gradient.addColorStop(1, 'rgba(56, 189, 248, 0.0)');
+
+      charts["chartHoras"] = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: sortedH,
+          datasets: [{
+            label: 'Saídas / Hora',
+            data: vals,
+            borderColor: '#38bdf8',
+            backgroundColor: gradient,
+            borderWidth: 3,
+            fill: true,
+            tension: 0.35,
+            pointBackgroundColor: '#38bdf8',
+            pointRadius: 5
+          }]
+        },
         options: {
           responsive: true, maintainAspectRatio: false,
-          plugins: { legend: { display: false }, datalabels: { anchor: 'end', align: 'top', color: color, font: { weight: '800', size: 11 } } },
+          plugins: {
+            legend: { display: false },
+            datalabels: {
+              anchor: 'end',
+              align: 'top',
+              color: '#38bdf8',
+              font: { weight: '800', size: 11 },
+              formatter: v => `${v} carros`
+            }
+          },
           scales: {
             y: { grid: { color: '#1c2742' }, ticks: { color: '#64748b' } },
             x: { grid: { display: false }, ticks: { color: '#94a3b8', font: { weight: 700 } } }
@@ -487,16 +560,31 @@
       });
     }
 
-    function createAvgBar(id, obj, color) {
+    function renderAvgBar(canvasId, obj, color) {
       const labels = Object.keys(obj);
       const vals = labels.map(k => parseFloat((obj[k].reduce((a, b) => a + b, 0) / obj[k].length).toFixed(1)));
-      if (charts[id]) charts[id].destroy();
-      charts[id] = new Chart(document.getElementById(id), {
+
+      const ctx = document.getElementById(canvasId).getContext('2d');
+      if (charts[canvasId]) charts[canvasId].destroy();
+
+      charts[canvasId] = new Chart(ctx, {
         type: 'bar',
-        data: { labels: labels, datasets: [{ data: vals, backgroundColor: color, borderRadius: 6, maxBarThickness: 45 }] },
+        data: {
+          labels: labels,
+          datasets: [{ data: vals, backgroundColor: color, borderRadius: 6, maxBarThickness: 45 }]
+        },
         options: {
           responsive: true, maintainAspectRatio: false,
-          plugins: { legend: { display: false }, datalabels: { anchor: 'end', align: 'top', color: '#fff', font: { weight: '800', size: 11 }, formatter: v => `${v} min` } },
+          plugins: {
+            legend: { display: false },
+            datalabels: {
+              anchor: 'end',
+              align: 'top',
+              color: '#f8fafc',
+              font: { weight: '800', size: 11 },
+              formatter: v => `${v} min`
+            }
+          },
           scales: {
             y: { grid: { color: '#1c2742' }, ticks: { color: '#64748b' } },
             x: { grid: { display: false }, ticks: { color: '#94a3b8', font: { weight: 700 } } }
@@ -505,25 +593,37 @@
       });
     }
 
-    function createDriversBar(id, obj) {
-      const list = Object.keys(obj).map(k => {
-        const arr = obj[k];
-        return { name: k, avg: parseFloat((arr.reduce((a, b) => a + b, 0) / arr.length).toFixed(1)) };
-      }).sort((a, b) => b.avg - a.avg).slice(0, 8);
+    function renderRankingList(drivers) {
+      const container = document.getElementById("ranking-drivers-container");
+      const list = Object.keys(drivers).map(k => {
+        const arr = drivers[k];
+        const avg = arr.reduce((a, b) => a + b, 0) / arr.length;
+        return { name: k, avg: parseFloat(avg.toFixed(1)), count: arr.length };
+      }).sort((a, b) => b.avg - a.avg).slice(0, 6); // Top 6
 
-      if (charts[id]) charts[id].destroy();
-      charts[id] = new Chart(document.getElementById(id), {
-        type: 'bar',
-        data: { labels: list.map(d => d.name), datasets: [{ data: list.map(d => d.avg), backgroundColor: '#ef4444', borderRadius: 5, maxBarThickness: 18 }] },
-        options: {
-          indexAxis: 'y', responsive: true, maintainAspectRatio: false,
-          plugins: { legend: { display: false }, datalabels: { anchor: 'end', align: 'right', color: '#fca5a5', font: { weight: '800', size: 10 }, formatter: v => `${v} min` } },
-          scales: {
-            x: { grid: { color: '#1c2742' }, ticks: { color: '#64748b' } },
-            y: { grid: { display: false }, ticks: { color: '#cbd5e1', font: { weight: 700, size: 10 } } }
-          }
-        }
+      if (!list.length) {
+        container.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding:20px;">Nenhum dado encontrado para o filtro selecionado.</div>`;
+        return;
+      }
+
+      const maxTmc = Math.max(...list.map(d => d.avg), 40);
+      let html = "";
+
+      list.forEach((item, idx) => {
+        const pct = Math.min(100, Math.round((item.avg / maxTmc) * 100));
+        html += `
+          <div class="ranking-item">
+            <div class="rank-pos">#${idx + 1}</div>
+            <div class="rank-info">
+              <div class="rank-name">${item.name}</div>
+              <div class="rank-meta">${item.count} viagens registradas</div>
+              <div class="rank-bar-bg"><div class="rank-bar-fill" style="width: ${pct}%;"></div></div>
+            </div>
+            <div class="rank-val">${item.avg} <span style="font-size:0.75rem; color:var(--text-muted);">min</span></div>
+          </div>
+        `;
       });
+      container.innerHTML = html;
     }
 
     setInterval(() => {
