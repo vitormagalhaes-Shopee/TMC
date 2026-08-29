@@ -2,11 +2,10 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Shopee LRJ-19 - Central de Operações & Inteligência Logística</title>
-  <!-- Chart.js + Plugin de Rótulos Diretos (DataLabels) -->
+  <title>Shopee LRJ-19 - Live Ops & Analytics</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700;800&family=JetBrains+Mono:wght@400;600;800&family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@700;800&family=JetBrains+Mono:wght@600;700;800&family=Inter:wght@500;600;700;800;900&display=swap" rel="stylesheet">
   <style>
     :root {
       --bg: #060911;
@@ -20,85 +19,98 @@
       --warn: #f59e0b;
       --crit: #ef4444;
       --blue: #38bdf8;
-      --purple: #a855f7;
+      --purple: #8b5cf6;
     }
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; min-height: 100vh; padding: 18px; }
+    body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; min-height: 100vh; padding: 16px; }
 
-    /* Header Estilo Centro de Controle */
-    header { display: flex; justify-content: space-between; align-items: center; background: var(--header-bg); border: 1px solid var(--card-border); padding: 12px 24px; border-radius: 12px; margin-bottom: 18px; }
-    .hub-badge { font-family: 'Chakra Petch', sans-serif; background: var(--shopee); color: #fff; font-size: 1.15rem; font-weight: 800; padding: 6px 14px; border-radius: 6px; letter-spacing: 1.2px; }
+    /* Header */
+    header { display: flex; justify-content: space-between; align-items: center; background: var(--header-bg); border: 1px solid var(--card-border); padding: 12px 20px; border-radius: 12px; margin-bottom: 16px; }
+    .hub-badge { font-family: 'Chakra Petch', sans-serif; background: var(--shopee); color: #fff; font-size: 1.15rem; font-weight: 800; padding: 6px 14px; border-radius: 6px; letter-spacing: 1px; }
     .nav-tabs { display: flex; gap: 8px; }
-    .tab-btn { background: #131a2e; border: 1px solid #202b47; color: #94a3b8; padding: 10px 20px; border-radius: 8px; font-weight: 800; font-size: 0.85rem; cursor: pointer; transition: 0.2s; letter-spacing: 0.5px; }
-    .tab-btn.active { background: #1e293b; color: #38bdf8; border-color: #38bdf8; box-shadow: 0 0 12px rgba(56,189,248,0.25); }
-    .clock-display { font-family: 'JetBrains Mono', monospace; font-size: 1.4rem; font-weight: 800; color: #38bdf8; }
+    .tab-btn { background: #131a2e; border: 1px solid #202b47; color: #94a3b8; padding: 9px 18px; border-radius: 8px; font-weight: 800; font-size: 0.85rem; cursor: pointer; transition: 0.15s ease-out; }
+    .tab-btn.active { background: #1e293b; color: #38bdf8; border-color: #38bdf8; box-shadow: 0 0 10px rgba(56,189,248,0.25); }
+    .clock-display { font-family: 'JetBrains Mono', monospace; font-size: 1.35rem; font-weight: 800; color: #38bdf8; }
 
-    /* Views */
     .view-panel { display: none; }
     .view-panel.active { display: block; }
 
-    /* KPI Cards */
-    .kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-bottom: 18px; }
-    .kpi-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 10px; padding: 14px; text-align: center; }
-    .kpi-label { font-size: 0.72rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
-    .kpi-val { font-family: 'Chakra Petch', sans-serif; font-size: 2.1rem; font-weight: 800; margin-top: 4px; }
+    /* KPIs */
+    .kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin-bottom: 16px; }
+    .kpi-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 10px; padding: 12px; text-align: center; }
+    .kpi-label { font-size: 0.7rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.8px; }
+    .kpi-val { font-family: 'Chakra Petch', sans-serif; font-size: 2rem; font-weight: 800; margin-top: 2px; }
     .crit-txt { color: var(--crit); }
     .blue-txt { color: var(--blue); }
     .green-txt { color: var(--ok); }
 
-    /* Airport Table */
+    /* Board Table */
     .board-box { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px; overflow: hidden; }
     table { width: 100%; border-collapse: collapse; text-align: left; }
-    th { background: #080c14; padding: 14px 18px; font-size: 0.78rem; text-transform: uppercase; color: var(--text-muted); letter-spacing: 1px; border-bottom: 1px solid var(--card-border); }
-    td { padding: 12px 18px; font-size: 0.98rem; border-bottom: 1px solid rgba(255,255,255,0.03); vertical-align: middle; }
-    .flight-gate { font-family: 'Chakra Petch', sans-serif; font-size: 1.35rem; font-weight: 800; color: #fbbf24; background: #1c1917; padding: 3px 10px; border-radius: 6px; display: inline-block; border: 1px solid #451a03; }
+    th { background: #080c14; padding: 12px 16px; font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); border-bottom: 1px solid var(--card-border); }
+    td { padding: 10px 16px; font-size: 0.95rem; border-bottom: 1px solid rgba(255,255,255,0.03); }
+    
+    /* Correção de quebra da Rota */
+    .flight-gate {
+      font-family: 'Chakra Petch', sans-serif;
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: #fbbf24;
+      background: #1c1917;
+      padding: 4px 10px;
+      border-radius: 6px;
+      display: inline-block;
+      border: 1px solid #451a03;
+      white-space: nowrap;
+      min-width: 65px;
+      text-align: center;
+    }
     .mono-time { font-family: 'JetBrains Mono', monospace; font-weight: 700; }
 
-    .status-badge { font-family: 'Chakra Petch', sans-serif; font-size: 0.8rem; font-weight: 800; padding: 5px 10px; border-radius: 6px; letter-spacing: 0.8px; text-transform: uppercase; display: inline-flex; align-items: center; }
+    /* Tags Status */
+    .status-badge { font-family: 'Chakra Petch', sans-serif; font-size: 0.75rem; font-weight: 800; padding: 4px 10px; border-radius: 5px; text-transform: uppercase; display: inline-flex; align-items: center; white-space: nowrap; }
     .tag-ok { background: rgba(16,185,129,0.15); color: var(--ok); border: 1px solid var(--ok); }
     .tag-warn { background: rgba(245,158,11,0.15); color: var(--warn); border: 1px solid var(--warn); }
-    .tag-crit { background: rgba(239,68,68,0.2); color: var(--crit); border: 1px solid var(--crit); animation: beaconPulse 1.2s infinite alternate; }
+    .tag-crit { background: rgba(239,68,68,0.25); color: var(--crit); border: 1px solid var(--crit); animation: beaconPulse 1.2s infinite alternate; }
     @keyframes beaconPulse {
       0% { box-shadow: 0 0 2px var(--crit); opacity: 0.85; }
-      100% { box-shadow: 0 0 16px var(--crit); opacity: 1; }
+      100% { box-shadow: 0 0 14px var(--crit); opacity: 1; }
     }
 
-    /* Analytics Dashboard Layout (Looker Style) */
-    .filter-bar { display: flex; gap: 14px; margin-bottom: 18px; background: var(--card-bg); border: 1px solid var(--card-border); padding: 12px 20px; border-radius: 10px; align-items: center; flex-wrap: wrap; }
-    .filter-select { background: #080c14; border: 1px solid #202b47; color: #f1f5f9; padding: 8px 14px; border-radius: 6px; font-weight: 700; font-size: 0.85rem; outline: none; }
+    /* Analytics Layout */
+    .filter-bar { display: flex; gap: 12px; margin-bottom: 16px; background: var(--card-bg); border: 1px solid var(--card-border); padding: 10px 16px; border-radius: 10px; align-items: center; flex-wrap: wrap; }
+    .filter-select { background: #080c14; border: 1px solid #202b47; color: #f1f5f9; padding: 6px 12px; border-radius: 6px; font-weight: 700; font-size: 0.85rem; outline: none; }
     
-    .analytics-grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 16px; }
+    .analytics-grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 14px; }
     .col-4 { grid-column: span 4; }
     .col-6 { grid-column: span 6; }
     .col-8 { grid-column: span 8; }
     .col-12 { grid-column: span 12; }
 
-    .chart-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px; padding: 16px 20px; display: flex; flex-direction: column; justify-content: space-between; }
+    .chart-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px; padding: 16px 20px; }
     .chart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-    .chart-title { font-size: 0.85rem; font-weight: 800; color: #cbd5e1; text-transform: uppercase; letter-spacing: 0.8px; }
-    .chart-badge { background: #1a233a; color: var(--blue); font-size: 0.75rem; font-weight: 700; padding: 3px 8px; border-radius: 4px; }
-    .canvas-holder { position: relative; width: 100%; height: 260px; }
+    .chart-title { font-size: 0.8rem; font-weight: 800; color: #cbd5e1; text-transform: uppercase; letter-spacing: 0.5px; }
+    .chart-badge { background: #1a233a; color: var(--blue); font-size: 0.7rem; font-weight: 700; padding: 2px 6px; border-radius: 4px; }
+    .canvas-holder { position: relative; width: 100%; height: 240px; }
   </style>
 </head>
 <body>
 
   <header>
-    <div style="display: flex; align-items: center; gap: 14px;">
+    <div style="display: flex; align-items: center; gap: 12px;">
       <div class="hub-badge">HUB LRJ-19</div>
       <div class="nav-tabs">
-        <button class="tab-btn active" onclick="setTab('ops')">✈️ MONITOR OPERACIONAL (TV AO VIVO)</button>
-        <button class="tab-btn" onclick="setTab('analytics')">📊 DASHBOARD EXECUTIVO & ANÁLISES</button>
+        <button id="tab-btn-ops" class="tab-btn active" onclick="setTab('ops')">✈️ MONITOR OPERACIONAL (TV)</button>
+        <button id="tab-btn-analytics" class="tab-btn" onclick="setTab('analytics')">📊 DASHBOARD EXECUTIVO & ANÁLISES</button>
       </div>
     </div>
-    <div style="display: flex; align-items: center; gap: 16px;">
+    <div style="display: flex; align-items: center; gap: 14px;">
       <div class="clock-display" id="clock-txt">--:--:--</div>
       <button id="btn-audio" class="tab-btn" onclick="toggleAudio()">🔊 Alerta Sonoro</button>
     </div>
   </header>
 
-  <!-- ============================================== -->
-  <!-- ABA 1: MONITOR DE PÁTIO (OPERACIONAL AO VIVO) -->
-  <!-- ============================================== -->
+  <!-- ABA 1: OPERACIONAL -->
   <div id="panel-ops" class="view-panel active">
     <div class="kpi-row">
       <div class="kpi-card">
@@ -110,16 +122,16 @@
         <div class="kpi-val" id="kpi-patio-avg">00:00</div>
       </div>
       <div class="kpi-card">
-        <div class="kpi-label">Alertas Críticos (> 15m)</div>
+        <div class="kpi-label">Alertas Críticos (> 10M)</div>
         <div class="kpi-val crit-txt" id="kpi-patio-crit">0</div>
       </div>
       <div class="kpi-card">
-        <div class="kpi-label">Velocidade de Escoamento (Hoje)</div>
+        <div class="kpi-label">Carros Carregados / Hora</div>
         <div class="kpi-val blue-txt" id="kpi-flow-rate">0.0 /h</div>
       </div>
       <div class="kpi-card">
         <div class="kpi-label">Finalizados Hoje / Início Rota</div>
-        <div class="kpi-val" id="kpi-today-summary" style="font-size: 1.5rem; padding-top: 6px;">0 rotas | --:--</div>
+        <div class="kpi-val" id="kpi-today-summary" style="font-size: 1.4rem; padding-top: 4px;">0 rotas | --:--</div>
       </div>
     </div>
 
@@ -131,34 +143,30 @@
             <th>Motorista</th>
             <th>Modal</th>
             <th>Transportadora</th>
-            <th>Fim Subida (Ei)</th>
+            <th>Horário Subida de Rota</th>
             <th>Tempo no Carro (TMC)</th>
             <th style="text-align: right;">Status Operacional</th>
           </tr>
         </thead>
         <tbody id="ops-table-body">
-          <tr><td colspan="7" style="text-align:center; color: var(--text-muted); padding: 40px;">Carregando dados da operação ao vivo...</td></tr>
+          <tr><td colspan="7" style="text-align:center; color: var(--text-muted); padding: 30px;">Carregando operação...</td></tr>
         </tbody>
       </table>
     </div>
   </div>
 
-  <!-- ============================================== -->
-  <!-- ABA 2: VISÃO GERENCIAL / LOOKER DASHBOARD      -->
-  <!-- ============================================== -->
+  <!-- ABA 2: GERENCIAL -->
   <div id="panel-analytics" class="view-panel">
-    <!-- FILTROS GERENCIAIS -->
     <div class="filter-bar">
-      <span style="font-size: 0.8rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">🔍 Filtros Executivos:</span>
-      <select id="filtro-data" class="filter-select" onchange="runAnalyticsDashboard()"><option value="ALL">Todas as Datas</option></select>
-      <select id="filtro-modal" class="filter-select" onchange="runAnalyticsDashboard()"><option value="ALL">Todos os Modais</option></select>
-      <select id="filtro-transp" class="filter-select" onchange="runAnalyticsDashboard()"><option value="ALL">Todas as Transportadoras</option></select>
+      <span style="font-size: 0.75rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">🔍 Filtros:</span>
+      <select id="filtro-data" class="filter-select" onchange="runAnalytics()"><option value="ALL">Todas as Datas</option></select>
+      <select id="filtro-modal" class="filter-select" onchange="runAnalytics()"><option value="ALL">Todos os Modais</option></select>
+      <select id="filtro-transp" class="filter-select" onchange="runAnalytics()"><option value="ALL">Todas as Transportadoras</option></select>
     </div>
 
-    <!-- CARDS EXECUTIVOS ESPECÍFICOS -->
     <div class="kpi-row">
       <div class="kpi-card">
-        <div class="kpi-label">Total Carros Analisados</div>
+        <div class="kpi-label">Total Carros Filtrados</div>
         <div class="kpi-val blue-txt" id="mgr-kpi-total">0</div>
       </div>
       <div class="kpi-card">
@@ -166,91 +174,69 @@
         <div class="kpi-val" id="mgr-kpi-tmc">0.0 min</div>
       </div>
       <div class="kpi-card">
-        <div class="kpi-label">Aderência SLA (&lt; 15 min)</div>
+        <div class="kpi-label">Aderência SLA (&lt; 10 min)</div>
         <div class="kpi-val green-txt" id="mgr-kpi-sla">0.0%</div>
       </div>
       <div class="kpi-card">
-        <div class="kpi-label">Modal Mais Rápido (Menor TMC)</div>
-        <div class="kpi-val" id="mgr-kpi-fastest" style="font-size: 1.6rem; padding-top: 6px; color: #fbbf24;">--</div>
+        <div class="kpi-label">Modal Mais Rápido</div>
+        <div class="kpi-val" id="mgr-kpi-fastest" style="font-size: 1.4rem; padding-top: 6px; color: #fbbf24;">--</div>
       </div>
     </div>
 
-    <!-- GRID DE GRÁFICOS CLEAN COM VALORES EXIBIDOS DIRETAMENTE -->
     <div class="analytics-grid">
-      <!-- 1. Distribuição de SLAs -->
       <div class="chart-card col-4">
-        <div class="chart-header">
-          <div class="chart-title">Distribuição por Faixa de SLA</div>
-          <span class="chart-badge">Volume</span>
-        </div>
-        <div class="canvas-holder">
-          <canvas id="chartFaixas"></canvas>
-        </div>
+        <div class="chart-header"><div class="chart-title">Distribuição de SLA</div><span class="chart-badge">Volume</span></div>
+        <div class="canvas-holder"><canvas id="chartFaixas"></canvas></div>
       </div>
-
-      <!-- 2. Escoamento por Hora -->
       <div class="chart-card col-8">
-        <div class="chart-header">
-          <div class="chart-title">Curva de Carregamento por Janela de Horário</div>
-          <span class="chart-badge">Carros/Hora</span>
-        </div>
-        <div class="canvas-holder">
-          <canvas id="chartHoras"></canvas>
-        </div>
+        <div class="chart-header"><div class="chart-title">Carros Finalizados por Horário</div><span class="chart-badge">Volume / Hora</span></div>
+        <div class="canvas-holder"><canvas id="chartHoras"></canvas></div>
       </div>
-
-      <!-- 3. TMC por Modal -->
       <div class="chart-card col-6">
-        <div class="chart-header">
-          <div class="chart-title">TMC Médio por Modal (Minutos)</div>
-          <span class="chart-badge">Agilidade</span>
-        </div>
-        <div class="canvas-holder">
-          <canvas id="chartModal"></canvas>
-        </div>
+        <div class="chart-header"><div class="chart-title">TMC Médio por Modal (Minutos)</div><span class="chart-badge">Agilidade</span></div>
+        <div class="canvas-holder"><canvas id="chartModal"></canvas></div>
       </div>
-
-      <!-- 4. TMC por Transportadora -->
       <div class="chart-card col-6">
-        <div class="chart-header">
-          <div class="chart-title">TMC Médio por Transportadora (Minutos)</div>
-          <span class="chart-badge">Performance</span>
-        </div>
-        <div class="canvas-holder">
-          <canvas id="chartTransp"></canvas>
-        </div>
+        <div class="chart-header"><div class="chart-title">TMC Médio por Transportadora</div><span class="chart-badge">Performance</span></div>
+        <div class="canvas-holder"><canvas id="chartTransp"></canvas></div>
       </div>
-
-      <!-- 5. Top Motoristas Demorados -->
       <div class="chart-card col-12">
-        <div class="chart-header">
-          <div class="chart-title">Top 8 Motoristas com Maior TMC Médio (Mais Demorados)</div>
-          <span class="chart-badge">Ofensores</span>
-        </div>
-        <div class="canvas-holder" style="height: 220px;">
-          <canvas id="chartDrivers"></canvas>
-        </div>
+        <div class="chart-header"><div class="chart-title">Top 8 Motoristas com Maior TMC Médio (Mais Demorados)</div><span class="chart-badge">Ofensores</span></div>
+        <div class="canvas-holder" style="height: 220px;"><canvas id="chartDrivers"></canvas></div>
       </div>
     </div>
   </div>
 
   <script>
-    // Registra plugin para exibir números diretamente sobre os gráficos
     Chart.register(ChartDataLabels);
 
-    const API_URL = "https://script.google.com/macros/s/AKfycbwO9YxzWqLNQeR6o_5c6s6JB6Q5a_cUMLss6x_dbp10si9szgFJXJZfDR81fAsvYME/exec"; // <-- Cole sua URL aqui
+    const API_URL = "https://script.google.com/macros/s/AKfycbwO9YxzWqLNQeR6o_5c6s6JB6Q5a_cUMLss6x_dbp10si9szgFJXJZfDR81fAsvYME/exec";
 
-    let fullDataset = [];
-    let audioCtx = null;
-    let audioActive = false;
+    let dataset = [];
+    let audioCtx = null, audioActive = false;
+    let activeTab = 'ops';
+    let charts = {};
 
-    let cFaixas = null, cHoras = null, cModal = null, cTransp = null, cDrivers = null;
+    // Função de limpeza e padronização dos modais
+    function cleanModal(m) {
+      if (!m) return "OUTROS";
+      const u = String(m).toUpperCase().trim();
+      if (u.includes("PASSEIO")) return "PASSEIO";
+      if (u.includes("FIORINO")) return "FIORINO";
+      if (u.includes("MOTO")) return "MOTO";
+      if (u.includes("VAN")) return "VAN";
+      if (u.includes("VUC")) return "VUC";
+      return u;
+    }
 
     function setTab(tab) {
-      document.querySelectorAll(".tab-btn").forEach((b, i) => b.classList.toggle("active", (tab === 'ops' && i === 0) || (tab === 'analytics' && i === 1)));
+      activeTab = tab;
+      document.getElementById("tab-btn-ops").classList.toggle("active", tab === 'ops');
+      document.getElementById("tab-btn-analytics").classList.toggle("active", tab === 'analytics');
       document.getElementById("panel-ops").classList.toggle("active", tab === 'ops');
       document.getElementById("panel-analytics").classList.toggle("active", tab === 'analytics');
-      if (tab === 'analytics') runAnalyticsDashboard();
+      if (tab === 'analytics') runAnalytics();
+      else renderOps();
     }
 
     function toggleAudio() {
@@ -267,148 +253,127 @@
       const osc = audioCtx.createOscillator();
       const gain = audioCtx.createGain();
       osc.frequency.setValueAtTime(880, audioCtx.currentTime);
-      gain.gain.setValueAtTime(0.25, audioCtx.currentTime);
+      gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
       osc.connect(gain);
       gain.connect(audioCtx.destination);
       osc.start();
-      osc.stop(audioCtx.currentTime + 0.35);
+      osc.stop(audioCtx.currentTime + 0.3);
     }
 
-    function parseTimeToSecs(t) {
+    function parseSec(t) {
       if (!t) return null;
       const m = String(t).trim().match(/(\d{2}):(\d{2})(?::(\d{2}))?/);
-      if (!m) return null;
-      return parseInt(m[1], 10) * 3600 + parseInt(m[2], 10) * 60 + (m[3] ? parseInt(m[3], 10) : 0);
+      return m ? parseInt(m[1], 10) * 3600 + parseInt(m[2], 10) * 60 + (m[3] ? parseInt(m[3], 10) : 0) : null;
     }
 
     function fmtMinSec(sec) {
-      const m = Math.floor(sec / 60);
-      const s = Math.floor(sec % 60);
+      const m = Math.floor(sec / 60), s = sec % 60;
       return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
     }
 
-    function getCurDaySecs() {
+    function getNowSec() {
       const n = new Date();
       return n.getHours() * 3600 + n.getMinutes() * 60 + n.getSeconds();
-    }
-
-    function getTodayFormatted() {
-      const n = new Date();
-      const d = String(n.getDate()).padStart(2, '0');
-      const m = String(n.getMonth() + 1).padStart(2, '0');
-      const y = n.getFullYear();
-      return `${d}/${m}/${y}`;
     }
 
     async function fetchApiData() {
       try {
         const res = await fetch(API_URL);
-        fullDataset = await res.json();
-        buildFilterOptions();
-        renderLiveOps();
-        if (document.getElementById("panel-analytics").classList.contains("active")) {
-          runAnalyticsDashboard();
-        }
+        const raw = await res.json();
+        
+        // Padroniza modais na base recebida
+        dataset = raw.map(d => ({
+          ...d,
+          modal: cleanModal(d.modal)
+        }));
+
+        buildFilters();
+        if (activeTab === 'ops') renderOps();
+        else runAnalytics();
       } catch (err) {
-        console.warn("Buscando dados...", err);
+        console.warn("Sincronizando...", err);
       }
     }
 
-    // ==========================================
-    // RENDER OPERACIONAL AO VIVO (APENAS HOJE)
-    // ==========================================
-    function renderLiveOps() {
-      const nowSec = getCurDaySecs();
-      const todayStr = getTodayFormatted();
-
-      // Pega a data de hoje ou a data mais recente presente na base se for teste
-      const allDates = [...new Set(fullDataset.map(d => d.data).filter(Boolean))];
-      const targetDate = allDates.includes(todayStr) ? todayStr : allDates[allDates.length - 1];
+    function renderOps() {
+      const now = getNowSec();
+      const allDates = [...new Set(dataset.map(d => d.data).filter(Boolean))];
+      const targetDate = allDates[allDates.length - 1];
 
       const patio = [];
-      let totalPatioSec = 0;
-      let critCount = 0;
-      let todayFinishedCount = 0;
+      let totalSec = 0, critCount = 0, finishedCount = 0;
+      let firstStart = null, lastEnd = null;
 
-      let firstStart = null;
-      let lastEnd = null;
-
-      fullDataset.forEach(d => {
-        // Filtra estritamente a data operacional atual
+      dataset.forEach(d => {
         if (d.data !== targetDate) return;
+        const ti = parseSec(d.validationTi);
+        const ei = parseSec(d.validationEi);
 
-        const eiSec = parseTimeToSecs(d.validationEi);
-        const tiSec = parseTimeToSecs(d.validationTi);
+        if (ti !== null) firstStart = (firstStart === null || ti < firstStart) ? ti : firstStart;
+        if (d.isFinalizado) finishedCount++;
 
-        if (tiSec !== null) firstStart = (firstStart === null || tiSec < firstStart) ? tiSec : firstStart;
-        if (d.isFinalizado) todayFinishedCount++;
-
-        if (eiSec !== null) {
-          lastEnd = (lastEnd === null || eiSec > lastEnd) ? eiSec : lastEnd;
-
-          // Se está no pátio carregando no momento
+        if (ei !== null) {
+          lastEnd = (lastEnd === null || ei > lastEnd) ? ei : lastEnd;
           if (!d.isFinalizado) {
-            const elap = Math.max(0, nowSec - eiSec);
+            const elap = Math.max(0, now - ei);
             patio.push({ ...d, elap });
-            totalPatioSec += elap;
-            if (elap >= 900) critCount++;
+            totalSec += elap;
+            if (elap >= 600) critCount++; // Crítico >= 10 minutos (600s)
           }
         }
       });
 
-      // KPIs Topo Operacionais
       document.getElementById("kpi-patio-count").innerText = patio.length;
       document.getElementById("kpi-patio-crit").innerText = critCount;
-      document.getElementById("kpi-patio-avg").innerText = patio.length ? fmtMinSec(Math.round(totalPatioSec / patio.length)) : "00:00";
+      document.getElementById("kpi-patio-avg").innerText = patio.length ? fmtMinSec(Math.round(totalSec / patio.length)) : "00:00";
 
       if (firstStart !== null && lastEnd !== null && lastEnd > firstStart) {
-        const spanHours = (lastEnd - firstStart) / 3600;
-        const rate = spanHours > 0 ? (todayFinishedCount / spanHours).toFixed(1) : todayFinishedCount;
-        document.getElementById("kpi-flow-rate").innerText = `${rate} /h`;
-        
-        const firstTiStr = `${String(Math.floor(firstStart / 3600)).padStart(2,'0')}:${String(Math.floor((firstStart % 3600)/60)).padStart(2,'0')}`;
-        document.getElementById("kpi-today-summary").innerText = `${todayFinishedCount} rotas | ${firstTiStr}`;
+        const spanH = (lastEnd - firstStart) / 3600;
+        document.getElementById("kpi-flow-rate").innerText = `${(finishedCount / spanH).toFixed(1)} /h`;
+        const tiStr = `${String(Math.floor(firstStart / 3600)).padStart(2,'0')}:${String(Math.floor((firstStart % 3600)/60)).padStart(2,'0')}`;
+        document.getElementById("kpi-today-summary").innerText = `${finishedCount} rotas | ${tiStr}`;
       } else {
         document.getElementById("kpi-flow-rate").innerText = `0.0 /h`;
-        document.getElementById("kpi-today-summary").innerText = `${todayFinishedCount} rotas | --:--`;
+        document.getElementById("kpi-today-summary").innerText = `${finishedCount} rotas | --:--`;
       }
 
       patio.sort((a, b) => b.elap - a.elap);
 
       const tb = document.getElementById("ops-table-body");
       if (!patio.length) {
-        tb.innerHTML = `<tr><td colspan="7" style="text-align:center; color: var(--text-muted); padding: 35px;">Pátio livre no momento. Nenhum carro carregando.</td></tr>`;
+        tb.innerHTML = `<tr><td colspan="7" style="text-align:center; color: var(--text-muted); padding: 30px;">Pátio livre no momento. Nenhum carro carregando.</td></tr>`;
         return;
       }
 
       let html = "";
       patio.forEach(car => {
         const mins = car.elap / 60;
-        let badge = mins >= 15 ? `<span class="status-badge tag-crit">🔴 CRÍTICO (>15m)</span>` :
-                    mins >= 10 ? `<span class="status-badge tag-warn">🟡 ATENÇÃO (10-15m)</span>` :
-                                 `<span class="status-badge tag-ok">🟢 REGULAR (&lt;10m)</span>`;
+        
+        // Novo SLA: Crítico > 10m | Atenção 7-10m | Regular < 7m
+        let badge = mins >= 10 ? `<span class="status-badge tag-crit">🔴 CRÍTICO (>10M)</span>` :
+                    mins >= 7  ? `<span class="status-badge tag-warn">🟡 ATENÇÃO (7-10M)</span>` :
+                                 `<span class="status-badge tag-ok">🟢 REGULAR (&lt;7M)</span>`;
 
         html += `
           <tr>
-            <td><div class="flight-gate">${car.rota}</div></td>
+            <td style="white-space: nowrap;"><div class="flight-gate">${car.rota}</div></td>
             <td><strong style="color:#fff;">${car.driverNome}</strong><br><small style="color:var(--text-muted);">ID: ${car.idDriver}</small></td>
             <td><span style="background:#131a2e; padding:4px 8px; border-radius:4px; font-weight:700; color:#38bdf8;">${car.modal}</span></td>
             <td>${car.transportadora}</td>
             <td class="mono-time" style="color:var(--text-muted);">${car.validationEi}</td>
-            <td class="mono-time" style="font-size:1.2rem; color:#fff;">${fmtMinSec(car.elap)} min</td>
+            <td class="mono-time" style="font-size:1.15rem; color:#fff;">${fmtMinSec(car.elap)} min</td>
             <td style="text-align:right;">${badge}</td>
           </tr>
         `;
       });
       tb.innerHTML = html;
-
       if (critCount > 0) soundBeep();
     }
 
-    function buildFilterOptions() {
-      const dates = [...new Set(fullDataset.map(d => d.data).filter(Boolean))];
-      const modais = [...new Set(fullDataset.map(d => d.modal).filter(Boolean))];
-      const transps = [...new Set(fullDataset.map(d => d.transportadora).filter(Boolean))];
+    function buildFilters() {
+      const dates = [...new Set(dataset.map(d => d.data).filter(Boolean))];
+      const modais = [...new Set(dataset.map(d => d.modal).filter(Boolean))];
+      const transps = [...new Set(dataset.map(d => d.transportadora).filter(Boolean))];
 
       populateDropdown("filtro-data", dates);
       populateDropdown("filtro-modal", modais);
@@ -425,45 +390,35 @@
       });
     }
 
-    // ==========================================
-    // VISÃO GERENCIAL COM NÚMEROS DIRETOS
-    // ==========================================
-    function runAnalyticsDashboard() {
+    function runAnalytics() {
       const selD = document.getElementById("filtro-data").value;
       const selM = document.getElementById("filtro-modal").value;
       const selT = document.getElementById("filtro-transp").value;
 
-      const filtered = fullDataset.filter(d => {
+      const filtered = dataset.filter(d => {
         return (selD === 'ALL' || d.data === selD) &&
                (selM === 'ALL' || d.modal === selM) &&
                (selT === 'ALL' || d.transportadora === selT);
       });
 
-      const faixas = { "< 10m": 0, "10-15m": 0, "15-25m": 0, "> 25m": 0 };
-      const horas = {};
-      const modais = {};
-      const transps = {};
-      const drivers = {};
-
-      let totalTmcSec = 0;
-      let countValid = 0;
-      let onTimeCount = 0;
+      const faixas = { "< 7m": 0, "7-10m": 0, "10-15m": 0, "> 15m": 0 };
+      const horas = {}, modais = {}, transps = {}, drivers = {};
+      let totalSec = 0, count = 0, onTime = 0;
 
       filtered.forEach(d => {
-        const ei = parseTimeToSecs(d.validationEi);
-        const co = parseTimeToSecs(d.checkOut);
+        const ei = parseSec(d.validationEi);
+        const co = parseSec(d.checkOut);
 
         if (ei !== null && co !== null && co >= ei) {
           const tmcMin = (co - ei) / 60;
-          totalTmcSec += (co - ei);
-          countValid++;
+          totalSec += (co - ei);
+          count++;
+          if (tmcMin <= 10) onTime++; // SLA meta <= 10 min
 
-          if (tmcMin <= 15) onTimeCount++;
-
-          if (tmcMin < 10) faixas["< 10m"]++;
+          if (tmcMin < 7) faixas["< 7m"]++;
+          else if (tmcMin <= 10) faixas["7-10m"]++;
           else if (tmcMin <= 15) faixas["10-15m"]++;
-          else if (tmcMin <= 25) faixas["15-25m"]++;
-          else faixas["> 25m"]++;
+          else faixas["> 15m"]++;
 
           const hBlock = d.checkOut.split(":")[0] + "h";
           horas[hBlock] = (horas[hBlock] || 0) + 1;
@@ -474,98 +429,56 @@
           if (!transps[d.transportadora]) transps[d.transportadora] = [];
           transps[d.transportadora].push(tmcMin);
 
-          const driverKey = `${d.driverNome} (${d.modal})`;
-          if (!drivers[driverKey]) drivers[driverKey] = [];
-          drivers[driverKey].push(tmcMin);
+          const dKey = `${d.driverNome} (${d.modal})`;
+          if (!drivers[dKey]) drivers[dKey] = [];
+          drivers[dKey].push(tmcMin);
         }
       });
 
-      // Atualiza KPIs Executivos
-      document.getElementById("mgr-kpi-total").innerText = countValid;
-      document.getElementById("mgr-kpi-tmc").innerText = countValid ? `${(totalTmcSec / countValid / 60).toFixed(1)} min` : "0.0 min";
-      document.getElementById("mgr-kpi-sla").innerText = countValid ? `${((onTimeCount / countValid) * 100).toFixed(1)}%` : "0.0%";
+      document.getElementById("mgr-kpi-total").innerText = count;
+      document.getElementById("mgr-kpi-tmc").innerText = count ? `${(totalSec / count / 60).toFixed(1)} min` : "0.0 min";
+      document.getElementById("mgr-kpi-sla").innerText = count ? `${((onTime / count) * 100).toFixed(1)}%` : "0.0%";
 
-      // Acha modal mais rápido
-      let fastestModal = "--", minAvg = 9999;
+      let fastest = "--", minAvg = 9999;
       Object.keys(modais).forEach(m => {
         const avg = modais[m].reduce((a, b) => a + b, 0) / modais[m].length;
-        if (avg < minAvg) { minAvg = avg; fastestModal = `${m} (${avg.toFixed(1)}m)`; }
+        if (avg < minAvg) { minAvg = avg; fastest = `${m} (${avg.toFixed(1)}m)`; }
       });
-      document.getElementById("mgr-kpi-fastest").innerText = fastestModal;
+      document.getElementById("mgr-kpi-fastest").innerText = fastest;
 
-      // 1. Gráfico de Faixas (Doughnut com % e Qtd direta)
-      renderFaixasChart(faixas);
-
-      // 2. Gráfico de Escoamento por Hora
-      renderHorasChart(horas);
-
-      // 3. Gráficos de Médias
-      renderAvgBarChart('chartModal', modais, '#ff5722');
-      renderAvgBarChart('chartTransp', transps, '#a855f7');
-
-      // 4. Top Ofensores
-      renderTopDriversChart(drivers);
+      createDoughnut('chartFaixas', Object.keys(faixas), Object.values(faixas));
+      createBar('chartHoras', Object.keys(horas).sort(), Object.keys(horas).sort().map(k => horas[k]), '#38bdf8');
+      createAvgBar('chartModal', modais, '#ff5722');
+      createAvgBar('chartTransp', transps, '#8b5cf6');
+      createDriversBar('chartDrivers', drivers);
     }
 
-    function renderFaixasChart(faixas) {
-      const ctx = document.getElementById("chartFaixas").getContext('2d');
-      if (cFaixas) cFaixas.destroy();
-
-      cFaixas = new Chart(ctx, {
+    function createDoughnut(id, labels, values) {
+      if (charts[id]) charts[id].destroy();
+      charts[id] = new Chart(document.getElementById(id), {
         type: 'doughnut',
         data: {
-          labels: Object.keys(faixas),
-          datasets: [{
-            data: Object.values(faixas),
-            backgroundColor: ['#10b981', '#f59e0b', '#f97316', '#ef4444'],
-            borderColor: '#0d1322',
-            borderWidth: 3
-          }]
+          labels: labels,
+          datasets: [{ data: values, backgroundColor: ['#10b981', '#f59e0b', '#f97316', '#ef4444'], borderColor: '#0d1322', borderWidth: 2 }]
         },
         options: {
-          responsive: true,
-          maintainAspectRatio: false,
+          responsive: true, maintainAspectRatio: false,
           plugins: {
             legend: { position: 'right', labels: { color: '#cbd5e1', font: { weight: 700 } } },
-            datalabels: {
-              color: '#fff',
-              font: { weight: '800', size: 12 },
-              formatter: (value, ctx) => value > 0 ? value : ''
-            }
+            datalabels: { color: '#fff', font: { weight: '800', size: 11 }, formatter: v => v > 0 ? v : '' }
           }
         }
       });
     }
 
-    function renderHorasChart(horas) {
-      const sortedLabels = Object.keys(horas).sort();
-      const dataVals = sortedLabels.map(k => horas[k]);
-
-      const ctx = document.getElementById("chartHoras").getContext('2d');
-      if (cHoras) cHoras.destroy();
-
-      cHoras = new Chart(ctx, {
+    function createBar(id, labels, values, color) {
+      if (charts[id]) charts[id].destroy();
+      charts[id] = new Chart(document.getElementById(id), {
         type: 'bar',
-        data: {
-          labels: sortedLabels,
-          datasets: [{
-            data: dataVals,
-            backgroundColor: '#38bdf8',
-            borderRadius: 6
-          }]
-        },
+        data: { labels: labels, datasets: [{ data: values, backgroundColor: color, borderRadius: 6, maxBarThickness: 42 }] },
         options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: { display: false },
-            datalabels: {
-              anchor: 'end',
-              align: 'top',
-              color: '#38bdf8',
-              font: { weight: '800', size: 12 }
-            }
-          },
+          responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { display: false }, datalabels: { anchor: 'end', align: 'top', color: color, font: { weight: '800', size: 11 } } },
           scales: {
             y: { grid: { color: '#1c2742' }, ticks: { color: '#64748b' } },
             x: { grid: { display: false }, ticks: { color: '#94a3b8', font: { weight: 700 } } }
@@ -574,97 +487,52 @@
       });
     }
 
-    function renderAvgBarChart(canvasId, groupObj, color) {
-      const labels = Object.keys(groupObj);
-      const dataVals = labels.map(k => {
-        const arr = groupObj[k];
-        return parseFloat((arr.reduce((a, b) => a + b, 0) / arr.length).toFixed(1));
-      });
-
-      const ctx = document.getElementById(canvasId).getContext('2d');
-      let inst = canvasId === 'chartModal' ? cModal : cTransp;
-      if (inst) inst.destroy();
-
-      const newInst = new Chart(ctx, {
+    function createAvgBar(id, obj, color) {
+      const labels = Object.keys(obj);
+      const vals = labels.map(k => parseFloat((obj[k].reduce((a, b) => a + b, 0) / obj[k].length).toFixed(1)));
+      if (charts[id]) charts[id].destroy();
+      charts[id] = new Chart(document.getElementById(id), {
         type: 'bar',
-        data: {
-          labels: labels,
-          datasets: [{ data: dataVals, backgroundColor: color, borderRadius: 6 }]
-        },
+        data: { labels: labels, datasets: [{ data: vals, backgroundColor: color, borderRadius: 6, maxBarThickness: 45 }] },
         options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: { display: false },
-            datalabels: {
-              anchor: 'end',
-              align: 'top',
-              color: '#f8fafc',
-              font: { weight: '800', size: 12 },
-              formatter: val => `${val} min`
-            }
-          },
+          responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { display: false }, datalabels: { anchor: 'end', align: 'top', color: '#fff', font: { weight: '800', size: 11 }, formatter: v => `${v} min` } },
           scales: {
             y: { grid: { color: '#1c2742' }, ticks: { color: '#64748b' } },
             x: { grid: { display: false }, ticks: { color: '#94a3b8', font: { weight: 700 } } }
           }
         }
       });
-
-      if (canvasId === 'chartModal') cModal = newInst;
-      if (canvasId === 'chartTransp') cTransp = newInst;
     }
 
-    function renderTopDriversChart(drivers) {
-      const driverList = Object.keys(drivers).map(k => {
-        const arr = drivers[k];
-        const avg = arr.reduce((a, b) => a + b, 0) / arr.length;
-        return { name: k, avg: parseFloat(avg.toFixed(1)), count: arr.length };
+    function createDriversBar(id, obj) {
+      const list = Object.keys(obj).map(k => {
+        const arr = obj[k];
+        return { name: k, avg: parseFloat((arr.reduce((a, b) => a + b, 0) / arr.length).toFixed(1)) };
       }).sort((a, b) => b.avg - a.avg).slice(0, 8);
 
-      const ctx = document.getElementById("chartDrivers").getContext('2d');
-      if (cDrivers) cDrivers.destroy();
-
-      cDrivers = new Chart(ctx, {
+      if (charts[id]) charts[id].destroy();
+      charts[id] = new Chart(document.getElementById(id), {
         type: 'bar',
-        data: {
-          labels: driverList.map(d => d.name),
-          datasets: [{
-            data: driverList.map(d => d.avg),
-            backgroundColor: '#ef4444',
-            borderRadius: 6
-          }]
-        },
+        data: { labels: list.map(d => d.name), datasets: [{ data: list.map(d => d.avg), backgroundColor: '#ef4444', borderRadius: 5, maxBarThickness: 18 }] },
         options: {
-          indexAxis: 'y',
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: { display: false },
-            datalabels: {
-              anchor: 'end',
-              align: 'right',
-              color: '#fca5a5',
-              font: { weight: '800', size: 11 },
-              formatter: val => `${val} min`
-            }
-          },
+          indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { display: false }, datalabels: { anchor: 'end', align: 'right', color: '#fca5a5', font: { weight: '800', size: 10 }, formatter: v => `${v} min` } },
           scales: {
             x: { grid: { color: '#1c2742' }, ticks: { color: '#64748b' } },
-            y: { grid: { display: false }, ticks: { color: '#cbd5e1', font: { weight: 700, size: 11 } } }
+            y: { grid: { display: false }, ticks: { color: '#cbd5e1', font: { weight: 700, size: 10 } } }
           }
         }
       });
     }
 
-    // Loops automáticos
     setInterval(() => {
       document.getElementById("clock-txt").innerText = new Date().toLocaleTimeString('pt-BR');
-      renderLiveOps();
+      if (activeTab === 'ops') renderOps();
     }, 1000);
 
     fetchApiData();
-    setInterval(fetchApiData, 8000);
+    setInterval(fetchApiData, 5000);
   </script>
 </body>
 </html>
