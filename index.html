@@ -5,11 +5,11 @@
   <title>Shopee LRJ-19 - Yard & Operations Command Center</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700;800&family=JetBrains+Mono:wght@500;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@700;800&family=JetBrains+Mono:wght@600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
       --bg: #030712;
-      --surface-card: #0b1322;
+      --card-bg: #0b1322;
       --border: #1a253a;
       --text: #f8fafc;
       --text-muted: #64748b;
@@ -21,11 +21,11 @@
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { background: var(--bg); color: var(--text); font-family: 'Plus Jakarta Sans', sans-serif; min-height: 100vh; padding: 16px; }
+    body { background: var(--bg); color: var(--text); font-family: 'Plus Jakarta Sans', sans-serif; min-height: 100vh; padding: 14px; }
 
     header {
       display: flex; justify-content: space-between; align-items: center;
-      background: #090e1a; border: 1px solid var(--border); padding: 12px 20px; border-radius: 12px; margin-bottom: 16px;
+      background: #090e1a; border: 1px solid var(--border); padding: 10px 18px; border-radius: 12px; margin-bottom: 14px;
     }
     .brand-group { display: flex; align-items: center; gap: 12px; }
     .badge-hub {
@@ -37,7 +37,7 @@
     .nav-tabs { display: flex; gap: 8px; }
     .tab-btn {
       background: #0d1527; border: 1px solid var(--border); color: #94a3b8;
-      padding: 9px 18px; border-radius: 8px; font-weight: 700; font-size: 0.82rem;
+      padding: 8px 18px; border-radius: 8px; font-weight: 800; font-size: 0.82rem;
       cursor: pointer; transition: 0.15s;
     }
     .tab-btn.active {
@@ -49,56 +49,56 @@
     .view-panel { display: none; }
     .view-panel.active { display: block; }
 
-    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 16px; }
-    .kpi-box { background: var(--surface-card); border: 1px solid var(--border); border-radius: 10px; padding: 14px; position: relative; }
-    .kpi-title { font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: var(--text-muted); }
-    .kpi-number { font-family: 'Chakra Petch', sans-serif; font-size: 2rem; font-weight: 800; margin-top: 4px; }
-    .kpi-foot { font-size: 0.72rem; color: var(--text-muted); margin-top: 4px; font-weight: 600; }
+    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin-bottom: 14px; }
+    .kpi-box { background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; }
+    .kpi-title { font-size: 0.68rem; font-weight: 800; text-transform: uppercase; color: var(--text-muted); }
+    .kpi-number { font-family: 'Chakra Petch', sans-serif; font-size: 1.9rem; font-weight: 800; margin-top: 2px; }
+    .kpi-foot { font-size: 0.7rem; color: var(--text-muted); margin-top: 2px; font-weight: 600; }
 
-    .table-container { background: var(--surface-card); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+    .table-container { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
     .table-toolbar {
-      display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;
-      padding: 12px 18px; background: rgba(5, 8, 15, 0.6); border-bottom: 1px solid var(--border);
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 10px 16px; background: rgba(5, 8, 15, 0.6); border-bottom: 1px solid var(--border);
     }
     .table-search, .filter-select {
       background: #040711; border: 1px solid #1f2b42; color: #fff;
       padding: 7px 12px; border-radius: 6px; font-size: 0.82rem; outline: none;
     }
-    .filter-select { cursor: pointer; font-weight: 600; }
+    .filter-select { cursor: pointer; font-weight: 700; }
 
     table { width: 100%; border-collapse: collapse; text-align: left; }
-    th { background: #060a12; padding: 10px 16px; font-size: 0.72rem; text-transform: uppercase; color: var(--text-muted); border-bottom: 1px solid var(--border); }
+    th { background: #060a12; padding: 10px 16px; font-size: 0.72rem; text-transform: uppercase; color: var(--text-muted); border-bottom: 1px solid var(--border); font-weight: 800; }
     td { padding: 10px 16px; font-size: 0.88rem; border-bottom: 1px solid rgba(255,255,255,0.03); }
     tr:hover td { background: rgba(255, 255, 255, 0.02); }
 
     .route-tag {
       font-family: 'Chakra Petch', sans-serif; font-size: 1.15rem; font-weight: 800;
-      color: #fbbf24; background: #1c1917; padding: 3px 8px; border-radius: 5px;
-      border: 1px solid #451a03; display: inline-block; min-width: 55px; text-align: center;
+      color: #fbbf24; background: #1c1917; padding: 4px 12px; border-radius: 6px;
+      border: 1px solid #451a03; display: inline-flex; align-items: center; justify-content: center;
+      min-width: 80px; width: fit-content; white-space: nowrap;
     }
-    .modal-tag { background: #131a2e; color: #38bdf8; font-weight: 700; font-size: 0.72rem; padding: 3px 7px; border-radius: 4px; }
+    .modal-tag { background: #131a2e; color: #38bdf8; font-weight: 700; font-size: 0.72rem; padding: 3px 8px; border-radius: 4px; white-space: nowrap; }
     .time-font { font-family: 'JetBrains Mono', monospace; font-weight: 700; }
     
-    .status-pill { font-family: 'Chakra Petch', sans-serif; font-size: 0.75rem; font-weight: 800; padding: 3px 9px; border-radius: 5px; text-transform: uppercase; }
+    .status-pill { font-family: 'Chakra Petch', sans-serif; font-size: 0.75rem; font-weight: 800; padding: 3px 9px; border-radius: 5px; text-transform: uppercase; white-space: nowrap; }
     .status-ok { background: rgba(16, 185, 129, 0.15); color: var(--ok); border: 1px solid var(--ok); }
     .status-warn { background: rgba(245, 158, 11, 0.15); color: var(--warn); border: 1px solid var(--warn); }
-    .status-crit { background: rgba(239, 68, 68, 0.25); color: var(--crit); border: 1px solid var(--crit); }
+    .status-crit { background: rgba(239, 68, 68, 0.25); color: var(--crit); border: 1px solid var(--crit); animation: flash 1s infinite alternate; }
+    @keyframes flash { 0% { opacity: 0.7; } 100% { opacity: 1; } }
 
     .filter-panel {
-      display: flex; gap: 12px; background: var(--surface-card); border: 1px solid var(--border);
-      padding: 12px 18px; border-radius: 10px; margin-bottom: 16px; align-items: center; flex-wrap: wrap;
+      display: flex; gap: 12px; background: var(--card-bg); border: 1px solid var(--border);
+      padding: 10px 16px; border-radius: 10px; margin-bottom: 14px; align-items: center; flex-wrap: wrap;
     }
 
     .grid-charts { display: grid; grid-template-columns: repeat(12, 1fr); gap: 14px; }
-    .span-4 { grid-column: span 4; }
     .span-6 { grid-column: span 6; }
-    .span-8 { grid-column: span 8; }
     .span-12 { grid-column: span 12; }
 
-    .panel-card { background: var(--surface-card); border: 1px solid var(--border); border-radius: 10px; padding: 16px; }
-    .card-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    .panel-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
+    .card-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
     .card-label { font-size: 0.78rem; font-weight: 800; color: #cbd5e1; text-transform: uppercase; }
-    .chart-box { position: relative; width: 100%; height: 220px; }
+    .chart-box { position: relative; width: 100%; height: 230px; }
 
     .offender-row {
       display: flex; align-items: center; justify-content: space-between;
@@ -119,7 +119,7 @@
     </div>
 
     <div class="nav-tabs">
-      <button id="btn-tab-live" class="tab-btn active" onclick="switchTab('live')">🚛 Monitor Operacional</button>
+      <button id="btn-tab-live" class="tab-btn active" onclick="switchTab('live')">🚛 Monitor de Vagas (Ao Vivo)</button>
       <button id="btn-tab-stats" class="tab-btn" onclick="switchTab('stats')">📊 Dashboard Gerencial</button>
     </div>
 
@@ -129,66 +129,59 @@
     </div>
   </header>
 
-  <!-- ABA 1: MONITOR DE PÁTIO -->
+  <!-- ==================== ABA 1: MONITOR DE PÁTIO AO VIVO ==================== -->
   <div id="view-live" class="view-panel active">
     <div class="kpi-grid">
       <div class="kpi-box">
-        <div class="kpi-title">Veículos Listados</div>
+        <div class="kpi-title">Veículos Carregando Agora</div>
         <div class="kpi-number" id="live-patio-count">0</div>
-        <div class="kpi-foot" id="live-filter-desc">Registros filtrados</div>
+        <div class="kpi-foot">Sem check-out registrado</div>
       </div>
       <div class="kpi-box">
-        <div class="kpi-title">TMC Médio</div>
+        <div class="kpi-title">TMC Médio Atual</div>
         <div class="kpi-number" id="live-patio-avg">00:00</div>
-        <div class="kpi-foot">Meta: &le; 10 min</div>
+        <div class="kpi-foot">Meta de pátio: &le; 10 min</div>
       </div>
       <div class="kpi-box">
-        <div class="kpi-title">Acima do SLA (> 10m)</div>
+        <div class="kpi-title">Vagas Críticas (> 10m)</div>
         <div class="kpi-number" id="live-patio-crit" style="color: var(--crit);">0</div>
-        <div class="kpi-foot">Gargalo operacional</div>
+        <div class="kpi-foot">Acima do SLA de vaga</div>
       </div>
       <div class="kpi-box">
-        <div class="kpi-title">Rotas do Dia Selecionado</div>
+        <div class="kpi-title">Rotas Finalizadas Hoje</div>
         <div class="kpi-number" id="live-finished-count">0</div>
-        <div class="kpi-foot" id="live-flow-rate">Fluxo: 0.0 rotas/hora</div>
+        <div class="kpi-foot" id="live-flow-rate">Fluxo: 0.0 carros/hora</div>
       </div>
     </div>
 
     <div class="table-container">
       <div class="table-toolbar">
-        <div style="display: flex; align-items: center; gap: 10px;">
-          <select id="live-date-select" class="filter-select" onchange="renderLiveYard()"></select>
-          <select id="live-mode-select" class="filter-select" onchange="renderLiveYard()">
-            <option value="ALL_DAY">Ver todas as viagens do dia</option>
-            <option value="IN_YARD">Somente no pátio agora (Sem Check-out)</option>
-          </select>
-        </div>
+        <span style="font-weight: 800; font-size: 0.8rem; color: #94a3b8; text-transform: uppercase;">Carros na Vaga de Carregamento</span>
         <input type="text" id="live-search" class="table-search" placeholder="Buscar Rota, Motorista ou Modal..." onkeyup="renderLiveYard()">
       </div>
       <table>
         <thead>
           <tr>
-            <th style="width: 85px;">Rota</th>
+            <th style="width: 100px;">Rota</th>
             <th>Motorista</th>
             <th>Modal</th>
             <th>Transportadora</th>
-            <th>Término Bipagem</th>
-            <th>Check-out</th>
-            <th>Tempo TMC</th>
+            <th>Fim da Bipagem</th>
+            <th>Tempo no Pátio (TMC)</th>
             <th style="text-align: right;">Status</th>
           </tr>
         </thead>
         <tbody id="yard-tbody">
-          <tr><td colspan="8" style="text-align:center; color: var(--text-muted); padding: 30px;">Carregando operação...</td></tr>
+          <tr><td colspan="7" style="text-align:center; color: var(--text-muted); padding: 30px;">Carregando operação ao vivo...</td></tr>
         </tbody>
       </table>
     </div>
   </div>
 
-  <!-- ABA 2: ANALYTICS -->
+  <!-- ==================== ABA 2: ANALYTICS GERENCIAL ==================== -->
   <div id="view-stats" class="view-panel">
     <div class="filter-panel">
-      <span style="font-size: 0.72rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">Filtros Executivos:</span>
+      <span style="font-size: 0.72rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">Filtros:</span>
       <select id="stat-data" class="filter-select" onchange="processAnalytics()"></select>
       <select id="stat-modal" class="filter-select" onchange="processAnalytics()"></select>
       <select id="stat-transp" class="filter-select" onchange="processAnalytics()"></select>
@@ -196,51 +189,56 @@
 
     <div class="kpi-grid">
       <div class="kpi-box">
-        <div class="kpi-title">Total Analisado</div>
+        <div class="kpi-title">Viagens Concluídas</div>
         <div class="kpi-number" id="kpi-stat-total">0</div>
-        <div class="kpi-foot">Rotas concluídas</div>
+        <div class="kpi-foot">Rotas finalizadas com check-out</div>
       </div>
       <div class="kpi-box">
         <div class="kpi-title">TMC Médio Global</div>
         <div class="kpi-number" id="kpi-stat-tmc">0.0m</div>
-        <div class="kpi-foot">Carregamento no carro</div>
+        <div class="kpi-foot">Meta de pátio: &le; 10 min</div>
       </div>
       <div class="kpi-box">
         <div class="kpi-title">Aderência ao SLA (&le; 10m)</div>
         <div class="kpi-number" id="kpi-stat-sla" style="color: var(--ok);">0.0%</div>
-        <div class="kpi-foot">Dentro do padrão Shopee</div>
+        <div class="kpi-foot">Carregamentos pontuais</div>
       </div>
       <div class="kpi-box">
         <div class="kpi-title">Tempo Médio Bancada</div>
         <div class="kpi-number" id="kpi-stat-bip">0.0m</div>
-        <div class="kpi-foot">Bipagem do operador</div>
+        <div class="kpi-foot">Duração da separação dos pacotes</div>
       </div>
     </div>
 
     <div class="grid-charts">
-      <div class="panel-card span-4">
-        <div class="card-head"><span class="card-label">Distribuição de SLA de Pátio</span></div>
-        <div class="chart-box"><canvas id="chartSla"></canvas></div>
-      </div>
-
-      <div class="panel-card span-8">
-        <div class="card-head"><span class="card-label">Curva de Carregamentos por Faixa Horária</span></div>
+      <!-- 1. Faixa Horária com label correto -->
+      <div class="panel-card span-6">
+        <div class="card-head"><span class="card-label">Curva de Carregamento por Horário</span></div>
         <div class="chart-box"><canvas id="chartHourly"></canvas></div>
       </div>
 
+      <!-- 2. SLA em formato Barra Horizontal -->
       <div class="panel-card span-6">
-        <div class="card-head"><span class="card-label">TMC Médio por Modal (Minutos)</span></div>
+        <div class="card-head"><span class="card-label">Distribuição de SLA de Pátio (Volume de Carros)</span></div>
+        <div class="chart-box"><canvas id="chartSla"></canvas></div>
+      </div>
+
+      <!-- 3. Modal Horizontal (Maior pro Menor) -->
+      <div class="panel-card span-6">
+        <div class="card-head"><span class="card-label">TMC Médio por Modal (Do maior para o menor)</span></div>
         <div class="chart-box"><canvas id="chartModal"></canvas></div>
       </div>
 
+      <!-- 4. Transportadora Horizontal (Maior pro Menor) -->
       <div class="panel-card span-6">
-        <div class="card-head"><span class="card-label">TMC Médio por Transportadora (Minutos)</span></div>
+        <div class="card-head"><span class="card-label">TMC Médio por Transportadora (Do maior para o menor)</span></div>
         <div class="chart-box"><canvas id="chartTransp"></canvas></div>
       </div>
 
+      <!-- 5. Ranking dos Motoristas -->
       <div class="panel-card span-12">
         <div class="card-head">
-          <span class="card-label">Top Motoristas com Maior TMC Médio (Ofensores de Pátio)</span>
+          <span class="card-label">Top Motoristas com Maior TMC Médio (Ofensores de Vaga)</span>
           <span style="font-size: 0.72rem; color: #f87171; font-weight: 800;">META: &le; 10 MINUTOS</span>
         </div>
         <div id="driver-ranking-box"></div>
@@ -272,8 +270,14 @@
       return s;
     }
 
+    function dateToTimestamp(dStr) {
+      const match = String(dStr).match(/(\d{2})\/(\d{2})\/(\d{4})/);
+      if (match) return new Date(`${match[3]}-${match[2]}-${match[1]}T00:00:00`).getTime();
+      return 0;
+    }
+
     function cleanModal(m) {
-      if (!m || String(m).includes("Não encontrado")) return "OUTROS";
+      if (!m || String(m).includes("Não encontrado")) return null;
       const u = String(m).toUpperCase().trim();
       if (u.includes("PASSEIO")) return "PASSEIO";
       if (u.includes("FIORINO")) return "FIORINO";
@@ -284,7 +288,7 @@
     }
 
     function cleanTransp(t) {
-      if (!t || String(t).includes("Não encontrado")) return "OF";
+      if (!t || String(t).includes("Não encontrado")) return null;
       return String(t).trim();
     }
 
@@ -327,27 +331,30 @@
         const response = await fetch(API_ENDPOINT);
         const data = await response.json();
         
-        rawDataset = data.map(item => ({
-          ...item,
-          data: cleanDateStr(item.data),
-          modal: cleanModal(item.modal),
-          transportadora: cleanTransp(item.transportadora)
-        }));
+        rawDataset = data.map(item => {
+          const hasOut = item.checkOut && item.checkOut !== "" && item.checkOut !== "00:00:00";
+          return {
+            ...item,
+            data: cleanDateStr(item.data),
+            modal: cleanModal(item.modal),
+            transportadora: cleanTransp(item.transportadora),
+            isFinalizado: Boolean(hasOut)
+          };
+        });
 
         populateFilters();
         if (activeTab === 'live') renderLiveYard();
         else processAnalytics();
       } catch (err) {
-        console.warn("Erro ao buscar API", err);
+        console.warn("Sincronizando...", err);
       }
     }
 
     function populateFilters() {
-      const dates = [...new Set(rawDataset.map(d => d.data).filter(Boolean))].sort().reverse();
-      const modais = [...new Set(rawDataset.map(d => d.modal).filter(m => m !== "OUTROS"))].sort();
-      const transps = [...new Set(rawDataset.map(d => d.transportadora).filter(t => t !== "Não encontrado"))].sort();
+      const dates = [...new Set(rawDataset.map(d => d.data).filter(Boolean))].sort((a, b) => dateToTimestamp(b) - dateToTimestamp(a));
+      const modais = [...new Set(rawDataset.map(d => d.modal).filter(Boolean))].sort();
+      const transps = [...new Set(rawDataset.map(d => d.transportadora).filter(Boolean))].sort();
 
-      fillSelect("live-date-select", dates, null);
       fillSelect("stat-data", dates, "Todas as Datas");
       fillSelect("stat-modal", modais, "Todos os Modais");
       fillSelect("stat-transp", transps, "Todas as Transportadoras");
@@ -356,7 +363,7 @@
     function fillSelect(id, values, defaultLabel) {
       const el = document.getElementById(id);
       const prev = el.value;
-      el.innerHTML = defaultLabel ? `<option value="ALL">${defaultLabel}</option>` : "";
+      el.innerHTML = `<option value="ALL">${defaultLabel}</option>`;
       values.forEach(v => {
         const opt = document.createElement("option");
         opt.value = v; opt.innerText = v;
@@ -367,82 +374,80 @@
 
     function renderLiveYard() {
       const now = getSecondsNow();
-      const targetDate = document.getElementById("live-date-select").value;
-      const mode = document.getElementById("live-mode-select").value;
       const searchTerm = (document.getElementById("live-search").value || "").toLowerCase();
 
-      const filtered = [];
-      let totalTime = 0, criticals = 0, completed = 0;
+      // Pega a data mais recente
+      const sortedDates = [...new Set(rawDataset.map(d => d.data).filter(Boolean))].sort((a, b) => dateToTimestamp(b) - dateToTimestamp(a));
+      const today = sortedDates[0] || "";
+
+      const yardItems = [];
+      let totalTime = 0, criticals = 0, finishedToday = 0;
       let firstStart = null, lastEnd = null;
 
       rawDataset.forEach(row => {
-        if (targetDate && row.data !== targetDate) return;
+        if (row.data !== today) return;
 
         const vStart = parseToSec(row.validationTi);
         const vEnd = parseToSec(row.validationEi);
         const cOut = parseToSec(row.checkOut);
 
         if (vStart !== null) firstStart = (firstStart === null || vStart < firstStart) ? vStart : firstStart;
-        if (row.isFinalizado) completed++;
-
-        let tmcSec = 0;
-        let isStillInYard = !row.isFinalizado;
-
-        if (vEnd !== null) {
-          lastEnd = (lastEnd === null || vEnd > lastEnd) ? vEnd : lastEnd;
-          tmcSec = isStillInYard ? Math.max(0, now - vEnd) : Math.max(0, (cOut || 0) - vEnd);
+        if (row.isFinalizado) {
+          finishedToday++;
+          if (cOut !== null) lastEnd = (lastEnd === null || cOut > lastEnd) ? cOut : lastEnd;
         }
 
-        if (mode === "IN_YARD" && !isStillInYard) return;
+        // Se NÃO deu check-out, está no pátio agora
+        if (!row.isFinalizado && vEnd !== null) {
+          const tmcSec = Math.max(0, now - vEnd);
+          const matches = !searchTerm || 
+            (row.rota && row.rota.toLowerCase().includes(searchTerm)) ||
+            (row.driverNome && row.driverNome.toLowerCase().includes(searchTerm)) ||
+            (row.modal && row.modal.toLowerCase().includes(searchTerm));
 
-        const matches = !searchTerm || 
-          (row.rota && row.rota.toLowerCase().includes(searchTerm)) ||
-          (row.driverNome && row.driverNome.toLowerCase().includes(searchTerm)) ||
-          (row.modal && row.modal.toLowerCase().includes(searchTerm));
-
-        if (matches) {
-          filtered.push({ ...row, tmcSec, isStillInYard });
-          totalTime += tmcSec;
-          if (tmcSec >= 600) criticals++;
+          if (matches) {
+            yardItems.push({ ...row, tmcSec });
+            totalTime += tmcSec;
+            if (tmcSec >= 600) criticals++;
+          }
         }
       });
 
-      document.getElementById("live-patio-count").innerText = filtered.length;
+      document.getElementById("live-patio-count").innerText = yardItems.length;
       document.getElementById("live-patio-crit").innerText = criticals;
-      document.getElementById("live-patio-avg").innerText = filtered.length ? fmtMinutes(Math.round(totalTime / filtered.length)) : "00:00";
-      document.getElementById("live-finished-count").innerText = completed;
+      document.getElementById("live-patio-avg").innerText = yardItems.length ? fmtMinutes(Math.round(totalTime / yardItems.length)) : "00:00";
+      document.getElementById("live-finished-count").innerText = finishedToday;
 
       if (firstStart !== null && lastEnd !== null && lastEnd > firstStart) {
         const spanH = (lastEnd - firstStart) / 3600;
-        document.getElementById("live-flow-rate").innerText = `Fluxo: ${(completed / spanH).toFixed(1)} rotas/hora`;
+        document.getElementById("live-flow-rate").innerText = `Fluxo: ${(finishedToday / spanH).toFixed(1)} carros/hora`;
       } else {
-        document.getElementById("live-flow-rate").innerText = `Fluxo: 0.0 rotas/hora`;
+        document.getElementById("live-flow-rate").innerText = `Fluxo: 0.0 carros/hora`;
       }
 
-      filtered.sort((a, b) => b.tmcSec - a.tmcSec);
+      yardItems.sort((a, b) => b.tmcSec - a.tmcSec);
 
       const tbody = document.getElementById("yard-tbody");
-      if (!filtered.length) {
-        tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; color: var(--text-muted); padding: 30px;">Nenhum veículo encontrado para a seleção.</td></tr>`;
+      if (!yardItems.length) {
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color: var(--text-muted); padding: 30px;">Pátio desocupado. Nenhum carro carregando no momento.</td></tr>`;
         return;
       }
 
       let rowsHtml = "";
-      filtered.forEach(car => {
+      yardItems.forEach(car => {
         const mins = car.tmcSec / 60;
-        const badge = mins >= 10 ? `<span class="status-pill status-crit">🔴 CRÍTICO</span>` :
-                      mins >= 7  ? `<span class="status-pill status-warn">🟡 ALERTA</span>` :
-                                   `<span class="status-pill status-ok">🟢 NO SLA</span>`;
+        const badge = mins >= 10 ? `<span class="status-pill status-crit">🔴 CRÍTICO (&gt;10m)</span>` :
+                      mins >= 7  ? `<span class="status-pill status-warn">🟡 ALERTA (7-10m)</span>` :
+                                   `<span class="status-pill status-ok">🟢 NO SLA (&lt;7m)</span>`;
 
         rowsHtml += `
           <tr>
             <td><div class="route-tag">${car.rota || '--'}</div></td>
             <td><strong>${car.driverNome || 'Não identificado'}</strong><br><small style="color:var(--text-muted)">ID: ${car.idDriver}</small></td>
-            <td><span class="modal-tag">${car.modal}</span></td>
-            <td style="color:#cbd5e1">${car.transportadora}</td>
+            <td><span class="modal-tag">${car.modal || 'OUTROS'}</span></td>
+            <td style="color:#cbd5e1">${car.transportadora || 'OF'}</td>
             <td class="time-font" style="color:var(--text-muted)">${car.validationEi || '--'}</td>
-            <td class="time-font" style="color:var(--text-muted)">${car.checkOut || '<span style="color:#38bdf8;">Em Carregamento</span>'}</td>
-            <td class="time-font" style="font-size:1.05rem; color:#fff">${fmtMinutes(car.tmcSec)}</td>
+            <td class="time-font" style="font-size:1.15rem; color:#fff">${fmtMinutes(car.tmcSec)} min</td>
             <td style="text-align:right">${badge}</td>
           </tr>
         `;
@@ -461,7 +466,7 @@
                (transpVal === 'ALL' || d.transportadora === transpVal);
       });
 
-      const slaBuckets = { "< 7m (Ideal)": 0, "7-10m (Aceitável)": 0, "10-15m (Crítico)": 0, "> 15m (Gargalo)": 0 };
+      const slaBuckets = { "< 7 min (Ideal)": 0, "7-10 min (Alerta)": 0, "10-15 min (Crítico)": 0, "> 15 min (Gargalo)": 0 };
       const hoursMap = {}, modalMap = {}, transpMap = {}, driverMap = {};
       let totalTmcSec = 0, validTmcCount = 0, onTimeCount = 0;
       let totalBipSec = 0, validBipCount = 0;
@@ -483,27 +488,27 @@
 
           if (diffMin <= 10) onTimeCount++;
 
-          if (diffMin < 7) slaBuckets["< 7m (Ideal)"]++;
-          else if (diffMin <= 10) slaBuckets["7-10m (Aceitável)"]++;
-          else if (diffMin <= 15) slaBuckets["10-15m (Crítico)"]++;
-          else slaBuckets["> 15m (Gargalo)"]++;
+          if (diffMin < 7) slaBuckets["< 7 min (Ideal)"]++;
+          else if (diffMin <= 10) slaBuckets["7-10 min (Alerta)"]++;
+          else if (diffMin <= 15) slaBuckets["10-15 min (Crítico)"]++;
+          else slaBuckets["> 15 min (Gargalo)"]++;
 
           if (item.checkOut) {
             const h = item.checkOut.split(":")[0] + "h";
             hoursMap[h] = (hoursMap[h] || 0) + 1;
           }
 
-          if (item.modal !== "OUTROS") {
+          if (item.modal) {
             if (!modalMap[item.modal]) modalMap[item.modal] = [];
             modalMap[item.modal].push(diffMin);
           }
 
-          if (item.transportadora !== "Não encontrado") {
+          if (item.transportadora) {
             if (!transpMap[item.transportadora]) transpMap[item.transportadora] = [];
             transpMap[item.transportadora].push(diffMin);
           }
 
-          const dKey = `${item.driverNome} • ${item.modal}`;
+          const dKey = `${item.driverNome} • ${item.modal || 'OUTROS'}`;
           if (!driverMap[dKey]) driverMap[dKey] = [];
           driverMap[dKey].push(diffMin);
         }
@@ -514,45 +519,14 @@
       document.getElementById("kpi-stat-sla").innerText = validTmcCount ? `${((onTimeCount / validTmcCount) * 100).toFixed(1)}%` : "0.0%";
       document.getElementById("kpi-stat-bip").innerText = validBipCount ? `${(totalBipSec / validBipCount / 60).toFixed(1)}m` : "0.0m";
 
-      chartDoughnut("chartSla", slaBuckets);
-      chartLineArea("chartHourly", hoursMap);
-      chartBarSingle("chartModal", modalMap, '#ff5722');
-      chartBarSingle("chartTransp", transpMap, '#38bdf8');
+      renderAreaLine("chartHourly", hoursMap);
+      renderHorizontalSla("chartSla", slaBuckets);
+      renderHorizontalBar("chartModal", modalMap, '#ff5722');
+      renderHorizontalBar("chartTransp", transpMap, '#38bdf8');
       renderDriverRanking(driverMap);
     }
 
-    function chartDoughnut(canvasId, buckets) {
-      const ctx = document.getElementById(canvasId).getContext('2d');
-      if (chartRefs[canvasId]) chartRefs[canvasId].destroy();
-
-      chartRefs[canvasId] = new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-          labels: Object.keys(buckets),
-          datasets: [{
-            data: Object.values(buckets),
-            backgroundColor: ['#10b981', '#f59e0b', '#ea580c', '#ef4444'],
-            borderColor: '#0b1322',
-            borderWidth: 3
-          }]
-        },
-        options: {
-          responsive: true, maintainAspectRatio: false,
-          plugins: {
-            legend: { position: 'right', labels: { color: '#94a3b8', font: { weight: 600, size: 10 } } },
-            datalabels: {
-              color: '#fff', font: { weight: '800', size: 11 },
-              formatter: (val, ctx) => {
-                const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
-                return (val > 0 && total > 0) ? `${Math.round((val/total)*100)}%` : '';
-              }
-            }
-          }
-        }
-      });
-    }
-
-    function chartLineArea(canvasId, series) {
+    function renderAreaLine(canvasId, series) {
       const labels = Object.keys(series).sort();
       const values = labels.map(k => series[k]);
 
@@ -560,7 +534,7 @@
       if (chartRefs[canvasId]) chartRefs[canvasId].destroy();
 
       const grad = ctx.createLinearGradient(0, 0, 0, 200);
-      grad.addColorStop(0, 'rgba(56, 189, 248, 0.4)');
+      grad.addColorStop(0, 'rgba(56, 189, 248, 0.35)');
       grad.addColorStop(1, 'rgba(56, 189, 248, 0)');
 
       chartRefs[canvasId] = new Chart(ctx, {
@@ -569,7 +543,7 @@
           labels: labels,
           datasets: [{
             data: values, borderColor: '#38bdf8', backgroundColor: grad,
-            borderWidth: 3, fill: true, tension: 0.35, pointRadius: 4, pointBackgroundColor: '#38bdf8'
+            borderWidth: 3, fill: true, tension: 0.35, pointRadius: 5, pointBackgroundColor: '#38bdf8'
           }]
         },
         options: {
@@ -578,7 +552,7 @@
             legend: { display: false },
             datalabels: {
               anchor: 'end', align: 'top', color: '#38bdf8', font: { weight: '800', size: 10 },
-              formatter: v => `${v}v`
+              formatter: v => `${v} carros`
             }
           },
           scales: {
@@ -589,9 +563,9 @@
       });
     }
 
-    function chartBarSingle(canvasId, dataMap, barColor) {
-      const labels = Object.keys(dataMap);
-      const values = labels.map(k => parseFloat((dataMap[k].reduce((a,b)=>a+b,0) / dataMap[k].length).toFixed(1)));
+    function renderHorizontalSla(canvasId, buckets) {
+      const labels = Object.keys(buckets);
+      const values = Object.values(buckets);
 
       const ctx = document.getElementById(canvasId).getContext('2d');
       if (chartRefs[canvasId]) chartRefs[canvasId].destroy();
@@ -600,20 +574,62 @@
         type: 'bar',
         data: {
           labels: labels,
-          datasets: [{ data: values, backgroundColor: barColor, borderRadius: 6, maxBarThickness: 38 }]
+          datasets: [{
+            data: values,
+            backgroundColor: ['#10b981', '#f59e0b', '#ea580c', '#ef4444'],
+            borderRadius: 6, maxBarThickness: 28
+          }]
         },
         options: {
+          indexAxis: 'y',
           responsive: true, maintainAspectRatio: false,
           plugins: {
             legend: { display: false },
             datalabels: {
-              anchor: 'end', align: 'top', color: '#f8fafc', font: { weight: '800', size: 11 },
-              formatter: v => `${v}m`
+              anchor: 'end', align: 'right', color: '#f8fafc', font: { weight: '800', size: 11 },
+              formatter: v => `${v} carros`
             }
           },
           scales: {
-            y: { grid: { color: '#1a253a' }, ticks: { color: '#64748b' } },
-            x: { grid: { display: false }, ticks: { color: '#94a3b8', font: { weight: 700 } } }
+            x: { grid: { color: '#1a253a' }, ticks: { color: '#64748b' } },
+            y: { grid: { display: false }, ticks: { color: '#cbd5e1', font: { weight: 700 } } }
+          }
+        }
+      });
+    }
+
+    function renderHorizontalBar(canvasId, dataMap, barColor) {
+      // Ordena do maior para o menor
+      const sorted = Object.keys(dataMap).map(k => ({
+        label: k,
+        avg: parseFloat((dataMap[k].reduce((a,b)=>a+b,0) / dataMap[k].length).toFixed(1))
+      })).sort((a, b) => b.avg - a.avg);
+
+      const labels = sorted.map(d => d.label);
+      const values = sorted.map(d => d.avg);
+
+      const ctx = document.getElementById(canvasId).getContext('2d');
+      if (chartRefs[canvasId]) chartRefs[canvasId].destroy();
+
+      chartRefs[canvasId] = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [{ data: values, backgroundColor: barColor, borderRadius: 6, maxBarThickness: 26 }]
+        },
+        options: {
+          indexAxis: 'y',
+          responsive: true, maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            datalabels: {
+              anchor: 'end', align: 'right', color: '#f8fafc', font: { weight: '800', size: 11 },
+              formatter: v => `${v} min`
+            }
+          },
+          scales: {
+            x: { grid: { color: '#1a253a' }, ticks: { color: '#64748b' } },
+            y: { grid: { display: false }, ticks: { color: '#cbd5e1', font: { weight: 700 } } }
           }
         }
       });
@@ -628,7 +644,7 @@
       }).sort((a, b) => b.avg - a.avg).slice(0, 6);
 
       if (!list.length) {
-        box.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding:20px;">Nenhum dado com os filtros aplicados.</div>`;
+        box.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding:20px;">Nenhum motorista encontrado.</div>`;
         return;
       }
 
@@ -659,7 +675,7 @@
     }, 1000);
 
     loadData();
-    setInterval(loadData, 10000);
+    setInterval(loadData, 3000);
   </script>
 </body>
 </html>
