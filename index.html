@@ -2,233 +2,300 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Shopee LRJ-19 - Central de Operações & Inteligência Logística</title>
+  <title>Shopee LRJ-19 - Yard & Operations Command Center</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@700;800&family=JetBrains+Mono:wght@600;700;800&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700;800&family=JetBrains+Mono:wght@500;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #060911;
-      --card-bg: #0d1322;
-      --card-border: #1c2742;
-      --header-bg: #090e1a;
+      --bg: #030712;
+      --surface: #0b1120;
+      --surface-card: #0f172a;
+      --border: #1e293b;
+      --border-focus: #38bdf8;
       --text: #f8fafc;
       --text-muted: #64748b;
       --shopee: #ff5722;
+      --shopee-glow: rgba(255, 87, 34, 0.25);
       --ok: #10b981;
       --warn: #f59e0b;
       --crit: #ef4444;
-      --blue: #38bdf8;
-      --purple: #8b5cf6;
+      --cyan: #06b6d4;
+      --purple: #a855f7;
     }
+
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; min-height: 100vh; padding: 16px; }
+    body { background: var(--bg); color: var(--text); font-family: 'Plus Jakarta Sans', sans-serif; min-height: 100vh; padding: 18px; }
 
-    /* Header */
-    header { display: flex; justify-content: space-between; align-items: center; background: var(--header-bg); border: 1px solid var(--card-border); padding: 12px 20px; border-radius: 12px; margin-bottom: 16px; }
-    .hub-badge { font-family: 'Chakra Petch', sans-serif; background: var(--shopee); color: #fff; font-size: 1.15rem; font-weight: 800; padding: 6px 14px; border-radius: 6px; letter-spacing: 1px; }
+    /* Top Bar */
+    header {
+      display: flex; justify-content: space-between; align-items: center;
+      background: rgba(11, 17, 32, 0.85); backdrop-filter: blur(12px);
+      border: 1px solid var(--border); padding: 14px 22px; border-radius: 14px; margin-bottom: 20px;
+    }
+    .brand-group { display: flex; align-items: center; gap: 14px; }
+    .badge-hub {
+      font-family: 'Chakra Petch', sans-serif; background: var(--shopee); color: #fff;
+      font-size: 1.15rem; font-weight: 800; padding: 6px 14px; border-radius: 6px;
+      box-shadow: 0 0 15px var(--shopee-glow);
+    }
+    .system-title { font-size: 0.95rem; font-weight: 700; color: #cbd5e1; letter-spacing: 0.5px; }
+    
     .nav-tabs { display: flex; gap: 8px; }
-    .tab-btn { background: #131a2e; border: 1px solid #202b47; color: #94a3b8; padding: 9px 18px; border-radius: 8px; font-weight: 800; font-size: 0.85rem; cursor: pointer; transition: 0.15s ease-out; }
-    .tab-btn.active { background: #1e293b; color: #38bdf8; border-color: #38bdf8; box-shadow: 0 0 12px rgba(56,189,248,0.25); }
-    .clock-display { font-family: 'JetBrains Mono', monospace; font-size: 1.35rem; font-weight: 800; color: #38bdf8; }
+    .tab-btn {
+      background: #0f172a; border: 1px solid var(--border); color: #94a3b8;
+      padding: 10px 20px; border-radius: 8px; font-weight: 700; font-size: 0.85rem;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .tab-btn.active {
+      background: #1e293b; color: #38bdf8; border-color: #38bdf8;
+      box-shadow: 0 0 16px rgba(56, 189, 248, 0.2);
+    }
+    .clock {
+      font-family: 'JetBrains Mono', monospace; font-size: 1.35rem; font-weight: 800; color: #38bdf8;
+    }
 
+    /* Views */
     .view-panel { display: none; }
     .view-panel.active { display: block; }
 
-    /* KPI Cards */
-    .kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin-bottom: 16px; }
-    .kpi-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 10px; padding: 14px; text-align: center; }
-    .kpi-label { font-size: 0.7rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.8px; }
-    .kpi-val { font-family: 'Chakra Petch', sans-serif; font-size: 2.1rem; font-weight: 800; margin-top: 3px; }
-    .crit-txt { color: var(--crit); }
-    .blue-txt { color: var(--blue); }
-    .green-txt { color: var(--ok); }
+    /* KPI Row */
+    .kpi-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+      gap: 14px; margin-bottom: 20px;
+    }
+    .kpi-box {
+      background: var(--surface-card); border: 1px solid var(--border);
+      border-radius: 12px; padding: 16px; position: relative; overflow: hidden;
+    }
+    .kpi-box::after {
+      content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%;
+      background: var(--border);
+    }
+    .kpi-box.border-crit::after { background: var(--crit); }
+    .kpi-box.border-warn::after { background: var(--warn); }
+    .kpi-box.border-ok::after { background: var(--ok); }
+    .kpi-box.border-blue::after { background: var(--cyan); }
 
-    /* Table Operacional */
-    .board-box { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px; overflow: hidden; }
+    .kpi-title { font-size: 0.72rem; font-weight: 800; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px; }
+    .kpi-number { font-family: 'Chakra Petch', sans-serif; font-size: 2.2rem; font-weight: 800; margin-top: 4px; }
+    .kpi-foot { font-size: 0.75rem; color: var(--text-muted); margin-top: 4px; font-weight: 600; }
+
+    /* Live Yard Table */
+    .table-container {
+      background: var(--surface-card); border: 1px solid var(--border);
+      border-radius: 14px; overflow: hidden;
+    }
+    .table-toolbar {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 14px 20px; background: rgba(8, 12, 20, 0.6); border-bottom: 1px solid var(--border);
+    }
+    .table-search {
+      background: #030712; border: 1px solid var(--border); color: #fff;
+      padding: 8px 14px; border-radius: 6px; font-size: 0.85rem; width: 260px; outline: none;
+    }
+    .table-search:focus { border-color: var(--border-focus); }
+
     table { width: 100%; border-collapse: collapse; text-align: left; }
-    th { background: #080c14; padding: 12px 16px; font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); border-bottom: 1px solid var(--card-border); }
-    td { padding: 10px 16px; font-size: 0.95rem; border-bottom: 1px solid rgba(255,255,255,0.03); }
-    .flight-gate { font-family: 'Chakra Petch', sans-serif; font-size: 1.25rem; font-weight: 800; color: #fbbf24; background: #1c1917; padding: 4px 10px; border-radius: 6px; display: inline-block; border: 1px solid #451a03; white-space: nowrap; min-width: 65px; text-align: center; }
-    .mono-time { font-family: 'JetBrains Mono', monospace; font-weight: 700; }
+    th {
+      background: #060a12; padding: 12px 18px; font-size: 0.75rem;
+      text-transform: uppercase; color: var(--text-muted); border-bottom: 1px solid var(--border);
+      font-weight: 800;
+    }
+    td { padding: 12px 18px; font-size: 0.92rem; border-bottom: 1px solid rgba(255,255,255,0.03); }
+    tr:hover td { background: rgba(255, 255, 255, 0.015); }
 
-    .status-badge { font-family: 'Chakra Petch', sans-serif; font-size: 0.75rem; font-weight: 800; padding: 4px 10px; border-radius: 5px; text-transform: uppercase; display: inline-flex; align-items: center; white-space: nowrap; }
-    .tag-ok { background: rgba(16,185,129,0.15); color: var(--ok); border: 1px solid var(--ok); }
-    .tag-warn { background: rgba(245,158,11,0.15); color: var(--warn); border: 1px solid var(--warn); }
-    .tag-crit { background: rgba(239,68,68,0.25); color: var(--crit); border: 1px solid var(--crit); animation: beaconPulse 1.2s infinite alternate; }
-    @keyframes beaconPulse {
-      0% { box-shadow: 0 0 2px var(--crit); opacity: 0.85; }
-      100% { box-shadow: 0 0 14px var(--crit); opacity: 1; }
+    .route-tag {
+      font-family: 'Chakra Petch', sans-serif; font-size: 1.25rem; font-weight: 800;
+      color: #fbbf24; background: #1c1917; padding: 4px 10px; border-radius: 6px;
+      border: 1px solid #451a03; display: inline-block; min-width: 65px; text-align: center;
+    }
+    .modal-tag {
+      background: #131a2e; color: #38bdf8; font-weight: 700; font-size: 0.75rem;
+      padding: 4px 8px; border-radius: 4px;
+    }
+    .time-font { font-family: 'JetBrains Mono', monospace; font-weight: 700; }
+    
+    .status-pill {
+      font-family: 'Chakra Petch', sans-serif; font-size: 0.78rem; font-weight: 800;
+      padding: 4px 12px; border-radius: 6px; text-transform: uppercase; display: inline-flex;
+    }
+    .status-ok { background: rgba(16, 185, 129, 0.15); color: var(--ok); border: 1px solid var(--ok); }
+    .status-warn { background: rgba(245, 158, 11, 0.15); color: var(--warn); border: 1px solid var(--warn); }
+    .status-crit {
+      background: rgba(239, 68, 68, 0.2); color: var(--crit); border: 1px solid var(--crit);
+      animation: flash 1.2s infinite alternate;
+    }
+    @keyframes flash {
+      0% { opacity: 0.8; box-shadow: 0 0 3px var(--crit); }
+      100% { opacity: 1; box-shadow: 0 0 14px var(--crit); }
     }
 
-    /* Filters Bar */
-    .filter-bar { display: flex; gap: 12px; margin-bottom: 16px; background: var(--card-bg); border: 1px solid var(--card-border); padding: 12px 18px; border-radius: 10px; align-items: center; flex-wrap: wrap; }
-    .filter-select { background: #080c14; border: 1px solid #202b47; color: #f1f5f9; padding: 8px 14px; border-radius: 6px; font-weight: 700; font-size: 0.85rem; outline: none; cursor: pointer; }
+    /* Analytics Section */
+    .filter-panel {
+      display: flex; gap: 14px; background: var(--surface-card); border: 1px solid var(--border);
+      padding: 14px 20px; border-radius: 12px; margin-bottom: 20px; align-items: center; flex-wrap: wrap;
+    }
+    .custom-select {
+      background: #030712; border: 1px solid var(--border); color: #fff;
+      padding: 8px 14px; border-radius: 6px; font-weight: 600; font-size: 0.85rem; outline: none; cursor: pointer;
+    }
+    .custom-select:focus { border-color: var(--border-focus); }
 
-    /* Grid Analytics */
-    .analytics-grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 16px; }
-    .col-4 { grid-column: span 4; }
-    .col-6 { grid-column: span 6; }
-    .col-8 { grid-column: span 8; }
-    .col-12 { grid-column: span 12; }
+    .grid-charts {
+      display: grid; grid-template-columns: repeat(12, 1fr); gap: 16px;
+    }
+    .span-4 { grid-column: span 4; }
+    .span-6 { grid-column: span 6; }
+    .span-8 { grid-column: span 8; }
+    .span-12 { grid-column: span 12; }
 
-    .chart-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px; padding: 18px 20px; display: flex; flex-direction: column; justify-content: space-between; }
-    .chart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-    .chart-title { font-size: 0.82rem; font-weight: 800; color: #cbd5e1; text-transform: uppercase; letter-spacing: 0.6px; }
-    .chart-badge { background: #1a233a; color: var(--blue); font-size: 0.7rem; font-weight: 700; padding: 3px 7px; border-radius: 4px; }
-    .canvas-holder { position: relative; width: 100%; height: 230px; }
+    .panel-card {
+      background: var(--surface-card); border: 1px solid var(--border);
+      border-radius: 12px; padding: 18px 20px;
+    }
+    .card-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+    .card-label { font-size: 0.82rem; font-weight: 800; color: #cbd5e1; text-transform: uppercase; }
+    .chart-box { position: relative; width: 100%; height: 230px; }
 
-    /* Ranking Ofensores List */
-    .ranking-list { display: flex; flex-direction: column; gap: 10px; max-height: 290px; overflow-y: auto; padding-right: 6px; }
-    .ranking-item { display: flex; align-items: center; justify-content: space-between; background: #080c14; border: 1px solid #1a233a; padding: 10px 14px; border-radius: 8px; }
-    .rank-pos { font-family: 'Chakra Petch', sans-serif; font-size: 1.1rem; font-weight: 800; width: 28px; color: var(--warn); }
-    .rank-info { flex: 1; margin: 0 12px; }
-    .rank-name { font-weight: 700; color: #fff; font-size: 0.9rem; }
-    .rank-meta { font-size: 0.75rem; color: var(--text-muted); margin-top: 2px; }
-    .rank-bar-bg { width: 100%; height: 5px; background: #1a233a; border-radius: 3px; margin-top: 6px; overflow: hidden; }
-    .rank-bar-fill { height: 100%; background: var(--crit); border-radius: 3px; }
-    .rank-val { font-family: 'JetBrains Mono', monospace; font-size: 1.1rem; font-weight: 800; color: var(--crit); }
+    /* Top Offender Table/List */
+    .offender-row {
+      display: flex; align-items: center; justify-content: space-between;
+      background: #060a12; border: 1px solid #162032; padding: 10px 14px; border-radius: 8px; margin-bottom: 8px;
+    }
+    .offender-rank { font-family: 'Chakra Petch', sans-serif; font-size: 1.1rem; font-weight: 800; color: var(--warn); width: 30px; }
+    .offender-details { flex: 1; margin: 0 12px; }
+    .offender-bar-wrap { width: 100%; height: 6px; background: #1a233a; border-radius: 4px; margin-top: 6px; overflow: hidden; }
+    .offender-bar-val { height: 100%; background: var(--crit); border-radius: 4px; }
   </style>
 </head>
 <body>
 
   <header>
-    <div style="display: flex; align-items: center; gap: 12px;">
-      <div class="hub-badge">HUB LRJ-19</div>
-      <div class="nav-tabs">
-        <button id="tab-btn-ops" class="tab-btn active" onclick="setTab('ops')">✈️ MONITOR OPERACIONAL (TV)</button>
-        <button id="tab-btn-analytics" class="tab-btn" onclick="setTab('analytics')">📊 DASHBOARD EXECUTIVO GERAL</button>
-      </div>
+    <div class="brand-group">
+      <div class="badge-hub">HUB LRJ-19</div>
+      <div class="system-title">Central de Carregamento & Gestão de Pátio</div>
     </div>
-    <div style="display: flex; align-items: center; gap: 14px;">
-      <div class="clock-display" id="clock-txt">--:--:--</div>
-      <button id="btn-audio" class="tab-btn" onclick="toggleAudio()">🔊 Alerta Sonoro</button>
+
+    <div class="nav-tabs">
+      <button id="btn-tab-live" class="tab-btn active" onclick="switchTab('live')">🚛 Monitor de Vagas (Ao Vivo)</button>
+      <button id="btn-tab-stats" class="tab-btn" onclick="switchTab('stats')">📈 Indicadores & Gargalos</button>
+    </div>
+
+    <div style="display: flex; align-items: center; gap: 16px;">
+      <div class="clock" id="live-clock">--:--:--</div>
+      <button id="btn-sound" class="tab-btn" style="padding: 8px 14px;" onclick="toggleAudioEngine()">🔊 Som: Off</button>
     </div>
   </header>
 
-  <!-- ============================================== -->
-  <!-- ABA 1: MONITOR OPERACIONAL (PÁTIO AO VIVO)     -->
-  <!-- ============================================== -->
-  <div id="panel-ops" class="view-panel active">
-    <div class="kpi-row">
-      <div class="kpi-card">
-        <div class="kpi-label">Carros Carregando (Pátio Hoje)</div>
-        <div class="kpi-val" id="kpi-patio-count">0</div>
+  <!-- ==================== ABA 1: AO VIVO / PÁTIO ==================== -->
+  <div id="view-live" class="view-panel active">
+    <div class="kpi-grid">
+      <div class="kpi-box border-blue">
+        <div class="kpi-title">Vagas em Carregamento</div>
+        <div class="kpi-number" id="live-patio-count">0</div>
+        <div class="kpi-foot">Veículos estacionados no pátio</div>
       </div>
-      <div class="kpi-card">
-        <div class="kpi-label">Média TMC (Pátio Hoje)</div>
-        <div class="kpi-val" id="kpi-patio-avg">00:00</div>
+      <div class="kpi-box border-warn">
+        <div class="kpi-title">TMC Médio Corrente</div>
+        <div class="kpi-number" id="live-patio-avg">00:00</div>
+        <div class="kpi-foot">Tempo pós-bipagem até saída</div>
       </div>
-      <div class="kpi-card">
-        <div class="kpi-label">Alertas Críticos (> 10M)</div>
-        <div class="kpi-val crit-txt" id="kpi-patio-crit">0</div>
+      <div class="kpi-box border-crit">
+        <div class="kpi-title">Vagas Críticas (> 10m)</div>
+        <div class="kpi-number" id="live-patio-crit" style="color: var(--crit);">0</div>
+        <div class="kpi-foot">Motoristas estourando SLA da vaga</div>
       </div>
-      <div class="kpi-card">
-        <div class="kpi-label">Carros Carregados / Hora</div>
-        <div class="kpi-val blue-txt" id="kpi-flow-rate">0.0 /h</div>
-      </div>
-      <div class="kpi-card">
-        <div class="kpi-label">Finalizados Hoje / Início Rota</div>
-        <div class="kpi-val" id="kpi-today-summary" style="font-size: 1.35rem; padding-top: 4px;">0 rotas | --:--</div>
+      <div class="kpi-box border-ok">
+        <div class="kpi-title">Rotas Finalizadas Hoje</div>
+        <div class="kpi-number" id="live-finished-count">0</div>
+        <div class="kpi-foot" id="live-flow-rate">Fluxo: 0.0 rotas/hora</div>
       </div>
     </div>
 
-    <div class="board-box">
+    <div class="table-container">
+      <div class="table-toolbar">
+        <span style="font-weight: 800; font-size: 0.85rem; color: #94a3b8; text-transform: uppercase;">Fluxo de Carregamento Instantâneo</span>
+        <input type="text" id="live-search" class="table-search" placeholder="Filtrar por Rota, Motorista ou Modal..." onkeyup="renderLiveYard()">
+      </div>
       <table>
         <thead>
           <tr>
-            <th style="width: 95px;">Rota</th>
+            <th style="width: 100px;">Rota</th>
             <th>Motorista</th>
             <th>Modal</th>
             <th>Transportadora</th>
-            <th>Horário Subida de Rota</th>
+            <th>Término Bipagem</th>
             <th>Tempo no Carro (TMC)</th>
-            <th style="text-align: right;">Status Operacional</th>
+            <th style="text-align: right;">Status da Vaga</th>
           </tr>
         </thead>
-        <tbody id="ops-table-body">
-          <tr><td colspan="7" style="text-align:center; color: var(--text-muted); padding: 30px;">Carregando operação ao vivo...</td></tr>
+        <tbody id="yard-tbody">
+          <tr><td colspan="7" style="text-align:center; color: var(--text-muted); padding: 30px;">Carregando fluxo logístico...</td></tr>
         </tbody>
       </table>
     </div>
   </div>
 
-  <!-- ============================================== -->
-  <!-- ABA 2: VISÃO GERENCIAL / ANALYTICS GERAL       -->
-  <!-- ============================================== -->
-  <div id="panel-analytics" class="view-panel">
-    <div class="filter-bar">
-      <span style="font-size: 0.75rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">🔍 Filtros Executivos:</span>
-      <select id="filtro-data" class="filter-select" onchange="runAnalytics()"><option value="ALL">Todas as Datas</option></select>
-      <select id="filtro-modal" class="filter-select" onchange="runAnalytics()"><option value="ALL">Todos os Modais</option></select>
-      <select id="filtro-transp" class="filter-select" onchange="runAnalytics()"><option value="ALL">Todas as Transportadoras</option></select>
+  <!-- ==================== ABA 2: ANALYTICS ==================== -->
+  <div id="view-stats" class="view-panel">
+    <div class="filter-panel">
+      <span style="font-size: 0.75rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">Filtros:</span>
+      <select id="stat-data" class="custom-select" onchange="processAnalytics()"></select>
+      <select id="stat-modal" class="custom-select" onchange="processAnalytics()"></select>
+      <select id="stat-transp" class="custom-select" onchange="processAnalytics()"></select>
     </div>
 
-    <div class="kpi-row">
-      <div class="kpi-card">
-        <div class="kpi-label">Total Carros Analisados</div>
-        <div class="kpi-val blue-txt" id="mgr-kpi-total">0</div>
+    <div class="kpi-grid">
+      <div class="kpi-box border-blue">
+        <div class="kpi-title">Viagens Concluídas</div>
+        <div class="kpi-number" id="kpi-stat-total">0</div>
+        <div class="kpi-foot">Total com check-out efetuado</div>
       </div>
-      <div class="kpi-card">
-        <div class="kpi-label">TMC Médio Consolidado</div>
-        <div class="kpi-val" id="mgr-kpi-tmc">0.0 min</div>
+      <div class="kpi-box border-warn">
+        <div class="kpi-title">TMC Médio Global</div>
+        <div class="kpi-number" id="kpi-stat-tmc">0.0m</div>
+        <div class="kpi-foot">Meta: $\le$ 10 minutos</div>
       </div>
-      <div class="kpi-card">
-        <div class="kpi-label">Aderência ao SLA (&lt; 10 min)</div>
-        <div class="kpi-val green-txt" id="mgr-kpi-sla">0.0%</div>
+      <div class="kpi-box border-ok">
+        <div class="kpi-title">Aderência ao SLA (&le; 10m)</div>
+        <div class="kpi-number" id="kpi-stat-sla" style="color: var(--ok);">0.0%</div>
+        <div class="kpi-foot">Veículos dentro da janela ideal</div>
       </div>
-      <div class="kpi-card">
-        <div class="kpi-label">Modal Mais Rápido (Melhor TMC)</div>
-        <div class="kpi-val" id="mgr-kpi-fastest" style="font-size: 1.4rem; padding-top: 6px; color: #fbbf24;">--</div>
+      <div class="kpi-box border-blue">
+        <div class="kpi-title">Tempo Médio Bancada</div>
+        <div class="kpi-number" id="kpi-stat-bip">0.0m</div>
+        <div class="kpi-foot">Duração da separação de pacotes</div>
       </div>
     </div>
 
-    <div class="analytics-grid">
-      <!-- 1. Distribuição SLA -->
-      <div class="chart-card col-4">
-        <div class="chart-header">
-          <div class="chart-title">Distribuição de SLA</div>
-          <span class="chart-badge">Volume</span>
-        </div>
-        <div class="canvas-holder"><canvas id="chartFaixas"></canvas></div>
+    <div class="grid-charts">
+      <div class="panel-card span-4">
+        <div class="card-head"><span class="card-label">Distribuição de SLA de Pátio</span></div>
+        <div class="chart-box"><canvas id="chartSla"></canvas></div>
       </div>
 
-      <!-- 2. Curva de Escoamento Contínua (Área Gradiente) -->
-      <div class="chart-card col-8">
-        <div class="chart-header">
-          <div class="chart-title">Curva de Carregamento por Horário</div>
-          <span class="chart-badge">Fluxo / Hora</span>
-        </div>
-        <div class="canvas-holder"><canvas id="chartHoras"></canvas></div>
+      <div class="panel-card span-8">
+        <div class="card-head"><span class="card-label">Fluxo de Saídas por Horário</span></div>
+        <div class="chart-box"><canvas id="chartHourly"></canvas></div>
       </div>
 
-      <!-- 3. TMC Médio por Modal (Barras com Meta 10m) -->
-      <div class="chart-card col-6">
-        <div class="chart-header">
-          <div class="chart-title">TMC Médio por Modal (Minutos)</div>
-          <span class="chart-badge">Agilidade</span>
-        </div>
-        <div class="canvas-holder"><canvas id="chartModal"></canvas></div>
+      <div class="panel-card span-6">
+        <div class="card-head"><span class="card-label">TMC Médio por Modal (Minutos)</span></div>
+        <div class="chart-box"><canvas id="chartModal"></canvas></div>
       </div>
 
-      <!-- 4. TMC Médio por Transportadora -->
-      <div class="chart-card col-6">
-        <div class="chart-header">
-          <div class="chart-title">TMC Médio por Transportadora (Minutos)</div>
-          <span class="chart-badge">Performance</span>
-        </div>
-        <div class="canvas-holder"><canvas id="chartTransp"></canvas></div>
+      <div class="panel-card span-6">
+        <div class="card-head"><span class="card-label">TMC Médio por Transportadora (Minutos)</span></div>
+        <div class="chart-box"><canvas id="chartTransp"></canvas></div>
       </div>
 
-      <!-- 5. Ranking dos Top 6 Motoristas Ofensores -->
-      <div class="chart-card col-12">
-        <div class="chart-header">
-          <div class="chart-title">Ranking de Ofensores - Top Motoristas com Maior TMC Médio</div>
-          <span class="chart-badge" style="background:#451a03; color:#fca5a5;">Meta: &le; 10 min</span>
+      <div class="panel-card span-12">
+        <div class="card-head">
+          <span class="card-label">Top Motoristas com Maior Tempo de Ocupação de Vaga (TMC Médio)</span>
+          <span style="font-size: 0.72rem; color: #f87171; font-weight: 800;">SLA META: &le; 10 MINUTOS</span>
         </div>
-        <div class="ranking-list" id="ranking-drivers-container">
-          <!-- Renderizado via JS -->
-        </div>
+        <div id="driver-ranking-box"></div>
       </div>
     </div>
   </div>
@@ -236,16 +303,16 @@
   <script>
     Chart.register(ChartDataLabels);
 
-    const API_URL = "https://script.google.com/macros/s/AKfycbwO9YxzWqLNQeR6o_5c6s6JB6Q5a_cUMLss6x_dbp10si9szgFJXJZfDR81fAsvYME/exec";
+    const API_ENDPOINT = "https://script.google.com/macros/s/AKfycbwO9YxzWqLNQeR6o_5c6s6JB6Q5a_cUMLss6x_dbp10si9szgFJXJZfDR81fAsvYME/exec";
 
-    let dataset = [];
-    let audioCtx = null, audioActive = false;
-    let activeTab = 'ops';
-    let charts = {};
+    let rawDataset = [];
+    let activeTab = 'live';
+    let audioContext = null, audioEnabled = false;
+    let chartRefs = {};
 
-    function cleanModal(m) {
-      if (!m) return "OUTROS";
-      const u = String(m).toUpperCase().trim();
+    function cleanCategory(str) {
+      if (!str) return "OUTROS";
+      const u = String(str).toUpperCase().trim();
       if (u.includes("PASSEIO")) return "PASSEIO";
       if (u.includes("FIORINO")) return "FIORINO";
       if (u.includes("MOTO")) return "MOTO";
@@ -254,255 +321,260 @@
       return u;
     }
 
-    function setTab(tab) {
-      activeTab = tab;
-      document.getElementById("tab-btn-ops").classList.toggle("active", tab === 'ops');
-      document.getElementById("tab-btn-analytics").classList.toggle("active", tab === 'analytics');
-      document.getElementById("panel-ops").classList.toggle("active", tab === 'ops');
-      document.getElementById("panel-analytics").classList.toggle("active", tab === 'analytics');
-      if (tab === 'analytics') runAnalytics();
-      else renderOps();
+    function switchTab(t) {
+      activeTab = t;
+      document.getElementById("btn-tab-live").classList.toggle("active", t === 'live');
+      document.getElementById("btn-tab-stats").classList.toggle("active", t === 'stats');
+      document.getElementById("view-live").classList.toggle("active", t === 'live');
+      document.getElementById("view-stats").classList.toggle("active", t === 'stats');
+      if (t === 'stats') processAnalytics();
+      else renderLiveYard();
     }
 
-    function toggleAudio() {
-      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      audioActive = !audioActive;
-      const b = document.getElementById("btn-audio");
-      b.innerText = audioActive ? "🔊 Som Ligado" : "🔇 Som Desligado";
-      b.style.borderColor = audioActive ? "#10b981" : "#202b47";
+    function toggleAudioEngine() {
+      if (!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      audioEnabled = !audioEnabled;
+      const btn = document.getElementById("btn-sound");
+      btn.innerText = audioEnabled ? "🔊 Som: On" : "🔇 Som: Off";
+      btn.style.borderColor = audioEnabled ? "#10b981" : "#1e293b";
     }
 
-    function soundBeep() {
-      if (!audioActive) return;
-      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      const osc = audioCtx.createOscillator();
-      const gain = audioCtx.createGain();
-      osc.frequency.setValueAtTime(880, audioCtx.currentTime);
-      gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+    function playBeep() {
+      if (!audioEnabled) return;
+      if (!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      const osc = audioContext.createOscillator();
+      const gain = audioContext.createGain();
+      osc.frequency.setValueAtTime(800, audioContext.currentTime);
+      gain.gain.setValueAtTime(0.15, audioContext.currentTime);
       osc.connect(gain);
-      gain.connect(audioCtx.destination);
+      gain.connect(audioContext.destination);
       osc.start();
-      osc.stop(audioCtx.currentTime + 0.3);
+      osc.stop(audioContext.currentTime + 0.25);
     }
 
-    function parseSec(t) {
-      if (!t) return null;
-      const m = String(t).trim().match(/(\d{2}):(\d{2})(?::(\d{2}))?/);
-      return m ? parseInt(m[1], 10) * 3600 + parseInt(m[2], 10) * 60 + (m[3] ? parseInt(m[3], 10) : 0) : null;
+    function parseToSec(timeStr) {
+      if (!timeStr) return null;
+      const match = String(timeStr).trim().match(/(\d{2}):(\d{2})(?::(\d{2}))?/);
+      return match ? (parseInt(match[1], 10) * 3600) + (parseInt(match[2], 10) * 60) + (match[3] ? parseInt(match[3], 10) : 0) : null;
     }
 
-    function fmtMinSec(sec) {
+    function fmtMinutes(sec) {
       const m = Math.floor(sec / 60), s = sec % 60;
       return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
     }
 
-    function getNowSec() {
-      const n = new Date();
-      return n.getHours() * 3600 + n.getMinutes() * 60 + n.getSeconds();
+    function getSecondsNow() {
+      const d = new Date();
+      return (d.getHours() * 3600) + (d.getMinutes() * 60) + d.getSeconds();
     }
 
-    async function fetchApiData() {
+    async function loadData() {
       try {
-        const res = await fetch(API_URL);
-        const raw = await res.json();
-        
-        dataset = raw.map(d => ({
-          ...d,
-          data: String(d.data || "").trim(),
-          modal: cleanModal(d.modal)
+        const response = await fetch(API_ENDPOINT);
+        const data = await response.json();
+        rawDataset = data.map(item => ({
+          ...item,
+          data: String(item.data || "").trim(),
+          modal: cleanCategory(item.modal)
         }));
-
-        buildFilters();
-        if (activeTab === 'ops') renderOps();
-        else runAnalytics();
+        populateFilters();
+        if (activeTab === 'live') renderLiveYard();
+        else processAnalytics();
       } catch (err) {
-        console.warn("Sincronizando base...", err);
+        console.warn("Sincronização pendente...", err);
       }
     }
 
-    function renderOps() {
-      const now = getNowSec();
-      const allDates = [...new Set(dataset.map(d => d.data).filter(Boolean))];
-      const targetDate = allDates[allDates.length - 1]; // Pega o dia mais recente ativo
+    function renderLiveYard() {
+      const now = getSecondsNow();
+      const availableDates = [...new Set(rawDataset.map(d => d.data).filter(Boolean))];
+      const targetDate = availableDates[availableDates.length - 1];
 
-      const patio = [];
-      let totalSec = 0, critCount = 0, finishedCount = 0;
+      const yardItems = [];
+      let totalTime = 0, criticals = 0, completed = 0;
       let firstStart = null, lastEnd = null;
 
-      dataset.forEach(d => {
-        if (d.data !== targetDate) return;
-        const ti = parseSec(d.validationTi);
-        const ei = parseSec(d.validationEi);
+      const searchTerm = (document.getElementById("live-search").value || "").toLowerCase();
 
-        if (ti !== null) firstStart = (firstStart === null || ti < firstStart) ? ti : firstStart;
-        if (d.isFinalizado) finishedCount++;
+      rawDataset.forEach(row => {
+        if (row.data !== targetDate) return;
+        const vStart = parseToSec(row.validationTi);
+        const vEnd = parseToSec(row.validationEi);
 
-        if (ei !== null) {
-          lastEnd = (lastEnd === null || ei > lastEnd) ? ei : lastEnd;
-          if (!d.isFinalizado) {
-            const elap = Math.max(0, now - ei);
-            patio.push({ ...d, elap });
-            totalSec += elap;
-            if (elap >= 600) critCount++; // Crítico >= 10m
+        if (vStart !== null) firstStart = (firstStart === null || vStart < firstStart) ? vStart : firstStart;
+        if (row.isFinalizado) completed++;
+
+        if (vEnd !== null) {
+          lastEnd = (lastEnd === null || vEnd > lastEnd) ? vEnd : lastEnd;
+          if (!row.isFinalizado) {
+            const elapsed = Math.max(0, now - vEnd);
+            const matchesSearch = !searchTerm || 
+              (row.rota && row.rota.toLowerCase().includes(searchTerm)) ||
+              (row.driverNome && row.driverNome.toLowerCase().includes(searchTerm)) ||
+              (row.modal && row.modal.toLowerCase().includes(searchTerm));
+
+            if (matchesSearch) {
+              yardItems.push({ ...row, elapsed });
+            }
+            totalTime += elapsed;
+            if (elapsed >= 600) criticals++;
           }
         }
       });
 
-      document.getElementById("kpi-patio-count").innerText = patio.length;
-      document.getElementById("kpi-patio-crit").innerText = critCount;
-      document.getElementById("kpi-patio-avg").innerText = patio.length ? fmtMinSec(Math.round(totalSec / patio.length)) : "00:00";
+      document.getElementById("live-patio-count").innerText = yardItems.length;
+      document.getElementById("live-patio-crit").innerText = criticals;
+      document.getElementById("live-patio-avg").innerText = yardItems.length ? fmtMinutes(Math.round(totalTime / yardItems.length)) : "00:00";
+      document.getElementById("live-finished-count").innerText = completed;
 
       if (firstStart !== null && lastEnd !== null && lastEnd > firstStart) {
         const spanH = (lastEnd - firstStart) / 3600;
-        document.getElementById("kpi-flow-rate").innerText = `${(finishedCount / spanH).toFixed(1)} /h`;
-        const tiStr = `${String(Math.floor(firstStart / 3600)).padStart(2,'0')}:${String(Math.floor((firstStart % 3600)/60)).padStart(2,'0')}`;
-        document.getElementById("kpi-today-summary").innerText = `${finishedCount} rotas | ${tiStr}`;
+        document.getElementById("live-flow-rate").innerText = `Fluxo: ${(completed / spanH).toFixed(1)} rotas/hora`;
       } else {
-        document.getElementById("kpi-flow-rate").innerText = `0.0 /h`;
-        document.getElementById("kpi-today-summary").innerText = `${finishedCount} rotas | --:--`;
+        document.getElementById("live-flow-rate").innerText = `Fluxo: 0.0 rotas/hora`;
       }
 
-      patio.sort((a, b) => b.elap - a.elap);
+      yardItems.sort((a, b) => b.elapsed - a.elapsed);
 
-      const tb = document.getElementById("ops-table-body");
-      if (!patio.length) {
-        tb.innerHTML = `<tr><td colspan="7" style="text-align:center; color: var(--text-muted); padding: 30px;">Pátio livre no momento. Nenhum carro carregando.</td></tr>`;
+      const tbody = document.getElementById("yard-tbody");
+      if (!yardItems.length) {
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color: var(--text-muted); padding: 30px;">Pátio livre. Nenhum veículo em carregamento no momento.</td></tr>`;
         return;
       }
 
-      let html = "";
-      patio.forEach(car => {
-        const mins = car.elap / 60;
-        let badge = mins >= 10 ? `<span class="status-badge tag-crit">🔴 CRÍTICO (>10M)</span>` :
-                    mins >= 7  ? `<span class="status-badge tag-warn">🟡 ATENÇÃO (7-10M)</span>` :
-                                 `<span class="status-badge tag-ok">🟢 REGULAR (&lt;7M)</span>`;
+      let rowsHtml = "";
+      yardItems.forEach(car => {
+        const minutes = car.elapsed / 60;
+        const badge = minutes >= 10 ? `<span class="status-pill status-crit">🔴 CRÍTICO (&gt;10m)</span>` :
+                      minutes >= 7  ? `<span class="status-pill status-warn">🟡 ALERTA (7-10m)</span>` :
+                                      `<span class="status-pill status-ok">🟢 REGULAR (&lt;7m)</span>`;
 
-        html += `
+        rowsHtml += `
           <tr>
-            <td style="white-space: nowrap;"><div class="flight-gate">${car.rota}</div></td>
-            <td><strong style="color:#fff;">${car.driverNome}</strong><br><small style="color:var(--text-muted);">ID: ${car.idDriver}</small></td>
-            <td><span style="background:#131a2e; padding:4px 8px; border-radius:4px; font-weight:700; color:#38bdf8;">${car.modal}</span></td>
-            <td>${car.transportadora}</td>
-            <td class="mono-time" style="color:var(--text-muted);">${car.validationEi}</td>
-            <td class="mono-time" style="font-size:1.15rem; color:#fff;">${fmtMinSec(car.elap)} min</td>
-            <td style="text-align:right;">${badge}</td>
+            <td><div class="route-tag">${car.rota || '--'}</div></td>
+            <td><strong>${car.driverNome || 'Não identificado'}</strong><br><small style="color:var(--text-muted)">ID: ${car.idDriver}</small></td>
+            <td><span class="modal-tag">${car.modal}</span></td>
+            <td style="color:#cbd5e1">${car.transportadora || '--'}</td>
+            <td class="time-font" style="color:var(--text-muted)">${car.validationEi || '--'}</td>
+            <td class="time-font" style="font-size:1.15rem; color:#fff">${fmtMinutes(car.elapsed)} min</td>
+            <td style="text-align:right">${badge}</td>
           </tr>
         `;
       });
-      tb.innerHTML = html;
-      if (critCount > 0) soundBeep();
+      tbody.innerHTML = rowsHtml;
+      if (criticals > 0) playBeep();
     }
 
-    function buildFilters() {
-      const dates = [...new Set(dataset.map(d => d.data).filter(Boolean))].sort().reverse();
-      const modais = [...new Set(dataset.map(d => d.modal).filter(Boolean))].sort();
-      const transps = [...new Set(dataset.map(d => d.transportadora).filter(Boolean))].sort();
+    function populateFilters() {
+      const dates = [...new Set(rawDataset.map(d => d.data).filter(Boolean))].sort().reverse();
+      const modais = [...new Set(rawDataset.map(d => d.modal).filter(Boolean))].sort();
+      const transps = [...new Set(rawDataset.map(d => d.transportadora).filter(Boolean))].sort();
 
-      updateDropdown("filtro-data", dates);
-      updateDropdown("filtro-modal", modais);
-      updateDropdown("filtro-transp", transps);
+      fillSelect("stat-data", dates, "Todas as Datas");
+      fillSelect("stat-modal", modais, "Todos os Modais");
+      fillSelect("stat-transp", transps, "Todas as Transportadoras");
     }
 
-    function updateDropdown(id, items) {
+    function fillSelect(id, values, defaultLabel) {
       const el = document.getElementById(id);
-      const curVal = el.value;
-      el.innerHTML = `<option value="ALL">Todas as ${id === 'filtro-data' ? 'Datas' : id === 'filtro-modal' ? 'Modais' : 'Transportadoras'}</option>`;
-      items.forEach(it => {
+      const prev = el.value;
+      el.innerHTML = `<option value="ALL">${defaultLabel}</option>`;
+      values.forEach(v => {
         const opt = document.createElement("option");
-        opt.value = it; opt.innerText = it;
+        opt.value = v; opt.innerText = v;
         el.appendChild(opt);
       });
-      if (items.includes(curVal)) el.value = curVal;
+      if (values.includes(prev)) el.value = prev;
     }
 
-    // ==============================================
-    // MOTOR ANALYTICS EXECUTIVO
-    // ==============================================
-    function runAnalytics() {
-      const selD = document.getElementById("filtro-data").value;
-      const selM = document.getElementById("filtro-modal").value;
-      const selT = document.getElementById("filtro-transp").value;
+    function processAnalytics() {
+      const dateVal = document.getElementById("stat-data").value;
+      const modalVal = document.getElementById("stat-modal").value;
+      const transpVal = document.getElementById("stat-transp").value;
 
-      const filtered = dataset.filter(d => {
-        return (selD === 'ALL' || d.data === selD) &&
-               (selM === 'ALL' || d.modal === selM) &&
-               (selT === 'ALL' || d.transportadora === selT);
+      const filtered = rawDataset.filter(d => {
+        return (dateVal === 'ALL' || d.data === dateVal) &&
+               (modalVal === 'ALL' || d.modal === modalVal) &&
+               (transpVal === 'ALL' || d.transportadora === transpVal);
       });
 
-      const faixas = { "< 7m (Ideal)": 0, "7-10m (Alerta)": 0, "10-15m (Crítico)": 0, "> 15m (Gargalo)": 0 };
-      const horas = {}, modais = {}, transps = {}, drivers = {};
-      let totalSec = 0, count = 0, onTime = 0;
+      const slaBuckets = { "< 7m (Ideal)": 0, "7-10m (Aceitável)": 0, "10-15m (Crítico)": 0, "> 15m (Gargalo)": 0 };
+      const hoursMap = {}, modalMap = {}, transpMap = {}, driverMap = {};
+      let totalTmcSec = 0, validTmcCount = 0, onTimeCount = 0;
+      let totalBipSec = 0, validBipCount = 0;
 
-      filtered.forEach(d => {
-        const ei = parseSec(d.validationEi);
-        const co = parseSec(d.checkOut);
+      filtered.forEach(item => {
+        const vStart = parseToSec(item.validationTi);
+        const vEnd = parseToSec(item.validationEi);
+        const cOut = parseToSec(item.checkOut);
 
-        if (ei !== null && co !== null && co >= ei) {
-          const tmcMin = (co - ei) / 60;
-          totalSec += (co - ei);
-          count++;
-          if (tmcMin <= 10) onTime++; // SLA meta <= 10m
+        if (vStart !== null && vEnd !== null && vEnd >= vStart) {
+          totalBipSec += (vEnd - vStart);
+          validBipCount++;
+        }
 
-          if (tmcMin < 7) faixas["< 7m (Ideal)"]++;
-          else if (tmcMin <= 10) faixas["7-10m (Alerta)"]++;
-          else if (tmcMin <= 15) faixas["10-15m (Crítico)"]++;
-          else faixas["> 15m (Gargalo)"]++;
+        if (vEnd !== null && cOut !== null && cOut >= vEnd) {
+          const diffMin = (cOut - vEnd) / 60;
+          totalTmcSec += (cOut - vEnd);
+          validTmcCount++;
 
-          const hBlock = d.checkOut.split(":")[0] + "h";
-          horas[hBlock] = (horas[hBlock] || 0) + 1;
+          if (diffMin <= 10) onTimeCount++;
 
-          if (!modais[d.modal]) modais[d.modal] = [];
-          modais[d.modal].push(tmcMin);
+          if (diffMin < 7) slaBuckets["< 7m (Ideal)"]++;
+          else if (diffMin <= 10) slaBuckets["7-10m (Aceitável)"]++;
+          else if (diffMin <= 15) slaBuckets["10-15m (Crítico)"]++;
+          else slaBuckets["> 15m (Gargalo)"]++;
 
-          if (!transps[d.transportadora]) transps[d.transportadora] = [];
-          transps[d.transportadora].push(tmcMin);
+          if (item.checkOut) {
+            const h = item.checkOut.split(":")[0] + "h";
+            hoursMap[h] = (hoursMap[h] || 0) + 1;
+          }
 
-          const dKey = `${d.driverNome} • ${d.modal}`;
-          if (!drivers[dKey]) drivers[dKey] = [];
-          drivers[dKey].push(tmcMin);
+          if (!modalMap[item.modal]) modalMap[item.modal] = [];
+          modalMap[item.modal].push(diffMin);
+
+          if (!transpMap[item.transportadora]) transpMap[item.transportadora] = [];
+          transpMap[item.transportadora].push(diffMin);
+
+          const dKey = `${item.driverNome} • ${item.modal}`;
+          if (!driverMap[dKey]) driverMap[dKey] = [];
+          driverMap[dKey].push(diffMin);
         }
       });
 
-      document.getElementById("mgr-kpi-total").innerText = count;
-      document.getElementById("mgr-kpi-tmc").innerText = count ? `${(totalSec / count / 60).toFixed(1)} min` : "0.0 min";
-      document.getElementById("mgr-kpi-sla").innerText = count ? `${((onTime / count) * 100).toFixed(1)}%` : "0.0%";
+      document.getElementById("kpi-stat-total").innerText = validTmcCount;
+      document.getElementById("kpi-stat-tmc").innerText = validTmcCount ? `${(totalTmcSec / validTmcCount / 60).toFixed(1)}m` : "0.0m";
+      document.getElementById("kpi-stat-sla").innerText = validTmcCount ? `${((onTimeCount / validTmcCount) * 100).toFixed(1)}%` : "0.0%";
+      document.getElementById("kpi-stat-bip").innerText = validBipCount ? `${(totalBipSec / validBipCount / 60).toFixed(1)}m` : "0.0m";
 
-      let fastest = "--", minAvg = 9999;
-      Object.keys(modais).forEach(m => {
-        const avg = modais[m].reduce((a, b) => a + b, 0) / modais[m].length;
-        if (avg < minAvg) { minAvg = avg; fastest = `${m} (${avg.toFixed(1)}m)`; }
-      });
-      document.getElementById("mgr-kpi-fastest").innerText = fastest;
-
-      renderDonutSLA(faixas);
-      renderAreaFlow(horas);
-      renderAvgBar('chartModal', modais, '#ff5722');
-      renderAvgBar('chartTransp', transps, '#8b5cf6');
-      renderRankingList(drivers);
+      chartDoughnut("chartSla", slaBuckets);
+      chartLineArea("chartHourly", hoursMap);
+      chartBarSingle("chartModal", modalMap, '#ff5722');
+      chartBarSingle("chartTransp", transpMap, '#06b6d4');
+      renderDriverRanking(driverMap);
     }
 
-    function renderDonutSLA(faixas) {
-      const ctx = document.getElementById("chartFaixas").getContext('2d');
-      if (charts["chartFaixas"]) charts["chartFaixas"].destroy();
+    function chartDoughnut(canvasId, buckets) {
+      const ctx = document.getElementById(canvasId).getContext('2d');
+      if (chartRefs[canvasId]) chartRefs[canvasId].destroy();
 
-      charts["chartFaixas"] = new Chart(ctx, {
+      chartRefs[canvasId] = new Chart(ctx, {
         type: 'doughnut',
         data: {
-          labels: Object.keys(faixas),
+          labels: Object.keys(buckets),
           datasets: [{
-            data: Object.values(faixas),
+            data: Object.values(buckets),
             backgroundColor: ['#10b981', '#f59e0b', '#f97316', '#ef4444'],
-            borderColor: '#0d1322',
+            borderColor: '#0f172a',
             borderWidth: 3
           }]
         },
         options: {
           responsive: true, maintainAspectRatio: false,
           plugins: {
-            legend: { position: 'right', labels: { color: '#cbd5e1', font: { weight: 700, size: 10 } } },
+            legend: { position: 'right', labels: { color: '#94a3b8', font: { weight: 600, size: 10 } } },
             datalabels: {
-              color: '#fff',
-              font: { weight: '800', size: 12 },
+              color: '#fff', font: { weight: '800', size: 11 },
               formatter: (val, ctx) => {
                 const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
                 return (val > 0 && total > 0) ? `${Math.round((val/total)*100)}%` : '';
@@ -513,31 +585,24 @@
       });
     }
 
-    function renderAreaFlow(horas) {
-      const sortedH = Object.keys(horas).sort();
-      const vals = sortedH.map(k => horas[k]);
+    function chartLineArea(canvasId, series) {
+      const labels = Object.keys(series).sort();
+      const values = labels.map(k => series[k]);
 
-      const ctx = document.getElementById("chartHoras").getContext('2d');
-      if (charts["chartHoras"]) charts["chartHoras"].destroy();
+      const ctx = document.getElementById(canvasId).getContext('2d');
+      if (chartRefs[canvasId]) chartRefs[canvasId].destroy();
 
-      const gradient = ctx.createLinearGradient(0, 0, 0, 200);
-      gradient.addColorStop(0, 'rgba(56, 189, 248, 0.4)');
-      gradient.addColorStop(1, 'rgba(56, 189, 248, 0.0)');
+      const grad = ctx.createLinearGradient(0, 0, 0, 200);
+      grad.addColorStop(0, 'rgba(6, 182, 212, 0.4)');
+      grad.addColorStop(1, 'rgba(6, 182, 212, 0)');
 
-      charts["chartHoras"] = new Chart(ctx, {
+      chartRefs[canvasId] = new Chart(ctx, {
         type: 'line',
         data: {
-          labels: sortedH,
+          labels: labels,
           datasets: [{
-            label: 'Saídas / Hora',
-            data: vals,
-            borderColor: '#38bdf8',
-            backgroundColor: gradient,
-            borderWidth: 3,
-            fill: true,
-            tension: 0.35,
-            pointBackgroundColor: '#38bdf8',
-            pointRadius: 5
+            data: values, borderColor: '#06b6d4', backgroundColor: grad,
+            borderWidth: 3, fill: true, tension: 0.35, pointRadius: 4, pointBackgroundColor: '#06b6d4'
           }]
         },
         options: {
@@ -545,94 +610,90 @@
           plugins: {
             legend: { display: false },
             datalabels: {
-              anchor: 'end',
-              align: 'top',
-              color: '#38bdf8',
-              font: { weight: '800', size: 11 },
-              formatter: v => `${v} carros`
+              anchor: 'end', align: 'top', color: '#06b6d4', font: { weight: '800', size: 10 },
+              formatter: v => `${v}v`
             }
           },
           scales: {
-            y: { grid: { color: '#1c2742' }, ticks: { color: '#64748b' } },
+            y: { grid: { color: '#1e293b' }, ticks: { color: '#64748b' } },
             x: { grid: { display: false }, ticks: { color: '#94a3b8', font: { weight: 700 } } }
           }
         }
       });
     }
 
-    function renderAvgBar(canvasId, obj, color) {
-      const labels = Object.keys(obj);
-      const vals = labels.map(k => parseFloat((obj[k].reduce((a, b) => a + b, 0) / obj[k].length).toFixed(1)));
+    function chartBarSingle(canvasId, dataMap, barColor) {
+      const labels = Object.keys(dataMap);
+      const values = labels.map(k => parseFloat((dataMap[k].reduce((a,b)=>a+b,0) / dataMap[k].length).toFixed(1)));
 
       const ctx = document.getElementById(canvasId).getContext('2d');
-      if (charts[canvasId]) charts[canvasId].destroy();
+      if (chartRefs[canvasId]) chartRefs[canvasId].destroy();
 
-      charts[canvasId] = new Chart(ctx, {
+      chartRefs[canvasId] = new Chart(ctx, {
         type: 'bar',
         data: {
           labels: labels,
-          datasets: [{ data: vals, backgroundColor: color, borderRadius: 6, maxBarThickness: 45 }]
+          datasets: [{ data: values, backgroundColor: barColor, borderRadius: 6, maxBarThickness: 40 }]
         },
         options: {
           responsive: true, maintainAspectRatio: false,
           plugins: {
             legend: { display: false },
             datalabels: {
-              anchor: 'end',
-              align: 'top',
-              color: '#f8fafc',
-              font: { weight: '800', size: 11 },
-              formatter: v => `${v} min`
+              anchor: 'end', align: 'top', color: '#f8fafc', font: { weight: '800', size: 11 },
+              formatter: v => `${v}m`
             }
           },
           scales: {
-            y: { grid: { color: '#1c2742' }, ticks: { color: '#64748b' } },
+            y: { grid: { color: '#1e293b' }, ticks: { color: '#64748b' } },
             x: { grid: { display: false }, ticks: { color: '#94a3b8', font: { weight: 700 } } }
           }
         }
       });
     }
 
-    function renderRankingList(drivers) {
-      const container = document.getElementById("ranking-drivers-container");
-      const list = Object.keys(drivers).map(k => {
-        const arr = drivers[k];
+    function renderDriverRanking(drivers) {
+      const box = document.getElementById("driver-ranking-box");
+      const list = Object.keys(drivers).map(key => {
+        const arr = drivers[key];
         const avg = arr.reduce((a, b) => a + b, 0) / arr.length;
-        return { name: k, avg: parseFloat(avg.toFixed(1)), count: arr.length };
-      }).sort((a, b) => b.avg - a.avg).slice(0, 6); // Top 6
+        return { name: key, avg: parseFloat(avg.toFixed(1)), count: arr.length };
+      }).sort((a, b) => b.avg - a.avg).slice(0, 6);
 
       if (!list.length) {
-        container.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding:20px;">Nenhum dado encontrado para o filtro selecionado.</div>`;
+        box.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding:20px;">Nenhum dado com os filtros aplicados.</div>`;
         return;
       }
 
-      const maxTmc = Math.max(...list.map(d => d.avg), 40);
-      let html = "";
+      const topVal = Math.max(...list.map(d => d.avg), 30);
+      let outHtml = "";
 
-      list.forEach((item, idx) => {
-        const pct = Math.min(100, Math.round((item.avg / maxTmc) * 100));
-        html += `
-          <div class="ranking-item">
-            <div class="rank-pos">#${idx + 1}</div>
-            <div class="rank-info">
-              <div class="rank-name">${item.name}</div>
-              <div class="rank-meta">${item.count} viagens registradas</div>
-              <div class="rank-bar-bg"><div class="rank-bar-fill" style="width: ${pct}%;"></div></div>
+      list.forEach((item, index) => {
+        const barWidth = Math.min(100, Math.round((item.avg / topVal) * 100));
+        outHtml += `
+          <div class="offender-row">
+            <div class="offender-rank">#${index + 1}</div>
+            <div class="offender-details">
+              <div style="font-weight:700; color:#fff; font-size:0.9rem;">${item.name}</div>
+              <div style="font-size:0.75rem; color:var(--text-muted);">${item.count} viagens registradas</div>
+              <div class="offender-bar-wrap"><div class="offender-bar-val" style="width:${barWidth}%"></div></div>
             </div>
-            <div class="rank-val">${item.avg} <span style="font-size:0.75rem; color:var(--text-muted);">min</span></div>
+            <div style="font-family:'JetBrains Mono', monospace; font-size:1.15rem; font-weight:800; color:var(--crit);">
+              ${item.avg} <span style="font-size:0.75rem; color:var(--text-muted)">min</span>
+            </div>
           </div>
         `;
       });
-      container.innerHTML = html;
+      box.innerHTML = outHtml;
     }
 
     setInterval(() => {
-      document.getElementById("clock-txt").innerText = new Date().toLocaleTimeString('pt-BR');
-      if (activeTab === 'ops') renderOps();
+      document.getElementById("live-clock").innerText = new Date().toLocaleTimeString('pt-BR');
+      if (activeTab === 'live') renderLiveYard();
     }, 1000);
 
-    fetchApiData();
-    setInterval(fetchApiData, 5000);
+    loadData();
+    setInterval(loadData, 5000);
   </script>
 </body>
 </html>
