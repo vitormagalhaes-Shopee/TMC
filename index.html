@@ -21,13 +21,11 @@
       --warn: #f59e0b;
       --crit: #ef4444;
       --cyan: #06b6d4;
-      --purple: #a855f7;
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { background: var(--bg); color: var(--text); font-family: 'Plus Jakarta Sans', sans-serif; min-height: 100vh; padding: 18px; }
 
-    /* Top Bar */
     header {
       display: flex; justify-content: space-between; align-items: center;
       background: rgba(11, 17, 32, 0.85); backdrop-filter: blur(12px);
@@ -55,11 +53,9 @@
       font-family: 'JetBrains Mono', monospace; font-size: 1.35rem; font-weight: 800; color: #38bdf8;
     }
 
-    /* Views */
     .view-panel { display: none; }
     .view-panel.active { display: block; }
 
-    /* KPI Row */
     .kpi-grid {
       display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
       gap: 14px; margin-bottom: 20px;
@@ -81,7 +77,6 @@
     .kpi-number { font-family: 'Chakra Petch', sans-serif; font-size: 2.2rem; font-weight: 800; margin-top: 4px; }
     .kpi-foot { font-size: 0.75rem; color: var(--text-muted); margin-top: 4px; font-weight: 600; }
 
-    /* Live Yard Table */
     .table-container {
       background: var(--surface-card); border: 1px solid var(--border);
       border-radius: 14px; overflow: hidden;
@@ -92,7 +87,7 @@
     }
     .table-search {
       background: #030712; border: 1px solid var(--border); color: #fff;
-      padding: 8px 14px; border-radius: 6px; font-size: 0.85rem; width: 260px; outline: none;
+      padding: 8px 14px; border-radius: 6px; font-size: 0.85rem; width: 280px; outline: none;
     }
     .table-search:focus { border-color: var(--border-focus); }
 
@@ -131,7 +126,6 @@
       100% { opacity: 1; box-shadow: 0 0 14px var(--crit); }
     }
 
-    /* Analytics Section */
     .filter-panel {
       display: flex; gap: 14px; background: var(--surface-card); border: 1px solid var(--border);
       padding: 14px 20px; border-radius: 12px; margin-bottom: 20px; align-items: center; flex-wrap: wrap;
@@ -158,7 +152,6 @@
     .card-label { font-size: 0.82rem; font-weight: 800; color: #cbd5e1; text-transform: uppercase; }
     .chart-box { position: relative; width: 100%; height: 230px; }
 
-    /* Top Offender Table/List */
     .offender-row {
       display: flex; align-items: center; justify-content: space-between;
       background: #060a12; border: 1px solid #162032; padding: 10px 14px; border-radius: 8px; margin-bottom: 8px;
@@ -188,13 +181,13 @@
     </div>
   </header>
 
-  <!-- ==================== ABA 1: AO VIVO / PÁTIO ==================== -->
+  <!-- ABA 1: MONITOR DE PÁTIO AO VIVO -->
   <div id="view-live" class="view-panel active">
     <div class="kpi-grid">
       <div class="kpi-box border-blue">
         <div class="kpi-title">Vagas em Carregamento</div>
         <div class="kpi-number" id="live-patio-count">0</div>
-        <div class="kpi-foot">Veículos estacionados no pátio</div>
+        <div class="kpi-foot">Veículos no pátio agora</div>
       </div>
       <div class="kpi-box border-warn">
         <div class="kpi-title">TMC Médio Corrente</div>
@@ -204,7 +197,7 @@
       <div class="kpi-box border-crit">
         <div class="kpi-title">Vagas Críticas (> 10m)</div>
         <div class="kpi-number" id="live-patio-crit" style="color: var(--crit);">0</div>
-        <div class="kpi-foot">Motoristas estourando SLA da vaga</div>
+        <div class="kpi-foot">Estourando SLA de permanência</div>
       </div>
       <div class="kpi-box border-ok">
         <div class="kpi-title">Rotas Finalizadas Hoje</div>
@@ -237,7 +230,7 @@
     </div>
   </div>
 
-  <!-- ==================== ABA 2: ANALYTICS ==================== -->
+  <!-- ABA 2: ANALYTICS GERAL -->
   <div id="view-stats" class="view-panel">
     <div class="filter-panel">
       <span style="font-size: 0.75rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">Filtros:</span>
@@ -250,22 +243,22 @@
       <div class="kpi-box border-blue">
         <div class="kpi-title">Viagens Concluídas</div>
         <div class="kpi-number" id="kpi-stat-total">0</div>
-        <div class="kpi-foot">Total com check-out efetuado</div>
+        <div class="kpi-foot">Com check-out efetuado</div>
       </div>
       <div class="kpi-box border-warn">
         <div class="kpi-title">TMC Médio Global</div>
         <div class="kpi-number" id="kpi-stat-tmc">0.0m</div>
-        <div class="kpi-foot">Meta: $\le$ 10 minutos</div>
+        <div class="kpi-foot">Meta de pátio: &le; 10 min</div>
       </div>
       <div class="kpi-box border-ok">
-        <div class="kpi-title">Aderência ao SLA (&le; 10m)</div>
+        <div class="kpi-title">Aderência SLA (&le; 10m)</div>
         <div class="kpi-number" id="kpi-stat-sla" style="color: var(--ok);">0.0%</div>
-        <div class="kpi-foot">Veículos dentro da janela ideal</div>
+        <div class="kpi-foot">Dentro da meta estipulada</div>
       </div>
       <div class="kpi-box border-blue">
         <div class="kpi-title">Tempo Médio Bancada</div>
         <div class="kpi-number" id="kpi-stat-bip">0.0m</div>
-        <div class="kpi-foot">Duração da separação de pacotes</div>
+        <div class="kpi-foot">Duração da separação/bipagem</div>
       </div>
     </div>
 
@@ -303,7 +296,7 @@
   <script>
     Chart.register(ChartDataLabels);
 
-    const API_ENDPOINT = "https://script.google.com/macros/s/AKfycbwO9YxzWqLNQeR6o_5c6s6JB6Q5a_cUMLss6x_dbp10si9szgFJXJZfDR81fAsvYME/exec";
+    const API_ENDPOINT = "https://script.google.com/macros/s/AKfycbw5zZvaFivYcYb_2qm9B7bxtu0Mcj1Df8R2ocYlFD85lYyFIxHptBCnCD8tLep5NbgG/exec";
 
     let rawDataset = [];
     let activeTab = 'live';
@@ -354,7 +347,7 @@
 
     function parseToSec(timeStr) {
       if (!timeStr) return null;
-      const match = String(timeStr).trim().match(/(\d{2}):(\d{2})(?::(\d{2}))?/);
+      const match = String(timeStr).trim().match(/(\d{1,2}):(\d{2})(?::(\d{2}))?/);
       return match ? (parseInt(match[1], 10) * 3600) + (parseInt(match[2], 10) * 60) + (match[3] ? parseInt(match[3], 10) : 0) : null;
     }
 
@@ -372,16 +365,18 @@
       try {
         const response = await fetch(API_ENDPOINT);
         const data = await response.json();
+        
         rawDataset = data.map(item => ({
           ...item,
           data: String(item.data || "").trim(),
           modal: cleanCategory(item.modal)
         }));
+
         populateFilters();
         if (activeTab === 'live') renderLiveYard();
         else processAnalytics();
       } catch (err) {
-        console.warn("Sincronização pendente...", err);
+        console.warn("Sincronizando...", err);
       }
     }
 
