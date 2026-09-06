@@ -9,157 +9,105 @@
   <style>
     :root {
       --bg: #030712;
-      --surface: #0b1120;
-      --surface-card: #0f172a;
-      --border: #1e293b;
-      --border-focus: #38bdf8;
+      --surface-card: #0b1322;
+      --border: #1a253a;
       --text: #f8fafc;
       --text-muted: #64748b;
       --shopee: #ff5722;
-      --shopee-glow: rgba(255, 87, 34, 0.25);
       --ok: #10b981;
       --warn: #f59e0b;
       --crit: #ef4444;
-      --cyan: #06b6d4;
+      --cyan: #38bdf8;
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { background: var(--bg); color: var(--text); font-family: 'Plus Jakarta Sans', sans-serif; min-height: 100vh; padding: 18px; }
+    body { background: var(--bg); color: var(--text); font-family: 'Plus Jakarta Sans', sans-serif; min-height: 100vh; padding: 16px; }
 
     header {
       display: flex; justify-content: space-between; align-items: center;
-      background: rgba(11, 17, 32, 0.85); backdrop-filter: blur(12px);
-      border: 1px solid var(--border); padding: 14px 22px; border-radius: 14px; margin-bottom: 20px;
+      background: #090e1a; border: 1px solid var(--border); padding: 12px 20px; border-radius: 12px; margin-bottom: 16px;
     }
-    .brand-group { display: flex; align-items: center; gap: 14px; }
+    .brand-group { display: flex; align-items: center; gap: 12px; }
     .badge-hub {
       font-family: 'Chakra Petch', sans-serif; background: var(--shopee); color: #fff;
-      font-size: 1.15rem; font-weight: 800; padding: 6px 14px; border-radius: 6px;
-      box-shadow: 0 0 15px var(--shopee-glow);
+      font-size: 1.1rem; font-weight: 800; padding: 5px 12px; border-radius: 6px;
     }
-    .system-title { font-size: 0.95rem; font-weight: 700; color: #cbd5e1; letter-spacing: 0.5px; }
+    .system-title { font-size: 0.9rem; font-weight: 700; color: #cbd5e1; }
     
     .nav-tabs { display: flex; gap: 8px; }
     .tab-btn {
-      background: #0f172a; border: 1px solid var(--border); color: #94a3b8;
-      padding: 10px 20px; border-radius: 8px; font-weight: 700; font-size: 0.85rem;
-      cursor: pointer; transition: all 0.2s;
+      background: #0d1527; border: 1px solid var(--border); color: #94a3b8;
+      padding: 9px 18px; border-radius: 8px; font-weight: 700; font-size: 0.82rem;
+      cursor: pointer; transition: 0.15s;
     }
     .tab-btn.active {
-      background: #1e293b; color: #38bdf8; border-color: #38bdf8;
-      box-shadow: 0 0 16px rgba(56, 189, 248, 0.2);
+      background: #192339; color: var(--cyan); border-color: var(--cyan);
+      box-shadow: 0 0 12px rgba(56, 189, 248, 0.2);
     }
-    .clock {
-      font-family: 'JetBrains Mono', monospace; font-size: 1.35rem; font-weight: 800; color: #38bdf8;
-    }
+    .clock { font-family: 'JetBrains Mono', monospace; font-size: 1.25rem; font-weight: 800; color: var(--cyan); }
 
     .view-panel { display: none; }
     .view-panel.active { display: block; }
 
-    .kpi-grid {
-      display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
-      gap: 14px; margin-bottom: 20px;
-    }
-    .kpi-box {
-      background: var(--surface-card); border: 1px solid var(--border);
-      border-radius: 12px; padding: 16px; position: relative; overflow: hidden;
-    }
-    .kpi-box::after {
-      content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%;
-      background: var(--border);
-    }
-    .kpi-box.border-crit::after { background: var(--crit); }
-    .kpi-box.border-warn::after { background: var(--warn); }
-    .kpi-box.border-ok::after { background: var(--ok); }
-    .kpi-box.border-blue::after { background: var(--cyan); }
+    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 16px; }
+    .kpi-box { background: var(--surface-card); border: 1px solid var(--border); border-radius: 10px; padding: 14px; position: relative; }
+    .kpi-title { font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: var(--text-muted); }
+    .kpi-number { font-family: 'Chakra Petch', sans-serif; font-size: 2rem; font-weight: 800; margin-top: 4px; }
+    .kpi-foot { font-size: 0.72rem; color: var(--text-muted); margin-top: 4px; font-weight: 600; }
 
-    .kpi-title { font-size: 0.72rem; font-weight: 800; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px; }
-    .kpi-number { font-family: 'Chakra Petch', sans-serif; font-size: 2.2rem; font-weight: 800; margin-top: 4px; }
-    .kpi-foot { font-size: 0.75rem; color: var(--text-muted); margin-top: 4px; font-weight: 600; }
-
-    .table-container {
-      background: var(--surface-card); border: 1px solid var(--border);
-      border-radius: 14px; overflow: hidden;
-    }
+    .table-container { background: var(--surface-card); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
     .table-toolbar {
-      display: flex; justify-content: space-between; align-items: center;
-      padding: 14px 20px; background: rgba(8, 12, 20, 0.6); border-bottom: 1px solid var(--border);
+      display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;
+      padding: 12px 18px; background: rgba(5, 8, 15, 0.6); border-bottom: 1px solid var(--border);
     }
-    .table-search {
-      background: #030712; border: 1px solid var(--border); color: #fff;
-      padding: 8px 14px; border-radius: 6px; font-size: 0.85rem; width: 280px; outline: none;
+    .table-search, .filter-select {
+      background: #040711; border: 1px solid #1f2b42; color: #fff;
+      padding: 7px 12px; border-radius: 6px; font-size: 0.82rem; outline: none;
     }
-    .table-search:focus { border-color: var(--border-focus); }
+    .filter-select { cursor: pointer; font-weight: 600; }
 
     table { width: 100%; border-collapse: collapse; text-align: left; }
-    th {
-      background: #060a12; padding: 12px 18px; font-size: 0.75rem;
-      text-transform: uppercase; color: var(--text-muted); border-bottom: 1px solid var(--border);
-      font-weight: 800;
-    }
-    td { padding: 12px 18px; font-size: 0.92rem; border-bottom: 1px solid rgba(255,255,255,0.03); }
-    tr:hover td { background: rgba(255, 255, 255, 0.015); }
+    th { background: #060a12; padding: 10px 16px; font-size: 0.72rem; text-transform: uppercase; color: var(--text-muted); border-bottom: 1px solid var(--border); }
+    td { padding: 10px 16px; font-size: 0.88rem; border-bottom: 1px solid rgba(255,255,255,0.03); }
+    tr:hover td { background: rgba(255, 255, 255, 0.02); }
 
     .route-tag {
-      font-family: 'Chakra Petch', sans-serif; font-size: 1.25rem; font-weight: 800;
-      color: #fbbf24; background: #1c1917; padding: 4px 10px; border-radius: 6px;
-      border: 1px solid #451a03; display: inline-block; min-width: 65px; text-align: center;
+      font-family: 'Chakra Petch', sans-serif; font-size: 1.15rem; font-weight: 800;
+      color: #fbbf24; background: #1c1917; padding: 3px 8px; border-radius: 5px;
+      border: 1px solid #451a03; display: inline-block; min-width: 55px; text-align: center;
     }
-    .modal-tag {
-      background: #131a2e; color: #38bdf8; font-weight: 700; font-size: 0.75rem;
-      padding: 4px 8px; border-radius: 4px;
-    }
+    .modal-tag { background: #131a2e; color: #38bdf8; font-weight: 700; font-size: 0.72rem; padding: 3px 7px; border-radius: 4px; }
     .time-font { font-family: 'JetBrains Mono', monospace; font-weight: 700; }
     
-    .status-pill {
-      font-family: 'Chakra Petch', sans-serif; font-size: 0.78rem; font-weight: 800;
-      padding: 4px 12px; border-radius: 6px; text-transform: uppercase; display: inline-flex;
-    }
+    .status-pill { font-family: 'Chakra Petch', sans-serif; font-size: 0.75rem; font-weight: 800; padding: 3px 9px; border-radius: 5px; text-transform: uppercase; }
     .status-ok { background: rgba(16, 185, 129, 0.15); color: var(--ok); border: 1px solid var(--ok); }
     .status-warn { background: rgba(245, 158, 11, 0.15); color: var(--warn); border: 1px solid var(--warn); }
-    .status-crit {
-      background: rgba(239, 68, 68, 0.2); color: var(--crit); border: 1px solid var(--crit);
-      animation: flash 1.2s infinite alternate;
-    }
-    @keyframes flash {
-      0% { opacity: 0.8; box-shadow: 0 0 3px var(--crit); }
-      100% { opacity: 1; box-shadow: 0 0 14px var(--crit); }
-    }
+    .status-crit { background: rgba(239, 68, 68, 0.25); color: var(--crit); border: 1px solid var(--crit); }
 
     .filter-panel {
-      display: flex; gap: 14px; background: var(--surface-card); border: 1px solid var(--border);
-      padding: 14px 20px; border-radius: 12px; margin-bottom: 20px; align-items: center; flex-wrap: wrap;
+      display: flex; gap: 12px; background: var(--surface-card); border: 1px solid var(--border);
+      padding: 12px 18px; border-radius: 10px; margin-bottom: 16px; align-items: center; flex-wrap: wrap;
     }
-    .custom-select {
-      background: #030712; border: 1px solid var(--border); color: #fff;
-      padding: 8px 14px; border-radius: 6px; font-weight: 600; font-size: 0.85rem; outline: none; cursor: pointer;
-    }
-    .custom-select:focus { border-color: var(--border-focus); }
 
-    .grid-charts {
-      display: grid; grid-template-columns: repeat(12, 1fr); gap: 16px;
-    }
+    .grid-charts { display: grid; grid-template-columns: repeat(12, 1fr); gap: 14px; }
     .span-4 { grid-column: span 4; }
     .span-6 { grid-column: span 6; }
     .span-8 { grid-column: span 8; }
     .span-12 { grid-column: span 12; }
 
-    .panel-card {
-      background: var(--surface-card); border: 1px solid var(--border);
-      border-radius: 12px; padding: 18px 20px;
-    }
-    .card-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
-    .card-label { font-size: 0.82rem; font-weight: 800; color: #cbd5e1; text-transform: uppercase; }
-    .chart-box { position: relative; width: 100%; height: 230px; }
+    .panel-card { background: var(--surface-card); border: 1px solid var(--border); border-radius: 10px; padding: 16px; }
+    .card-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    .card-label { font-size: 0.78rem; font-weight: 800; color: #cbd5e1; text-transform: uppercase; }
+    .chart-box { position: relative; width: 100%; height: 220px; }
 
     .offender-row {
       display: flex; align-items: center; justify-content: space-between;
-      background: #060a12; border: 1px solid #162032; padding: 10px 14px; border-radius: 8px; margin-bottom: 8px;
+      background: #050811; border: 1px solid #141d2d; padding: 8px 12px; border-radius: 6px; margin-bottom: 6px;
     }
-    .offender-rank { font-family: 'Chakra Petch', sans-serif; font-size: 1.1rem; font-weight: 800; color: var(--warn); width: 30px; }
-    .offender-details { flex: 1; margin: 0 12px; }
-    .offender-bar-wrap { width: 100%; height: 6px; background: #1a233a; border-radius: 4px; margin-top: 6px; overflow: hidden; }
-    .offender-bar-val { height: 100%; background: var(--crit); border-radius: 4px; }
+    .offender-rank { font-family: 'Chakra Petch', sans-serif; font-size: 1rem; font-weight: 800; color: var(--warn); width: 28px; }
+    .offender-details { flex: 1; margin: 0 10px; }
+    .offender-bar-wrap { width: 100%; height: 5px; background: #131c2c; border-radius: 3px; margin-top: 4px; overflow: hidden; }
+    .offender-bar-val { height: 100%; background: var(--crit); border-radius: 3px; }
   </style>
 </head>
 <body>
@@ -167,40 +115,40 @@
   <header>
     <div class="brand-group">
       <div class="badge-hub">HUB LRJ-19</div>
-      <div class="system-title">Central de Carregamento & Gestão de Pátio</div>
+      <div class="system-title">Central de Gestão de Pátio & TMC</div>
     </div>
 
     <div class="nav-tabs">
-      <button id="btn-tab-live" class="tab-btn active" onclick="switchTab('live')">🚛 Monitor de Vagas (Ao Vivo)</button>
-      <button id="btn-tab-stats" class="tab-btn" onclick="switchTab('stats')">📈 Indicadores & Gargalos</button>
+      <button id="btn-tab-live" class="tab-btn active" onclick="switchTab('live')">🚛 Monitor Operacional</button>
+      <button id="btn-tab-stats" class="tab-btn" onclick="switchTab('stats')">📊 Dashboard Gerencial</button>
     </div>
 
-    <div style="display: flex; align-items: center; gap: 16px;">
+    <div style="display: flex; align-items: center; gap: 14px;">
       <div class="clock" id="live-clock">--:--:--</div>
-      <button id="btn-sound" class="tab-btn" style="padding: 8px 14px;" onclick="toggleAudioEngine()">🔊 Som: Off</button>
+      <button id="btn-sound" class="tab-btn" style="padding: 6px 12px;" onclick="toggleAudioEngine()">🔊 Som: Off</button>
     </div>
   </header>
 
-  <!-- ABA 1: MONITOR DE PÁTIO AO VIVO -->
+  <!-- ABA 1: MONITOR DE PÁTIO -->
   <div id="view-live" class="view-panel active">
     <div class="kpi-grid">
-      <div class="kpi-box border-blue">
-        <div class="kpi-title">Vagas em Carregamento</div>
+      <div class="kpi-box">
+        <div class="kpi-title">Veículos Listados</div>
         <div class="kpi-number" id="live-patio-count">0</div>
-        <div class="kpi-foot">Veículos no pátio agora</div>
+        <div class="kpi-foot" id="live-filter-desc">Registros filtrados</div>
       </div>
-      <div class="kpi-box border-warn">
-        <div class="kpi-title">TMC Médio Corrente</div>
+      <div class="kpi-box">
+        <div class="kpi-title">TMC Médio</div>
         <div class="kpi-number" id="live-patio-avg">00:00</div>
-        <div class="kpi-foot">Tempo pós-bipagem até saída</div>
+        <div class="kpi-foot">Meta: &le; 10 min</div>
       </div>
-      <div class="kpi-box border-crit">
-        <div class="kpi-title">Vagas Críticas (> 10m)</div>
+      <div class="kpi-box">
+        <div class="kpi-title">Acima do SLA (> 10m)</div>
         <div class="kpi-number" id="live-patio-crit" style="color: var(--crit);">0</div>
-        <div class="kpi-foot">Estourando SLA de permanência</div>
+        <div class="kpi-foot">Gargalo operacional</div>
       </div>
-      <div class="kpi-box border-ok">
-        <div class="kpi-title">Rotas Finalizadas Hoje</div>
+      <div class="kpi-box">
+        <div class="kpi-title">Rotas do Dia Selecionado</div>
         <div class="kpi-number" id="live-finished-count">0</div>
         <div class="kpi-foot" id="live-flow-rate">Fluxo: 0.0 rotas/hora</div>
       </div>
@@ -208,57 +156,64 @@
 
     <div class="table-container">
       <div class="table-toolbar">
-        <span style="font-weight: 800; font-size: 0.85rem; color: #94a3b8; text-transform: uppercase;">Fluxo de Carregamento Instantâneo</span>
-        <input type="text" id="live-search" class="table-search" placeholder="Filtrar por Rota, Motorista ou Modal..." onkeyup="renderLiveYard()">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <select id="live-date-select" class="filter-select" onchange="renderLiveYard()"></select>
+          <select id="live-mode-select" class="filter-select" onchange="renderLiveYard()">
+            <option value="ALL_DAY">Ver todas as viagens do dia</option>
+            <option value="IN_YARD">Somente no pátio agora (Sem Check-out)</option>
+          </select>
+        </div>
+        <input type="text" id="live-search" class="table-search" placeholder="Buscar Rota, Motorista ou Modal..." onkeyup="renderLiveYard()">
       </div>
       <table>
         <thead>
           <tr>
-            <th style="width: 100px;">Rota</th>
+            <th style="width: 85px;">Rota</th>
             <th>Motorista</th>
             <th>Modal</th>
             <th>Transportadora</th>
             <th>Término Bipagem</th>
-            <th>Tempo no Carro (TMC)</th>
-            <th style="text-align: right;">Status da Vaga</th>
+            <th>Check-out</th>
+            <th>Tempo TMC</th>
+            <th style="text-align: right;">Status</th>
           </tr>
         </thead>
         <tbody id="yard-tbody">
-          <tr><td colspan="7" style="text-align:center; color: var(--text-muted); padding: 30px;">Carregando fluxo logístico...</td></tr>
+          <tr><td colspan="8" style="text-align:center; color: var(--text-muted); padding: 30px;">Carregando operação...</td></tr>
         </tbody>
       </table>
     </div>
   </div>
 
-  <!-- ABA 2: ANALYTICS GERAL -->
+  <!-- ABA 2: ANALYTICS -->
   <div id="view-stats" class="view-panel">
     <div class="filter-panel">
-      <span style="font-size: 0.75rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">Filtros:</span>
-      <select id="stat-data" class="custom-select" onchange="processAnalytics()"></select>
-      <select id="stat-modal" class="custom-select" onchange="processAnalytics()"></select>
-      <select id="stat-transp" class="custom-select" onchange="processAnalytics()"></select>
+      <span style="font-size: 0.72rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">Filtros Executivos:</span>
+      <select id="stat-data" class="filter-select" onchange="processAnalytics()"></select>
+      <select id="stat-modal" class="filter-select" onchange="processAnalytics()"></select>
+      <select id="stat-transp" class="filter-select" onchange="processAnalytics()"></select>
     </div>
 
     <div class="kpi-grid">
-      <div class="kpi-box border-blue">
-        <div class="kpi-title">Viagens Concluídas</div>
+      <div class="kpi-box">
+        <div class="kpi-title">Total Analisado</div>
         <div class="kpi-number" id="kpi-stat-total">0</div>
-        <div class="kpi-foot">Com check-out efetuado</div>
+        <div class="kpi-foot">Rotas concluídas</div>
       </div>
-      <div class="kpi-box border-warn">
+      <div class="kpi-box">
         <div class="kpi-title">TMC Médio Global</div>
         <div class="kpi-number" id="kpi-stat-tmc">0.0m</div>
-        <div class="kpi-foot">Meta de pátio: &le; 10 min</div>
+        <div class="kpi-foot">Carregamento no carro</div>
       </div>
-      <div class="kpi-box border-ok">
-        <div class="kpi-title">Aderência SLA (&le; 10m)</div>
+      <div class="kpi-box">
+        <div class="kpi-title">Aderência ao SLA (&le; 10m)</div>
         <div class="kpi-number" id="kpi-stat-sla" style="color: var(--ok);">0.0%</div>
-        <div class="kpi-foot">Dentro da meta estipulada</div>
+        <div class="kpi-foot">Dentro do padrão Shopee</div>
       </div>
-      <div class="kpi-box border-blue">
+      <div class="kpi-box">
         <div class="kpi-title">Tempo Médio Bancada</div>
         <div class="kpi-number" id="kpi-stat-bip">0.0m</div>
-        <div class="kpi-foot">Duração da separação/bipagem</div>
+        <div class="kpi-foot">Bipagem do operador</div>
       </div>
     </div>
 
@@ -269,7 +224,7 @@
       </div>
 
       <div class="panel-card span-8">
-        <div class="card-head"><span class="card-label">Fluxo de Saídas por Horário</span></div>
+        <div class="card-head"><span class="card-label">Curva de Carregamentos por Faixa Horária</span></div>
         <div class="chart-box"><canvas id="chartHourly"></canvas></div>
       </div>
 
@@ -285,8 +240,8 @@
 
       <div class="panel-card span-12">
         <div class="card-head">
-          <span class="card-label">Top Motoristas com Maior Tempo de Ocupação de Vaga (TMC Médio)</span>
-          <span style="font-size: 0.72rem; color: #f87171; font-weight: 800;">SLA META: &le; 10 MINUTOS</span>
+          <span class="card-label">Top Motoristas com Maior TMC Médio (Ofensores de Pátio)</span>
+          <span style="font-size: 0.72rem; color: #f87171; font-weight: 800;">META: &le; 10 MINUTOS</span>
         </div>
         <div id="driver-ranking-box"></div>
       </div>
@@ -303,15 +258,34 @@
     let audioContext = null, audioEnabled = false;
     let chartRefs = {};
 
-    function cleanCategory(str) {
-      if (!str) return "OUTROS";
-      const u = String(str).toUpperCase().trim();
+    function cleanDateStr(dStr) {
+      if (!dStr) return "";
+      const s = String(dStr).trim();
+      const directMatch = s.match(/(\d{2})\/(\d{2})\/(\d{4})/);
+      if (directMatch) return `${directMatch[1]}/${directMatch[2]}/${directMatch[3]}`;
+      const d = new Date(s);
+      if (!isNaN(d.getTime())) {
+        const dia = String(d.getDate()).padStart(2, '0');
+        const mes = String(d.getMonth() + 1).padStart(2, '0');
+        return `${dia}/${mes}/${d.getFullYear()}`;
+      }
+      return s;
+    }
+
+    function cleanModal(m) {
+      if (!m || String(m).includes("Não encontrado")) return "OUTROS";
+      const u = String(m).toUpperCase().trim();
       if (u.includes("PASSEIO")) return "PASSEIO";
       if (u.includes("FIORINO")) return "FIORINO";
       if (u.includes("MOTO")) return "MOTO";
       if (u.includes("VAN")) return "VAN";
       if (u.includes("VUC")) return "VUC";
       return u;
+    }
+
+    function cleanTransp(t) {
+      if (!t || String(t).includes("Não encontrado")) return "OF";
+      return String(t).trim();
     }
 
     function switchTab(t) {
@@ -329,20 +303,7 @@
       audioEnabled = !audioEnabled;
       const btn = document.getElementById("btn-sound");
       btn.innerText = audioEnabled ? "🔊 Som: On" : "🔇 Som: Off";
-      btn.style.borderColor = audioEnabled ? "#10b981" : "#1e293b";
-    }
-
-    function playBeep() {
-      if (!audioEnabled) return;
-      if (!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)();
-      const osc = audioContext.createOscillator();
-      const gain = audioContext.createGain();
-      osc.frequency.setValueAtTime(800, audioContext.currentTime);
-      gain.gain.setValueAtTime(0.15, audioContext.currentTime);
-      osc.connect(gain);
-      gain.connect(audioContext.destination);
-      osc.start();
-      osc.stop(audioContext.currentTime + 0.25);
+      btn.style.borderColor = audioEnabled ? "#10b981" : "#1a253a";
     }
 
     function parseToSec(timeStr) {
@@ -368,58 +329,87 @@
         
         rawDataset = data.map(item => ({
           ...item,
-          data: String(item.data || "").trim(),
-          modal: cleanCategory(item.modal)
+          data: cleanDateStr(item.data),
+          modal: cleanModal(item.modal),
+          transportadora: cleanTransp(item.transportadora)
         }));
 
         populateFilters();
         if (activeTab === 'live') renderLiveYard();
         else processAnalytics();
       } catch (err) {
-        console.warn("Sincronizando...", err);
+        console.warn("Erro ao buscar API", err);
       }
+    }
+
+    function populateFilters() {
+      const dates = [...new Set(rawDataset.map(d => d.data).filter(Boolean))].sort().reverse();
+      const modais = [...new Set(rawDataset.map(d => d.modal).filter(m => m !== "OUTROS"))].sort();
+      const transps = [...new Set(rawDataset.map(d => d.transportadora).filter(t => t !== "Não encontrado"))].sort();
+
+      fillSelect("live-date-select", dates, null);
+      fillSelect("stat-data", dates, "Todas as Datas");
+      fillSelect("stat-modal", modais, "Todos os Modais");
+      fillSelect("stat-transp", transps, "Todas as Transportadoras");
+    }
+
+    function fillSelect(id, values, defaultLabel) {
+      const el = document.getElementById(id);
+      const prev = el.value;
+      el.innerHTML = defaultLabel ? `<option value="ALL">${defaultLabel}</option>` : "";
+      values.forEach(v => {
+        const opt = document.createElement("option");
+        opt.value = v; opt.innerText = v;
+        el.appendChild(opt);
+      });
+      if (values.includes(prev)) el.value = prev;
     }
 
     function renderLiveYard() {
       const now = getSecondsNow();
-      const availableDates = [...new Set(rawDataset.map(d => d.data).filter(Boolean))];
-      const targetDate = availableDates[availableDates.length - 1];
+      const targetDate = document.getElementById("live-date-select").value;
+      const mode = document.getElementById("live-mode-select").value;
+      const searchTerm = (document.getElementById("live-search").value || "").toLowerCase();
 
-      const yardItems = [];
+      const filtered = [];
       let totalTime = 0, criticals = 0, completed = 0;
       let firstStart = null, lastEnd = null;
 
-      const searchTerm = (document.getElementById("live-search").value || "").toLowerCase();
-
       rawDataset.forEach(row => {
-        if (row.data !== targetDate) return;
+        if (targetDate && row.data !== targetDate) return;
+
         const vStart = parseToSec(row.validationTi);
         const vEnd = parseToSec(row.validationEi);
+        const cOut = parseToSec(row.checkOut);
 
         if (vStart !== null) firstStart = (firstStart === null || vStart < firstStart) ? vStart : firstStart;
         if (row.isFinalizado) completed++;
 
+        let tmcSec = 0;
+        let isStillInYard = !row.isFinalizado;
+
         if (vEnd !== null) {
           lastEnd = (lastEnd === null || vEnd > lastEnd) ? vEnd : lastEnd;
-          if (!row.isFinalizado) {
-            const elapsed = Math.max(0, now - vEnd);
-            const matchesSearch = !searchTerm || 
-              (row.rota && row.rota.toLowerCase().includes(searchTerm)) ||
-              (row.driverNome && row.driverNome.toLowerCase().includes(searchTerm)) ||
-              (row.modal && row.modal.toLowerCase().includes(searchTerm));
+          tmcSec = isStillInYard ? Math.max(0, now - vEnd) : Math.max(0, (cOut || 0) - vEnd);
+        }
 
-            if (matchesSearch) {
-              yardItems.push({ ...row, elapsed });
-            }
-            totalTime += elapsed;
-            if (elapsed >= 600) criticals++;
-          }
+        if (mode === "IN_YARD" && !isStillInYard) return;
+
+        const matches = !searchTerm || 
+          (row.rota && row.rota.toLowerCase().includes(searchTerm)) ||
+          (row.driverNome && row.driverNome.toLowerCase().includes(searchTerm)) ||
+          (row.modal && row.modal.toLowerCase().includes(searchTerm));
+
+        if (matches) {
+          filtered.push({ ...row, tmcSec, isStillInYard });
+          totalTime += tmcSec;
+          if (tmcSec >= 600) criticals++;
         }
       });
 
-      document.getElementById("live-patio-count").innerText = yardItems.length;
+      document.getElementById("live-patio-count").innerText = filtered.length;
       document.getElementById("live-patio-crit").innerText = criticals;
-      document.getElementById("live-patio-avg").innerText = yardItems.length ? fmtMinutes(Math.round(totalTime / yardItems.length)) : "00:00";
+      document.getElementById("live-patio-avg").innerText = filtered.length ? fmtMinutes(Math.round(totalTime / filtered.length)) : "00:00";
       document.getElementById("live-finished-count").innerText = completed;
 
       if (firstStart !== null && lastEnd !== null && lastEnd > firstStart) {
@@ -429,57 +419,35 @@
         document.getElementById("live-flow-rate").innerText = `Fluxo: 0.0 rotas/hora`;
       }
 
-      yardItems.sort((a, b) => b.elapsed - a.elapsed);
+      filtered.sort((a, b) => b.tmcSec - a.tmcSec);
 
       const tbody = document.getElementById("yard-tbody");
-      if (!yardItems.length) {
-        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color: var(--text-muted); padding: 30px;">Pátio livre. Nenhum veículo em carregamento no momento.</td></tr>`;
+      if (!filtered.length) {
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; color: var(--text-muted); padding: 30px;">Nenhum veículo encontrado para a seleção.</td></tr>`;
         return;
       }
 
       let rowsHtml = "";
-      yardItems.forEach(car => {
-        const minutes = car.elapsed / 60;
-        const badge = minutes >= 10 ? `<span class="status-pill status-crit">🔴 CRÍTICO (&gt;10m)</span>` :
-                      minutes >= 7  ? `<span class="status-pill status-warn">🟡 ALERTA (7-10m)</span>` :
-                                      `<span class="status-pill status-ok">🟢 REGULAR (&lt;7m)</span>`;
+      filtered.forEach(car => {
+        const mins = car.tmcSec / 60;
+        const badge = mins >= 10 ? `<span class="status-pill status-crit">🔴 CRÍTICO</span>` :
+                      mins >= 7  ? `<span class="status-pill status-warn">🟡 ALERTA</span>` :
+                                   `<span class="status-pill status-ok">🟢 NO SLA</span>`;
 
         rowsHtml += `
           <tr>
             <td><div class="route-tag">${car.rota || '--'}</div></td>
             <td><strong>${car.driverNome || 'Não identificado'}</strong><br><small style="color:var(--text-muted)">ID: ${car.idDriver}</small></td>
             <td><span class="modal-tag">${car.modal}</span></td>
-            <td style="color:#cbd5e1">${car.transportadora || '--'}</td>
+            <td style="color:#cbd5e1">${car.transportadora}</td>
             <td class="time-font" style="color:var(--text-muted)">${car.validationEi || '--'}</td>
-            <td class="time-font" style="font-size:1.15rem; color:#fff">${fmtMinutes(car.elapsed)} min</td>
+            <td class="time-font" style="color:var(--text-muted)">${car.checkOut || '<span style="color:#38bdf8;">Em Carregamento</span>'}</td>
+            <td class="time-font" style="font-size:1.05rem; color:#fff">${fmtMinutes(car.tmcSec)}</td>
             <td style="text-align:right">${badge}</td>
           </tr>
         `;
       });
       tbody.innerHTML = rowsHtml;
-      if (criticals > 0) playBeep();
-    }
-
-    function populateFilters() {
-      const dates = [...new Set(rawDataset.map(d => d.data).filter(Boolean))].sort().reverse();
-      const modais = [...new Set(rawDataset.map(d => d.modal).filter(Boolean))].sort();
-      const transps = [...new Set(rawDataset.map(d => d.transportadora).filter(Boolean))].sort();
-
-      fillSelect("stat-data", dates, "Todas as Datas");
-      fillSelect("stat-modal", modais, "Todos os Modais");
-      fillSelect("stat-transp", transps, "Todas as Transportadoras");
-    }
-
-    function fillSelect(id, values, defaultLabel) {
-      const el = document.getElementById(id);
-      const prev = el.value;
-      el.innerHTML = `<option value="ALL">${defaultLabel}</option>`;
-      values.forEach(v => {
-        const opt = document.createElement("option");
-        opt.value = v; opt.innerText = v;
-        el.appendChild(opt);
-      });
-      if (values.includes(prev)) el.value = prev;
     }
 
     function processAnalytics() {
@@ -525,11 +493,15 @@
             hoursMap[h] = (hoursMap[h] || 0) + 1;
           }
 
-          if (!modalMap[item.modal]) modalMap[item.modal] = [];
-          modalMap[item.modal].push(diffMin);
+          if (item.modal !== "OUTROS") {
+            if (!modalMap[item.modal]) modalMap[item.modal] = [];
+            modalMap[item.modal].push(diffMin);
+          }
 
-          if (!transpMap[item.transportadora]) transpMap[item.transportadora] = [];
-          transpMap[item.transportadora].push(diffMin);
+          if (item.transportadora !== "Não encontrado") {
+            if (!transpMap[item.transportadora]) transpMap[item.transportadora] = [];
+            transpMap[item.transportadora].push(diffMin);
+          }
 
           const dKey = `${item.driverNome} • ${item.modal}`;
           if (!driverMap[dKey]) driverMap[dKey] = [];
@@ -545,7 +517,7 @@
       chartDoughnut("chartSla", slaBuckets);
       chartLineArea("chartHourly", hoursMap);
       chartBarSingle("chartModal", modalMap, '#ff5722');
-      chartBarSingle("chartTransp", transpMap, '#06b6d4');
+      chartBarSingle("chartTransp", transpMap, '#38bdf8');
       renderDriverRanking(driverMap);
     }
 
@@ -559,8 +531,8 @@
           labels: Object.keys(buckets),
           datasets: [{
             data: Object.values(buckets),
-            backgroundColor: ['#10b981', '#f59e0b', '#f97316', '#ef4444'],
-            borderColor: '#0f172a',
+            backgroundColor: ['#10b981', '#f59e0b', '#ea580c', '#ef4444'],
+            borderColor: '#0b1322',
             borderWidth: 3
           }]
         },
@@ -588,16 +560,16 @@
       if (chartRefs[canvasId]) chartRefs[canvasId].destroy();
 
       const grad = ctx.createLinearGradient(0, 0, 0, 200);
-      grad.addColorStop(0, 'rgba(6, 182, 212, 0.4)');
-      grad.addColorStop(1, 'rgba(6, 182, 212, 0)');
+      grad.addColorStop(0, 'rgba(56, 189, 248, 0.4)');
+      grad.addColorStop(1, 'rgba(56, 189, 248, 0)');
 
       chartRefs[canvasId] = new Chart(ctx, {
         type: 'line',
         data: {
           labels: labels,
           datasets: [{
-            data: values, borderColor: '#06b6d4', backgroundColor: grad,
-            borderWidth: 3, fill: true, tension: 0.35, pointRadius: 4, pointBackgroundColor: '#06b6d4'
+            data: values, borderColor: '#38bdf8', backgroundColor: grad,
+            borderWidth: 3, fill: true, tension: 0.35, pointRadius: 4, pointBackgroundColor: '#38bdf8'
           }]
         },
         options: {
@@ -605,12 +577,12 @@
           plugins: {
             legend: { display: false },
             datalabels: {
-              anchor: 'end', align: 'top', color: '#06b6d4', font: { weight: '800', size: 10 },
+              anchor: 'end', align: 'top', color: '#38bdf8', font: { weight: '800', size: 10 },
               formatter: v => `${v}v`
             }
           },
           scales: {
-            y: { grid: { color: '#1e293b' }, ticks: { color: '#64748b' } },
+            y: { grid: { color: '#1a253a' }, ticks: { color: '#64748b' } },
             x: { grid: { display: false }, ticks: { color: '#94a3b8', font: { weight: 700 } } }
           }
         }
@@ -628,7 +600,7 @@
         type: 'bar',
         data: {
           labels: labels,
-          datasets: [{ data: values, backgroundColor: barColor, borderRadius: 6, maxBarThickness: 40 }]
+          datasets: [{ data: values, backgroundColor: barColor, borderRadius: 6, maxBarThickness: 38 }]
         },
         options: {
           responsive: true, maintainAspectRatio: false,
@@ -640,7 +612,7 @@
             }
           },
           scales: {
-            y: { grid: { color: '#1e293b' }, ticks: { color: '#64748b' } },
+            y: { grid: { color: '#1a253a' }, ticks: { color: '#64748b' } },
             x: { grid: { display: false }, ticks: { color: '#94a3b8', font: { weight: 700 } } }
           }
         }
@@ -669,11 +641,11 @@
           <div class="offender-row">
             <div class="offender-rank">#${index + 1}</div>
             <div class="offender-details">
-              <div style="font-weight:700; color:#fff; font-size:0.9rem;">${item.name}</div>
-              <div style="font-size:0.75rem; color:var(--text-muted);">${item.count} viagens registradas</div>
+              <div style="font-weight:700; color:#fff; font-size:0.88rem;">${item.name}</div>
+              <div style="font-size:0.72rem; color:var(--text-muted);">${item.count} viagens registradas</div>
               <div class="offender-bar-wrap"><div class="offender-bar-val" style="width:${barWidth}%"></div></div>
             </div>
-            <div style="font-family:'JetBrains Mono', monospace; font-size:1.15rem; font-weight:800; color:var(--crit);">
+            <div style="font-family:'JetBrains Mono', monospace; font-size:1.1rem; font-weight:800; color:var(--crit);">
               ${item.avg} <span style="font-size:0.75rem; color:var(--text-muted)">min</span>
             </div>
           </div>
@@ -684,11 +656,10 @@
 
     setInterval(() => {
       document.getElementById("live-clock").innerText = new Date().toLocaleTimeString('pt-BR');
-      if (activeTab === 'live') renderLiveYard();
     }, 1000);
 
     loadData();
-    setInterval(loadData, 5000);
+    setInterval(loadData, 10000);
   </script>
 </body>
 </html>
