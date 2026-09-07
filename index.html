@@ -129,7 +129,7 @@
     </div>
   </header>
 
-  <!-- ABA 1: MONITOR DE PÁTIO AO VIVO -->
+  <!-- ==================== ABA 1: MONITOR DE PÁTIO AO VIVO ==================== -->
   <div id="view-live" class="view-panel active">
     <div class="kpi-grid">
       <div class="kpi-box">
@@ -166,7 +166,7 @@
             <th>Motorista</th>
             <th>Modal</th>
             <th>Transportadora</th>
-            <th>Fim da Bipagem</th>
+            <th>Horário Referência</th>
             <th>Tempo no Pátio (TMC)</th>
             <th style="text-align: right;">Status</th>
           </tr>
@@ -178,7 +178,7 @@
     </div>
   </div>
 
-  <!-- ABA 2: ANALYTICS GERENCIAL -->
+  <!-- ==================== ABA 2: ANALYTICS GERENCIAL ==================== -->
   <div id="view-stats" class="view-panel">
     <div class="filter-panel">
       <span style="font-size: 0.72rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">Filtros:</span>
@@ -211,26 +211,31 @@
     </div>
 
     <div class="grid-charts">
+      <!-- 1. Curva Horária com label correto -->
       <div class="panel-card span-6">
         <div class="card-head"><span class="card-label">Curva de Carregamento por Horário</span></div>
         <div class="chart-box"><canvas id="chartHourly"></canvas></div>
       </div>
 
+      <!-- 2. SLA Horizontal -->
       <div class="panel-card span-6">
         <div class="card-head"><span class="card-label">Distribuição de SLA de Pátio (Volume de Carros)</span></div>
         <div class="chart-box"><canvas id="chartSla"></canvas></div>
       </div>
 
+      <!-- 3. Modal Horizontal (Maior pro Menor) -->
       <div class="panel-card span-6">
         <div class="card-head"><span class="card-label">TMC Médio por Modal (Do maior para o menor)</span></div>
         <div class="chart-box"><canvas id="chartModal"></canvas></div>
       </div>
 
+      <!-- 4. Transportadora Horizontal (Maior pro Menor) -->
       <div class="panel-card span-6">
         <div class="card-head"><span class="card-label">TMC Médio por Transportadora (Do maior para o menor)</span></div>
         <div class="chart-box"><canvas id="chartTransp"></canvas></div>
       </div>
 
+      <!-- 5. Ranking dos Motoristas -->
       <div class="panel-card span-12">
         <div class="card-head">
           <span class="card-label">Top Motoristas com Maior TMC Médio (Ofensores de Vaga)</span>
@@ -385,12 +390,13 @@
       let firstStart = null, lastEnd = null;
 
       rawDataset.forEach(row => {
-        const isFromLatestDay = !today || row.data === today;
+        const isToday = !today || row.data === today;
+        const cIn = parseToSec(row.checkIn);
         const vStart = parseToSec(row.validationTi);
         const vEnd = parseToSec(row.validationEi);
         const cOut = parseToSec(row.checkOut);
 
-        if (isFromLatestDay) {
+        if (isToday) {
           if (vStart !== null) firstStart = (firstStart === null || vStart < firstStart) ? vStart : firstStart;
           if (row.isFinalizado) {
             finishedToday++;
@@ -398,21 +404,24 @@
           }
         }
 
-        // Critério direto de pátio ativo: NÃO deu check-out e possui início ou fim de bipagem
-        if (!row.isFinalizado) {
-          const baseTime = vEnd !== null ? vEnd : vStart;
-          if (baseTime !== null) {
-            const tmcSec = Math.max(0, now - baseTime);
-            const matches = !searchTerm || 
-              (row.rota && row.rota.toLowerCase().includes(searchTerm)) ||
-              (row.driverNome && row.driverNome.toLowerCase().includes(searchTerm)) ||
-              (row.modal && row.modal.toLowerCase().includes(searchTerm));
+        // CARRO NO PÁTIO: Sem check-out e com rota ou id de motorista presente
+        if (!row.isFinalizado && (row.rota || row.idDriver)) {
+          let baseTime = vEnd !== null ? vEnd : (vStart !== null ? vStart : cIn);
+          let tmcSec = baseTime !== null ? Math.max(0, now - baseTime) : 0;
 
-            if (matches) {
-              yardItems.push({ ...row, tmcSec });
-              totalTime += tmcSec;
-              if (tmcSec >= 600) criticals++;
-            }
+          const matches = !searchTerm || 
+            (row.rota && row.rota.toLowerCase().includes(searchTerm)) ||
+            (row.driverNome && row.driverNome.toLowerCase().includes(searchTerm)) ||
+            (row.modal && row.modal.toLowerCase().includes(searchTerm));
+
+          if (matches) {
+            yardItems.push({ 
+              ...row, 
+              tmcSec,
+              horarioExibicao: row.validationEi || row.validationTi || row.checkIn || '--'
+            });
+            totalTime += tmcSec;
+            if (tmcSec >= 600) criticals++;
           }
         }
       });
@@ -450,7 +459,7 @@
             <td><strong>${car.driverNome || 'Não identificado'}</strong><br><small style="color:var(--text-muted)">ID: ${car.idDriver}</small></td>
             <td><span class="modal-tag">${car.modal || 'OUTROS'}</span></td>
             <td style="color:#cbd5e1">${car.transportadora || 'OF'}</td>
-            <td class="time-font" style="color:var(--text-muted)">${car.validationEi || car.validationTi || '--'}</td>
+            <td class="time-font" style="color:var(--text-muted)">${car.horarioExibicao}</td>
             <td class="time-font" style="font-size:1.15rem; color:#fff">${fmtMinutes(car.tmcSec)} min</td>
             <td style="text-align:right">${badge}</td>
           </tr>
