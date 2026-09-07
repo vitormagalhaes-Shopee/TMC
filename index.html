@@ -129,7 +129,7 @@
     </div>
   </header>
 
-  <!-- ==================== ABA 1: MONITOR DE PÁTIO AO VIVO ==================== -->
+  <!-- ABA 1: MONITOR DE PÁTIO AO VIVO -->
   <div id="view-live" class="view-panel active">
     <div class="kpi-grid">
       <div class="kpi-box">
@@ -178,7 +178,7 @@
     </div>
   </div>
 
-  <!-- ==================== ABA 2: ANALYTICS GERENCIAL ==================== -->
+  <!-- ABA 2: ANALYTICS GERENCIAL -->
   <div id="view-stats" class="view-panel">
     <div class="filter-panel">
       <span style="font-size: 0.72rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">Filtros:</span>
@@ -211,31 +211,26 @@
     </div>
 
     <div class="grid-charts">
-      <!-- 1. Faixa Horária com label correto -->
       <div class="panel-card span-6">
         <div class="card-head"><span class="card-label">Curva de Carregamento por Horário</span></div>
         <div class="chart-box"><canvas id="chartHourly"></canvas></div>
       </div>
 
-      <!-- 2. SLA em formato Barra Horizontal -->
       <div class="panel-card span-6">
         <div class="card-head"><span class="card-label">Distribuição de SLA de Pátio (Volume de Carros)</span></div>
         <div class="chart-box"><canvas id="chartSla"></canvas></div>
       </div>
 
-      <!-- 3. Modal Horizontal (Maior pro Menor) -->
       <div class="panel-card span-6">
         <div class="card-head"><span class="card-label">TMC Médio por Modal (Do maior para o menor)</span></div>
         <div class="chart-box"><canvas id="chartModal"></canvas></div>
       </div>
 
-      <!-- 4. Transportadora Horizontal (Maior pro Menor) -->
       <div class="panel-card span-6">
         <div class="card-head"><span class="card-label">TMC Médio por Transportadora (Do maior para o menor)</span></div>
         <div class="chart-box"><canvas id="chartTransp"></canvas></div>
       </div>
 
-      <!-- 5. Ranking dos Motoristas -->
       <div class="panel-card span-12">
         <div class="card-head">
           <span class="card-label">Top Motoristas com Maior TMC Médio (Ofensores de Vaga)</span>
@@ -249,7 +244,7 @@
   <script>
     Chart.register(ChartDataLabels);
 
-    const API_ENDPOINT = "https://script.google.com/macros/s/AKfycbyyeZcko-bMQG_jz-I7kHur8BsKM2F_wh7fCfY3fsb7y4zUSnyvzP3rVOJx8RLxBhl_/exec";
+    const API_ENDPOINT = "https://script.google.com/macros/s/AKfycbwxNpxRtzchAIgk4YGgKrWknhfAXykjPAWiTod76lidVU1ka5KI6KQtjVB1SjMqsLLp/exec";
 
     let rawDataset = [];
     let activeTab = 'live';
@@ -259,8 +254,8 @@
     function cleanDateStr(dStr) {
       if (!dStr) return "";
       const s = String(dStr).trim();
-      const directMatch = s.match(/(\d{2})\/(\d{2})\/(\d{4})/);
-      if (directMatch) return `${directMatch[1]}/${directMatch[2]}/${directMatch[3]}`;
+      const directMatch = s.match(/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/);
+      if (directMatch) return `${directMatch[1].padStart(2, '0')}/${directMatch[2].padStart(2, '0')}/${directMatch[3]}`;
       const d = new Date(s);
       if (!isNaN(d.getTime())) {
         const dia = String(d.getDate()).padStart(2, '0');
@@ -271,8 +266,8 @@
     }
 
     function dateToTimestamp(dStr) {
-      const match = String(dStr).match(/(\d{2})\/(\d{2})\/(\d{4})/);
-      if (match) return new Date(`${match[3]}-${match[2]}-${match[1]}T00:00:00`).getTime();
+      const match = String(dStr).match(/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/);
+      if (match) return new Date(`${match[3]}-${match[2].padStart(2, '0')}-${match[1].padStart(2, '0')}T00:00:00`).getTime();
       return 0;
     }
 
@@ -326,13 +321,17 @@
       return (d.getHours() * 3600) + (d.getMinutes() * 60) + d.getSeconds();
     }
 
+    let isFetching = false;
     async function loadData() {
+      if (isFetching) return;
+      isFetching = true;
       try {
         const response = await fetch(API_ENDPOINT);
         const data = await response.json();
         
         rawDataset = data.map(item => {
-          const hasOut = item.checkOut && item.checkOut !== "" && item.checkOut !== "00:00:00";
+          const checkOutVal = (item.checkOut || "").trim();
+          const hasOut = checkOutVal !== "" && checkOutVal !== "00:00:00" && checkOutVal !== "-" && !checkOutVal.toLowerCase().includes("carregando");
           return {
             ...item,
             data: cleanDateStr(item.data),
@@ -347,6 +346,8 @@
         else processAnalytics();
       } catch (err) {
         console.warn("Sincronizando...", err);
+      } finally {
+        isFetching = false;
       }
     }
 
@@ -376,7 +377,6 @@
       const now = getSecondsNow();
       const searchTerm = (document.getElementById("live-search").value || "").toLowerCase();
 
-      // Pega a data mais recente
       const sortedDates = [...new Set(rawDataset.map(d => d.data).filter(Boolean))].sort((a, b) => dateToTimestamp(b) - dateToTimestamp(a));
       const today = sortedDates[0] || "";
 
@@ -385,30 +385,34 @@
       let firstStart = null, lastEnd = null;
 
       rawDataset.forEach(row => {
-        if (row.data !== today) return;
-
+        const isFromLatestDay = !today || row.data === today;
         const vStart = parseToSec(row.validationTi);
         const vEnd = parseToSec(row.validationEi);
         const cOut = parseToSec(row.checkOut);
 
-        if (vStart !== null) firstStart = (firstStart === null || vStart < firstStart) ? vStart : firstStart;
-        if (row.isFinalizado) {
-          finishedToday++;
-          if (cOut !== null) lastEnd = (lastEnd === null || cOut > lastEnd) ? cOut : lastEnd;
+        if (isFromLatestDay) {
+          if (vStart !== null) firstStart = (firstStart === null || vStart < firstStart) ? vStart : firstStart;
+          if (row.isFinalizado) {
+            finishedToday++;
+            if (cOut !== null) lastEnd = (lastEnd === null || cOut > lastEnd) ? cOut : lastEnd;
+          }
         }
 
-        // Se NÃO deu check-out, está no pátio agora
-        if (!row.isFinalizado && vEnd !== null) {
-          const tmcSec = Math.max(0, now - vEnd);
-          const matches = !searchTerm || 
-            (row.rota && row.rota.toLowerCase().includes(searchTerm)) ||
-            (row.driverNome && row.driverNome.toLowerCase().includes(searchTerm)) ||
-            (row.modal && row.modal.toLowerCase().includes(searchTerm));
+        // Critério direto de pátio ativo: NÃO deu check-out e possui início ou fim de bipagem
+        if (!row.isFinalizado) {
+          const baseTime = vEnd !== null ? vEnd : vStart;
+          if (baseTime !== null) {
+            const tmcSec = Math.max(0, now - baseTime);
+            const matches = !searchTerm || 
+              (row.rota && row.rota.toLowerCase().includes(searchTerm)) ||
+              (row.driverNome && row.driverNome.toLowerCase().includes(searchTerm)) ||
+              (row.modal && row.modal.toLowerCase().includes(searchTerm));
 
-          if (matches) {
-            yardItems.push({ ...row, tmcSec });
-            totalTime += tmcSec;
-            if (tmcSec >= 600) criticals++;
+            if (matches) {
+              yardItems.push({ ...row, tmcSec });
+              totalTime += tmcSec;
+              if (tmcSec >= 600) criticals++;
+            }
           }
         }
       });
@@ -446,7 +450,7 @@
             <td><strong>${car.driverNome || 'Não identificado'}</strong><br><small style="color:var(--text-muted)">ID: ${car.idDriver}</small></td>
             <td><span class="modal-tag">${car.modal || 'OUTROS'}</span></td>
             <td style="color:#cbd5e1">${car.transportadora || 'OF'}</td>
-            <td class="time-font" style="color:var(--text-muted)">${car.validationEi || '--'}</td>
+            <td class="time-font" style="color:var(--text-muted)">${car.validationEi || car.validationTi || '--'}</td>
             <td class="time-font" style="font-size:1.15rem; color:#fff">${fmtMinutes(car.tmcSec)} min</td>
             <td style="text-align:right">${badge}</td>
           </tr>
@@ -577,7 +581,7 @@
           datasets: [{
             data: values,
             backgroundColor: ['#10b981', '#f59e0b', '#ea580c', '#ef4444'],
-            borderRadius: 6, maxBarThickness: 28
+            borderRadius: 6, maxBarThickness: 26
           }]
         },
         options: {
@@ -599,7 +603,6 @@
     }
 
     function renderHorizontalBar(canvasId, dataMap, barColor) {
-      // Ordena do maior para o menor
       const sorted = Object.keys(dataMap).map(k => ({
         label: k,
         avg: parseFloat((dataMap[k].reduce((a,b)=>a+b,0) / dataMap[k].length).toFixed(1))
@@ -615,7 +618,7 @@
         type: 'bar',
         data: {
           labels: labels,
-          datasets: [{ data: values, backgroundColor: barColor, borderRadius: 6, maxBarThickness: 26 }]
+          datasets: [{ data: values, backgroundColor: barColor, borderRadius: 6, maxBarThickness: 24 }]
         },
         options: {
           indexAxis: 'y',
@@ -672,10 +675,11 @@
 
     setInterval(() => {
       document.getElementById("live-clock").innerText = new Date().toLocaleTimeString('pt-BR');
+      if (activeTab === 'live') renderLiveYard();
     }, 1000);
 
     loadData();
-    setInterval(loadData, 3000);
+    setInterval(loadData, 4000);
   </script>
 </body>
 </html>
