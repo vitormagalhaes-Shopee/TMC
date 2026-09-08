@@ -140,7 +140,7 @@
           <th>Motorista</th>
           <th>Modal</th>
           <th>Transportadora</th>
-          <th>Horário Início / Bipagem</th>
+          <th>Término da Bipagem</th>
           <th>Tempo no Pátio (TMC)</th>
           <th style="text-align: right;">Status da Vaga</th>
         </tr>
@@ -152,7 +152,7 @@
   </div>
 
   <script>
-    const API_ENDPOINT = "https://script.google.com/macros/s/AKfycbw7lDukd-yH8OSDXavlPCUXq8wrWEEAkCH-CzjuYdAD9vOkGhzIsRJQnM9g4VMQ2RPk/exec";
+    const API_ENDPOINT = "https://script.google.com/macros/s/AKfycbxZZQVxqv9uDrcam7KKzdMjaE13A0iCgH2JAnhN9ZRpOeXrbAeVipJYvXQyzzK9ZbSn/exec";
 
     let rawDataset = [];
     let audioContext = null, audioEnabled = false;
@@ -203,18 +203,10 @@
         const response = await fetch(API_ENDPOINT);
         const data = await response.json();
         
-        rawDataset = data.map(item => {
-          const rawOut = String(item.checkOut || "").trim();
-          const matchOut = rawOut.match(/\d{1,2}:\d{2}/);
-          const hasOut = Boolean(matchOut && !rawOut.toLowerCase().includes("carregando") && rawOut !== "00:00:00");
-
-          return {
-            ...item,
-            isFinalizado: hasOut
-          };
-        });
-
-        renderLiveYard();
+        if (Array.isArray(data) && data.length > 0) {
+          rawDataset = data;
+          renderLiveYard();
+        }
       } catch (err) {
         console.warn("Sincronizando...", err);
       } finally {
@@ -226,11 +218,17 @@
       const now = getSecondsNow();
       const searchTerm = (document.getElementById("live-search").value || "").toLowerCase();
 
+      // Pega a data da última linha recebida (operação atual)
+      const latestDate = rawDataset.length ? rawDataset[rawDataset.length - 1].data : "";
+
       const yardItems = [];
       let totalTime = 0, criticals = 0, finishedCount = 0;
       let firstStart = null, lastEnd = null;
 
       rawDataset.forEach(row => {
+        // Considera as viagens do dia mais recente
+        if (latestDate && row.data !== latestDate) return;
+
         const vStart = parseToSec(row.validationTi);
         const vEnd = parseToSec(row.validationEi);
         const cIn = parseToSec(row.checkIn);
@@ -240,7 +238,7 @@
           finishedCount++;
           if (cOut !== null) lastEnd = (lastEnd === null || cOut > lastEnd) ? cOut : lastEnd;
         } else if (row.rota || row.idDriver) {
-          // VEÍCULO NO PÁTIO (sem check-out efetuado)
+          // VEÍCULO NO PÁTIO AGORA
           let baseTime = vEnd !== null ? vEnd : (vStart !== null ? vStart : cIn);
           let tmcSec = baseTime !== null ? Math.max(0, now - baseTime) : 0;
 
@@ -306,13 +304,13 @@
       if (criticals > 0) playBeep();
     }
 
-    // Atualiza relógio e tempo de pátio todo segundo
+    // Cronômetro em tempo real (1 segundo)
     setInterval(() => {
       document.getElementById("live-clock").innerText = new Date().toLocaleTimeString('pt-BR');
       renderLiveYard();
     }, 1000);
 
-    // Consulta os novos dados da API a cada 3 segundos
+    // Consulta à API a cada 3 segundos
     loadData();
     setInterval(loadData, 3000);
   </script>
