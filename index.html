@@ -1,342 +1,430 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR">
-<head>
-  <meta charset="UTF-8">
-  <title>Shopee LRJ-19 - Monitor de Pátio ao Vivo</title>
-  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@700;800&family=JetBrains+Mono:wght@600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --bg: #030712;
-      --card-bg: #0b1322;
-      --border: #1a253a;
-      --text: #f8fafc;
-      --text-muted: #64748b;
-      --shopee: #ff5722;
-      --ok: #10b981;
-      --warn: #f59e0b;
-      --crit: #ef4444;
-      --cyan: #38bdf8;
-    }
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { background: var(--bg); color: var(--text); font-family: 'Plus Jakarta Sans', sans-serif; min-height: 100vh; padding: 16px; }
-
-    header {
-      display: flex; justify-content: space-between; align-items: center;
-      background: #090e1a; border: 1px solid var(--border); padding: 12px 20px; border-radius: 12px; margin-bottom: 16px;
-    }
-    .brand-group { display: flex; align-items: center; gap: 14px; }
-    .badge-hub {
-      font-family: 'Chakra Petch', sans-serif; background: var(--shopee); color: #fff;
-      font-size: 1.15rem; font-weight: 800; padding: 6px 14px; border-radius: 6px; letter-spacing: 0.5px;
-    }
-    .system-title { font-size: 0.95rem; font-weight: 700; color: #cbd5e1; }
-    .clock-group { display: flex; align-items: center; gap: 14px; }
-    .clock { font-family: 'JetBrains Mono', monospace; font-size: 1.35rem; font-weight: 800; color: var(--cyan); }
-    .btn-sound {
-      background: #0d1527; border: 1px solid var(--border); color: #94a3b8;
-      padding: 8px 14px; border-radius: 8px; font-weight: 800; font-size: 0.82rem; cursor: pointer;
-    }
-    .status-line { font-size: 0.7rem; color: var(--text-muted); margin-left: 12px; font-weight: 600; }
-
-    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-bottom: 16px; }
-    .kpi-box { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
-    .kpi-title { font-size: 0.72rem; font-weight: 800; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px; }
-    .kpi-number { font-family: 'Chakra Petch', sans-serif; font-size: 2.3rem; font-weight: 800; margin-top: 4px; }
-    .kpi-foot { font-size: 0.75rem; color: var(--text-muted); margin-top: 4px; font-weight: 600; }
-
-    .table-container { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
-    .table-toolbar {
-      display: flex; justify-content: space-between; align-items: center;
-      padding: 12px 18px; background: rgba(5, 8, 15, 0.6); border-bottom: 1px solid var(--border);
-    }
-    .table-search {
-      background: #040711; border: 1px solid #1f2b42; color: #fff;
-      padding: 8px 14px; border-radius: 6px; font-size: 0.85rem; outline: none; width: 280px;
-    }
-
-    table { width: 100%; border-collapse: collapse; text-align: left; }
-    th {
-      background: #060a12; padding: 12px 18px; font-size: 0.75rem;
-      text-transform: uppercase; color: var(--text-muted); border-bottom: 1px solid var(--border); font-weight: 800;
-    }
-    td { padding: 12px 18px; font-size: 0.92rem; border-bottom: 1px solid rgba(255,255,255,0.03); }
-    tr:hover td { background: rgba(255, 255, 255, 0.02); }
-
-    .route-tag {
-      font-family: 'Chakra Petch', sans-serif; font-size: 1.2rem; font-weight: 800;
-      color: #fbbf24; background: #1c1917; padding: 4px 14px; border-radius: 6px;
-      border: 1px solid #451a03; display: inline-flex; align-items: center; justify-content: center;
-      min-width: 80px; width: fit-content; white-space: nowrap;
-    }
-    .modal-tag { background: #131a2e; color: #38bdf8; font-weight: 700; font-size: 0.75rem; padding: 4px 10px; border-radius: 4px; white-space: nowrap; }
-    .time-font { font-family: 'JetBrains Mono', monospace; font-weight: 700; }
-
-    .status-pill {
-      font-family: 'Chakra Petch', sans-serif; font-size: 0.78rem; font-weight: 800;
-      padding: 4px 12px; border-radius: 6px; text-transform: uppercase; white-space: nowrap; display: inline-flex;
-    }
-    .status-ok { background: rgba(16, 185, 129, 0.15); color: var(--ok); border: 1px solid var(--ok); }
-    .status-warn { background: rgba(245, 158, 11, 0.15); color: var(--warn); border: 1px solid var(--warn); }
-    .status-crit {
-      background: rgba(239, 68, 68, 0.25); color: var(--crit); border: 1px solid var(--crit);
-      animation: beaconPulse 1s infinite alternate;
-    }
-    @keyframes beaconPulse {
-      0% { opacity: 0.75; box-shadow: 0 0 4px var(--crit); }
-      100% { opacity: 1; box-shadow: 0 0 12px var(--crit); }
-    }
-  </style>
-</head>
-<body>
-
-  <header>
-    <div class="brand-group">
-      <div class="badge-hub">HUB LRJ-19</div>
-      <div class="system-title">Monitor de Pátio em Tempo Real</div>
-    </div>
-    <div class="clock-group">
-      <span class="status-line" id="sync-status">Sincronizando...</span>
-      <div class="clock" id="live-clock">--:--:--</div>
-      <button id="btn-sound" class="btn-sound" onclick="toggleAudioEngine()">🔊 Som: Off</button>
-    </div>
-  </header>
-
-  <div class="kpi-grid">
-    <div class="kpi-box">
-      <div class="kpi-title">Veículos Carregando Agora</div>
-      <div class="kpi-number" id="live-patio-count">0</div>
-      <div class="kpi-foot">Em vaga de pátio (Sem saída)</div>
-    </div>
-    <div class="kpi-box">
-      <div class="kpi-title">TMC Médio Pátio</div>
-      <div class="kpi-number" id="live-patio-avg">00:00</div>
-      <div class="kpi-foot">Meta estipulada: &le; 10 min</div>
-    </div>
-    <div class="kpi-box">
-      <div class="kpi-title">Vagas Críticas (> 10M)</div>
-      <div class="kpi-number" id="live-patio-crit" style="color: var(--crit);">0</div>
-      <div class="kpi-foot">Acima da tolerância de vaga</div>
-    </div>
-    <div class="kpi-box">
-      <div class="kpi-title">Rotas Concluídas Hoje</div>
-      <div class="kpi-number" id="live-finished-count" style="color: var(--ok);">0</div>
-      <div class="kpi-foot" id="live-flow-rate">Fluxo: 0.0 carros/hora</div>
-    </div>
-  </div>
-
-  <div class="table-container">
-    <div class="table-toolbar">
-      <span style="font-weight: 800; font-size: 0.82rem; color: #94a3b8; text-transform: uppercase;">Carros em Carregamento na Vaga</span>
-      <input type="text" id="live-search" class="table-search" placeholder="Buscar Rota, Motorista ou Modal..." onkeyup="renderLiveYard()">
-    </div>
-    <table>
-      <thead>
-        <tr>
-          <th style="width: 100px;">Rota</th>
-          <th>Motorista</th>
-          <th>Modal</th>
-          <th>Transportadora</th>
-          <th>Término da Bipagem</th>
-          <th>Tempo no Pátio (TMC)</th>
-          <th style="text-align: right;">Status da Vaga</th>
-        </tr>
-      </thead>
-      <tbody id="yard-tbody">
-        <tr><td colspan="7" style="text-align:center; color: var(--text-muted); padding: 35px;">Sincronizando pátio da operação...</td></tr>
-      </tbody>
-    </table>
-  </div>
-
-  <script>
-    const API_ENDPOINT = "https://script.google.com/macros/s/AKfycbyEVQYuL2_UfI86_upTFcb1gOSSt9o3XZslB_X1JaWDyqZJ7iLceI4o-ZMwyiY624Y/exec";
-
-    let rawDataset = [];
-    let audioContext = null, audioEnabled = false;
-
-    function toggleAudioEngine() {
-      if (!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)();
-      audioEnabled = !audioEnabled;
-      const btn = document.getElementById("btn-sound");
-      btn.innerText = audioEnabled ? "🔊 Som: On" : "🔇 Som: Off";
-      btn.style.borderColor = audioEnabled ? "#10b981" : "#1a253a";
-    }
-
-    function parseToSec(timeStr) {
-      if (!timeStr) return null;
-      const s = String(timeStr).trim();
-      const match = s.match(/(\d{1,2}):(\d{2})(?::(\d{2}))?/);
-      return match ? (parseInt(match[1], 10) * 3600) + (parseInt(match[2], 10) * 60) + (match[3] ? parseInt(match[3], 10) : 0) : null;
-    }
-
-    function fmtMinutes(sec) {
-      const m = Math.floor(sec / 60), s = sec % 60;
-      return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-    }
-
-    function getSecondsNow() {
-      const d = new Date();
-      return (d.getHours() * 3600) + (d.getMinutes() * 60) + d.getSeconds();
-    }
-
-    // dd/MM/yyyy da data local do navegador (mesmo formato que o Apps Script devolve)
-    function getTodayStr() {
-      const d = new Date();
-      const dd = String(d.getDate()).padStart(2, '0');
-      const mm = String(d.getMonth() + 1).padStart(2, '0');
-      const yyyy = d.getFullYear();
-      return `${dd}/${mm}/${yyyy}`;
-    }
-
-    let isFetching = false;
-    async function loadData() {
-      if (isFetching) return;
-      isFetching = true;
-      const statusEl = document.getElementById("sync-status");
-      try {
-        const response = await fetch(API_ENDPOINT, { cache: "no-store" });
-        const data = await response.json();
-
-        if (data && data.error) {
-          statusEl.innerText = "Erro: " + data.message;
-          statusEl.style.color = "var(--crit)";
-          return;
-        }
-
-        if (Array.isArray(data)) {
-          rawDataset = data;
-          statusEl.innerText = "Atualizado " + new Date().toLocaleTimeString('pt-BR');
-          statusEl.style.color = "var(--text-muted)";
-          renderLiveYard();
-        }
-      } catch (err) {
-        statusEl.innerText = "Falha na sincronização";
-        statusEl.style.color = "var(--crit)";
-        console.warn("Erro ao buscar dados:", err);
-      } finally {
-        isFetching = false;
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Monitor de pátio em tempo real do hub LRJ-19."
+    />
+    <title>LRJ-19 | Monitor de Pátio</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --navy: #10232b;
+        --ink: #253c42;
+        --muted: #71807c;
+        --paper: #f6f4ef;
+        --card: #fffefa;
+        --line: #e7e4db;
+        --teal: #287e78;
+        --teal-soft: #e1f0ec;
+        --amber: #9b6b20;
+        --amber-soft: #f9efd9;
+        --red: #b34f47;
+        --red-soft: #fae5e1;
+        --shadow: 0 18px 50px rgba(31, 48, 51, 0.09);
       }
-    }
 
-    /**
-     * Decide qual conjunto de linhas representa "hoje".
-     * Corrige o bug antigo: em vez de travar tudo quando nenhuma linha bate
-     * com a data mais recente do array, tenta primeiro a data de hoje real;
-     * se não achar nada (ex: fuso, planilha atrasada), cai para a última
-     * data presente no dataset — mas nunca deixa a lista vazia por causa
-     * só de string de data não bater.
-     */
-    function resolveTargetDate() {
-      const todayStr = getTodayStr();
-      const hasToday = rawDataset.some(r => r.data === todayStr);
-      if (hasToday) return todayStr;
-
-      // fallback: usa a data da última linha não vazia do dataset
-      for (let i = rawDataset.length - 1; i >= 0; i--) {
-        if (rawDataset[i].data) return rawDataset[i].data;
+      * { box-sizing: border-box; }
+      html { background: var(--paper); }
+      body {
+        margin: 0;
+        min-width: 320px;
+        color: var(--ink);
+        background:
+          radial-gradient(circle at 15% -10%, rgba(216, 162, 71, 0.13), transparent 32rem),
+          var(--paper);
+        font-family: "DM Sans", sans-serif;
       }
-      return null; // sem nenhuma data válida -> não filtra por data
-    }
 
-    function renderLiveYard() {
-      const now = getSecondsNow();
-      const searchTerm = (document.getElementById("live-search").value || "").toLowerCase();
-      const targetDate = resolveTargetDate();
+      button, input { font: inherit; }
+      button { cursor: pointer; }
+      .topbar { color: #f4f0e6; background: var(--navy); }
+      .topbar-inner, .page { width: min(1560px, calc(100% - 40px)); margin: 0 auto; }
+      .topbar-inner {
+        min-height: 76px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+      }
+      .brand { display: flex; align-items: center; gap: 14px; }
+      .brand-mark {
+        width: 44px; height: 44px; display: grid; place-items: center;
+        border-radius: 12px; background: #d8a247; color: var(--navy);
+        font-weight: 700; font-size: 21px;
+      }
+      .brand-title { font: 600 18px "Space Grotesk", sans-serif; }
+      .eyebrow {
+        font: 700 10px "Space Grotesk", sans-serif;
+        letter-spacing: .15em; text-transform: uppercase;
+      }
+      .brand-subtitle { margin-top: 4px; color: #91aaa8; }
+      .topbar-info { display: flex; align-items: center; gap: 18px; color: #c9d5ce; font-size: 14px; }
+      .clock { padding-left: 18px; border-left: 1px solid #36505a; color: #f4f0e6; font: 500 14px "DM Mono", monospace; }
+      .page { padding: 40px 0 32px; }
+      .intro { display: flex; align-items: end; justify-content: space-between; gap: 30px; margin-bottom: 28px; }
+      .intro-kicker { display: flex; align-items: center; gap: 9px; color: var(--teal); }
+      .live-dot { width: 8px; height: 8px; border-radius: 50%; background: #4ca69d; box-shadow: 0 0 0 5px rgba(76,166,157,.12); }
+      h1 { margin: 14px 0 8px; font: 700 clamp(34px, 5vw, 54px)/1.03 "Space Grotesk", sans-serif; letter-spacing: -.045em; }
+      .intro-copy { max-width: 670px; margin: 0; color: #6e7975; font-size: 15px; }
+      .today { display: flex; align-items: center; gap: 10px; color: #65706d; font-size: 13px; }
+      .today strong { display: block; margin-top: 4px; color: var(--ink); font: 500 13px "DM Mono", monospace; text-transform: lowercase; }
+      .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 26px; }
+      .kpi {
+        min-height: 122px; padding: 18px 20px; border: 1px solid var(--line);
+        border-radius: 15px; background: rgba(255,254,250,.88); box-shadow: var(--shadow);
+      }
+      .kpi-head { display: flex; justify-content: space-between; gap: 10px; color: #78827e; }
+      .kpi-icon { width: 35px; height: 35px; display: grid; place-items: center; border-radius: 11px; background: var(--teal-soft); color: var(--teal); font-size: 17px; }
+      .kpi:nth-child(2) .kpi-icon { color: var(--red); background: var(--red-soft); }
+      .kpi:nth-child(3) .kpi-icon { color: var(--amber); background: var(--amber-soft); }
+      .kpi:nth-child(4) .kpi-icon { color: #64716f; background: #ecefed; }
+      .kpi-number { margin-top: 7px; font: 600 30px "Space Grotesk", sans-serif; }
+      .kpi-foot { margin-top: 5px; color: #87918d; font-size: 12px; }
+      .diagnostic {
+        display: none; align-items: center; justify-content: space-between; gap: 18px;
+        margin-bottom: 24px; padding: 15px 17px; border: 1px solid #ead0b4;
+        border-radius: 14px; color: #8c6746; background: #fff5e9;
+      }
+      .diagnostic.visible { display: flex; }
+      .diagnostic strong { display: block; margin-bottom: 3px; color: #9b683d; font: 700 11px "Space Grotesk", sans-serif; letter-spacing: .12em; text-transform: uppercase; }
+      .diagnostic p { margin: 0; font-size: 14px; }
+      .refresh {
+        display: inline-flex; align-items: center; gap: 8px; white-space: nowrap;
+        padding: 9px 13px; border: 1px solid #d8d5ca; border-radius: 10px;
+        color: #496461; background: rgba(255,255,255,.65); font-weight: 600;
+      }
+      .refresh:hover { background: #fff; }
+      .panel { overflow: hidden; border: 1px solid var(--line); border-radius: 16px; background: var(--card); box-shadow: var(--shadow); }
+      .panel-head { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 20px 24px; border-bottom: 1px solid var(--line); }
+      .panel-title { display: flex; align-items: center; gap: 10px; font: 600 17px "Space Grotesk", sans-serif; }
+      .panel-meta { margin-top: 4px; color: #8a9490; font-size: 12px; }
+      .panel-icon { width: 32px; height: 32px; display: grid; place-items: center; border-radius: 10px; color: var(--teal); background: var(--teal-soft); }
+      .controls { display: flex; align-items: center; gap: 9px; }
+      .search {
+        width: min(290px, 36vw); padding: 10px 13px; border: 1px solid #dcdad2;
+        border-radius: 10px; outline: none; color: var(--ink); background: #f8f7f2;
+      }
+      .search:focus { border-color: #76aaa3; box-shadow: 0 0 0 3px rgba(76,166,157,.13); }
+      .sound {
+        width: 41px; height: 41px; border: 1px solid #d7e5e0; border-radius: 10px;
+        color: var(--teal); background: var(--teal-soft); font-size: 17px;
+      }
+      .sound.off { color: #89928e; background: #f0f1ed; }
+      table { width: 100%; border-collapse: collapse; text-align: left; }
+      th { padding: 13px 18px; color: #7f8984; background: #f4f2ec; font: 700 10px "Space Grotesk", sans-serif; letter-spacing: .12em; text-transform: uppercase; }
+      td { padding: 15px 18px; border-top: 1px solid #eeece6; font-size: 14px; vertical-align: middle; }
+      tr:hover td { background: #fbfaf6; }
+      .driver { font-weight: 600; }
+      .secondary { margin-top: 4px; color: #93a09a; font-size: 11px; }
+      .mono { color: #405854; font: 500 13px "DM Mono", monospace; }
+      .route { color: #516761; font-weight: 700; }
+      .pill { display: inline-flex; align-items: center; gap: 7px; padding: 5px 9px; border-radius: 99px; font: 600 11px "Space Grotesk", sans-serif; }
+      .pill::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+      .pill.ok { color: var(--teal); background: var(--teal-soft); }
+      .pill.alert { color: var(--amber); background: var(--amber-soft); }
+      .pill.critical { color: var(--red); background: var(--red-soft); }
+      .empty { padding: 75px 20px; text-align: center; color: #7d8984; }
+      .empty-icon { width: 48px; height: 48px; display: grid; place-items: center; margin: 0 auto 14px; border-radius: 15px; background: var(--teal-soft); color: var(--teal); font-size: 22px; }
+      .empty h2 { margin: 0; color: var(--ink); font: 600 18px "Space Grotesk", sans-serif; }
+      .empty p { max-width: 480px; margin: 8px auto 0; font-size: 14px; line-height: 1.55; }
+      .panel-foot { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 13px 24px; border-top: 1px solid var(--line); color: #87918d; font-size: 12px; }
+      .legend { display: flex; gap: 15px; }
+      .legend span::before { content: ""; display: inline-block; width: 7px; height: 7px; margin-right: 6px; border-radius: 50%; background: #4ca69d; }
+      .legend .warn::before { background: #d8a247; }
+      .legend .crit::before { background: #bd5b54; }
+      footer { display: flex; justify-content: space-between; gap: 15px; margin-top: 20px; color: #8b9590; font-size: 11px; }
+      @media (max-width: 850px) {
+        .topbar-inner, .page { width: min(100% - 28px, 680px); }
+        .topbar-inner { min-height: 68px; }
+        .topbar-info { display: none; }
+        .page { padding-top: 30px; }
+        .intro { display: block; }
+        .today { margin-top: 22px; }
+        .kpis { grid-template-columns: repeat(2, 1fr); }
+        .panel { overflow-x: auto; }
+        .panel-head { min-width: 680px; }
+        table { min-width: 850px; }
+        .panel-foot { min-width: 680px; }
+        footer { display: block; line-height: 1.6; }
+      }
+      @media (max-width: 460px) {
+        .topbar-inner, .page { width: calc(100% - 28px); }
+        .kpis { grid-template-columns: 1fr; }
+        .kpi { min-height: 108px; }
+        .diagnostic { align-items: flex-start; flex-direction: column; }
+        .refresh { width: 100%; justify-content: center; }
+        .panel-head { min-width: 0; display: block; }
+        .controls { margin-top: 15px; }
+        .search { width: 100%; }
+        .sound { flex: 0 0 41px; }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="topbar-inner">
+        <div class="brand">
+          <div class="brand-mark" aria-hidden="true">◉</div>
+          <div>
+            <div class="brand-title">LRJ-19 / pátio</div>
+            <div class="brand-subtitle eyebrow">live operations console</div>
+          </div>
+        </div>
+        <div class="topbar-info">
+          <span>Hub LRJ-19</span>
+          <span class="clock" id="clock">--:--:--</span>
+        </div>
+      </div>
+    </header>
 
-      const yardItems = [];
-      let totalTime = 0, criticals = 0, finishedCount = 0;
-      let firstStart = null, lastEnd = null;
+    <main class="page">
+      <section class="intro">
+        <div>
+          <div class="intro-kicker eyebrow"><span class="live-dot"></span><span id="connection-label">Conectando ao serviço</span></div>
+          <h1>Quem ainda está no pátio?</h1>
+          <p class="intro-copy">Visão física do yard, sem deixar validação concluída mascarar uma permanência real.</p>
+        </div>
+        <div class="today"><span aria-hidden="true">▣</span><div>Turno de hoje<strong id="today-label">--</strong></div></div>
+      </section>
 
-      rawDataset.forEach(row => {
-        // Só filtra por data quando existe uma data-alvo válida; carros ainda
-        // no pátio (sem checkout) sempre entram, independentemente da data,
-        // para nunca "sumir" um carro real por causa de string de data.
-        const matchesDate = !targetDate || row.data === targetDate || !row.isFinalizado;
-        if (!matchesDate) return;
+      <section class="kpis" aria-label="Indicadores operacionais">
+        <article class="kpi"><div class="kpi-head"><span class="eyebrow">No pátio agora</span><span class="kpi-icon">▣</span></div><div class="kpi-number" id="kpi-yard">0</div><div class="kpi-foot">veículos fisicamente presentes</div></article>
+        <article class="kpi"><div class="kpi-head"><span class="eyebrow">Críticos</span><span class="kpi-icon">!</span></div><div class="kpi-number" id="kpi-critical">0</div><div class="kpi-foot">10 min ou mais</div></article>
+        <article class="kpi"><div class="kpi-head"><span class="eyebrow">Em alerta</span><span class="kpi-icon">◷</span></div><div class="kpi-number" id="kpi-alert">0</div><div class="kpi-foot">7 a 10 min</div></article>
+        <article class="kpi"><div class="kpi-head"><span class="eyebrow">Concluídos hoje</span><span class="kpi-icon">✓</span></div><div class="kpi-number" id="kpi-finished">0</div><div class="kpi-foot">com checkout registrado</div></article>
+      </section>
 
-        const vStart = parseToSec(row.validationTi);
-        const vEnd = parseToSec(row.validationEi);
-        const cIn = parseToSec(row.checkIn);
-        const cOut = parseToSec(row.checkOut);
+      <section class="diagnostic" id="diagnostic" aria-live="polite">
+        <div><strong id="diagnostic-title">Diagnóstico necessário</strong><p id="diagnostic-message"></p></div>
+        <button class="refresh" id="refresh-button" type="button">↻ Atualizar</button>
+      </section>
 
-        if (row.isFinalizado) {
-          if (row.data === targetDate || !targetDate) {
-            finishedCount++;
-            if (cOut !== null) lastEnd = (lastEnd === null || cOut > lastEnd) ? cOut : lastEnd;
-          }
-        } else if (row.rota || row.idDriver) {
-          let baseTime = vEnd !== null ? vEnd : (vStart !== null ? vStart : cIn);
-          let tmcSec = baseTime !== null ? Math.max(0, now - baseTime) : 0;
+      <section class="panel">
+        <div class="panel-head">
+          <div>
+            <div class="panel-title"><span class="panel-icon">⌁</span>Veículos dentro do yard</div>
+            <div class="panel-meta" id="panel-meta">0 exibidos · duração recalculada a cada segundo</div>
+          </div>
+          <div class="controls">
+            <input class="search" id="search" type="search" placeholder="Buscar motorista, rota, placa..." aria-label="Buscar veículos" />
+            <button class="sound" id="sound-button" type="button" aria-label="Ativar som" title="Ativar som">◖</button>
+          </div>
+        </div>
+        <table>
+          <thead><tr><th>Veículo / motorista</th><th>Rota</th><th>Entrada base</th><th>Duração</th><th>Sinal</th><th>Registro</th></tr></thead>
+          <tbody id="yard-body"></tbody>
+        </table>
+        <div class="panel-foot">
+          <span>Fonte: Google Apps Script · polling 3s · <span id="last-updated">aguardando primeira leitura</span></span>
+          <span class="legend"><span>normal</span><span class="warn">atenção</span><span class="crit">crítico</span></span>
+        </div>
+      </section>
 
-          const matchesSearch = !searchTerm ||
-            (row.rota && row.rota.toLowerCase().includes(searchTerm)) ||
-            (row.driverNome && row.driverNome.toLowerCase().includes(searchTerm)) ||
-            (row.modal && row.modal.toLowerCase().includes(searchTerm));
+      <footer><span>Visão operacional · checkout encerra presença</span><span>LRJ-19 / TMC</span></footer>
+    </main>
 
-          if (matchesSearch) {
-            yardItems.push({
-              ...row,
-              tmcSec,
-              horarioExibicao: row.validationEi || row.validationTi || row.checkIn || '--'
-            });
-            totalTime += tmcSec;
-            if (tmcSec >= 600) criticals++;
-          }
+    <script>
+      const API_ENDPOINT = "https://script.google.com/macros/s/AKfycbzbYloKShNZz-TaP7952HMv3Xz3uu6-BZl2wbQC_wzWq6IqSbcUwuWS0053rg2pqlk2/exec";
+      const HUB_TIMEZONE = "America/Sao_Paulo";
+      const state = { records: [], feed: "loading", message: "Conectando ao serviço de dados...", lastUpdated: null, sound: localStorage.getItem("l19-sound") !== "off" };
+      let inFlight = false;
+
+      const $ = (id) => document.getElementById(id);
+      const text = (value) => value === null || value === undefined ? "" : String(value).trim();
+      const first = (row, names) => names.map((name) => row[name]).find((value) => text(value) !== "") ?? "";
+      const escapeHtml = (value) => text(value).replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" }[char]));
+      const hasValue = (value) => text(value) !== "";
+
+      function datePartsInHub(date) {
+        const parts = new Intl.DateTimeFormat("en-US", { timeZone: HUB_TIMEZONE, year: "numeric", month: "2-digit", day: "2-digit" }).formatToParts(date);
+        return Object.fromEntries(parts.filter((part) => part.type !== "literal").map((part) => [part.type, part.value]));
+      }
+
+      function hubDateKey(date) {
+        const parts = datePartsInHub(date);
+        return `${parts.year}-${parts.month}-${parts.day}`;
+      }
+
+      function parseDate(value, fallbackDate) {
+        const raw = text(value);
+        if (!raw) return null;
+        const isoDate = raw.match(/^(\d{4})[\/.-](\d{1,2})[\/.-](\d{1,2})(?:[ T,]+(\d{1,2}):(\d{2})(?::(\d{2}))?)?/);
+        if (isoDate) {
+          return new Date(Number(isoDate[1]), Number(isoDate[2]) - 1, Number(isoDate[3]), Number(isoDate[4] || 0), Number(isoDate[5] || 0), Number(isoDate[6] || 0));
         }
-
-        if (vStart !== null && (row.data === targetDate || !targetDate)) {
-          firstStart = (firstStart === null || vStart < firstStart) ? vStart : firstStart;
+        const dateLike = raw.match(/^(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{2,4})(?:[ T,]+(\d{1,2}):(\d{2})(?::(\d{2}))?)?/);
+        if (dateLike) {
+          const year = Number(dateLike[3].length === 2 ? `20${dateLike[3]}` : dateLike[3]);
+          return new Date(year, Number(dateLike[2]) - 1, Number(dateLike[1]), Number(dateLike[4] || 0), Number(dateLike[5] || 0), Number(dateLike[6] || 0));
         }
+        const timeOnly = raw.match(/^(\d{1,2}):(\d{2})(?::(\d{2}))?/);
+        if (timeOnly && fallbackDate) {
+          const date = new Date(fallbackDate);
+          date.setHours(Number(timeOnly[1]), Number(timeOnly[2]), Number(timeOnly[3] || 0), 0);
+          return date;
+        }
+        const serialized = raw.match(/Date\((\d{10,})\)/i);
+        const parsed = serialized ? new Date(Number(serialized[1])) : new Date(raw);
+        return Number.isNaN(parsed.getTime()) ? null : parsed;
+      }
+
+      function normalize(row, index) {
+        const date = parseDate(first(row, ["data", "date", "dataRegistro"]));
+        const checkIn = parseDate(first(row, ["checkIn", "checkin", "entrada"]), date);
+        const validationStart = parseDate(first(row, ["validationStart", "validationTi", "validationInicio"]), date);
+        const validationEnd = parseDate(first(row, ["validationEnd", "validationEi", "validationFim"]), date);
+        const checkOutRaw = first(row, ["checkOut", "checkout", "saida"]);
+        const checkOut = parseDate(checkOutRaw, date);
+        const route = text(first(row, ["rota", "route"]));
+        const driverId = text(first(row, ["idDriver", "driverId"]));
+        const recordId = text(first(row, ["idRegistro", "id", "registro"]));
+        const baseAt = validationEnd || validationStart || checkIn;
+        return {
+          key: recordId || driverId || `${index}-${route}`,
+          date, checkIn, validationStart, validationEnd, checkOut, baseAt,
+          route, driverId, recordId, hasCheckOut: hasValue(checkOutRaw),
+          driver: text(first(row, ["driverNome", "nomeMotorista", "motorista", "driver"])),
+          modal: text(first(row, ["modal", "vehicle", "placa"])),
+          company: text(first(row, ["transportadora", "company"])),
+          valid: Boolean(route || driverId || recordId),
+          raw: row
+        };
+      }
+
+      function durationSeconds(start) {
+        return start ? Math.max(0, Math.floor((Date.now() - start.getTime()) / 1000)) : 0;
+      }
+
+      function formatDuration(seconds) {
+        const hours = Math.floor(seconds / 3600);
+        const minutes = Math.floor((seconds % 3600) / 60);
+        const remainder = seconds % 60;
+        return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(remainder).padStart(2, "0")}`;
+      }
+
+      async function fetchRecords() {
+        const response = await fetch(`${API_ENDPOINT}?t=${Date.now()}`, { cache: "no-store", headers: { Accept: "application/json" } });
+        const body = await response.text();
+        if (!response.ok) throw new Error(`O serviço respondeu com HTTP ${response.status}.`);
+        let payload;
+        try { payload = JSON.parse(body); } catch { throw new Error("A resposta do Apps Script não é um JSON válido."); }
+        if (Array.isArray(payload)) return payload;
+        if (payload && Array.isArray(payload.records)) return payload.records;
+        if (payload && Array.isArray(payload.data)) return payload.data;
+        throw new Error(text(payload && (payload.message || payload.error)) || "O Apps Script retornou um formato inesperado.");
+      }
+
+      async function loadData() {
+        if (inFlight) return;
+        inFlight = true;
+        try {
+          const payload = await fetchRecords();
+          state.records = payload.filter((item) => item && typeof item === "object").map(normalize);
+          state.feed = state.records.length ? "live" : "empty";
+          state.message = state.records.length ? "Dados recebidos e monitorados em tempo real." : "O serviço respondeu com uma lista vazia.";
+          state.lastUpdated = new Date();
+        } catch (error) {
+          state.records = [];
+          state.feed = "error";
+          state.message = error.message || "Não foi possível alcançar o serviço de dados.";
+        } finally {
+          inFlight = false;
+          render();
+        }
+      }
+
+      function getActiveRecords() {
+        return state.records.filter((record) => record.valid && !record.hasCheckOut);
+      }
+
+      function getCompletedToday() {
+        const today = hubDateKey(new Date());
+        return state.records.filter((record) => record.hasCheckOut && (record.date || record.checkOut) && hubDateKey(record.date || record.checkOut) === today).length;
+      }
+
+      function statusFor(seconds) {
+        if (seconds >= 600) return { className: "critical", label: "Crítico" };
+        if (seconds >= 420) return { className: "alert", label: "Atenção" };
+        return { className: "ok", label: "Normal" };
+      }
+
+      function render() {
+        const active = getActiveRecords();
+        const query = text($("search").value).toLocaleLowerCase();
+        const visible = active.filter((record) => !query || [record.route, record.driver, record.driverId, record.modal, record.company, record.recordId].join(" ").toLocaleLowerCase().includes(query));
+        let critical = 0;
+        let alert = 0;
+        visible.forEach((record) => {
+          const seconds = durationSeconds(record.baseAt);
+          if (seconds >= 600) critical += 1;
+          else if (seconds >= 420) alert += 1;
+        });
+
+        $("kpi-yard").textContent = active.length;
+        $("kpi-critical").textContent = critical;
+        $("kpi-alert").textContent = alert;
+        $("kpi-finished").textContent = getCompletedToday();
+        $("panel-meta").textContent = `${visible.length} exibido${visible.length === 1 ? "" : "s"} · duração recalculada a cada segundo`;
+        $("connection-label").textContent = state.feed === "live" ? "LIVE · FONTE CONECTADA" : state.feed === "loading" ? "CONECTANDO AO SERVIÇO" : "DIAGNÓSTICO NECESSÁRIO";
+        $("last-updated").textContent = state.lastUpdated ? `última leitura ${state.lastUpdated.toLocaleTimeString("pt-BR")}` : "aguardando primeira leitura";
+        $("today-label").textContent = new Intl.DateTimeFormat("pt-BR", { timeZone: HUB_TIMEZONE, weekday: "short", day: "2-digit", month: "short" }).format(new Date()).replace(".", "");
+
+        const diagnostic = $("diagnostic");
+        diagnostic.classList.toggle("visible", state.feed !== "live");
+        $("diagnostic-title").textContent = state.feed === "empty" ? "Fonte conectada, sem registros" : state.feed === "error" ? "Falha na fonte de dados" : "Diagnóstico necessário";
+        $("diagnostic-message").textContent = state.message;
+
+        if (!visible.length) {
+          const title = state.feed === "empty" ? "Nenhum registro recebido" : state.feed === "live" ? "Pátio sem veículos no momento" : "Aguardando dados da fonte";
+          const message = state.feed === "empty" ? "A API respondeu corretamente, mas sem linhas. Publique o novo Codigo.gs e teste a URL com ?diag=1." : state.feed === "live" ? "Nenhum veículo com checkout vazio foi encontrado nos registros recentes." : "Verifique a publicação do Web App e a permissão de acesso.";
+          $("yard-body").innerHTML = `<tr><td colspan="6"><div class="empty"><div class="empty-icon">▤</div><h2>${title}</h2><p>${message}</p></div></td></tr>`;
+        } else {
+          visible.sort((a, b) => durationSeconds(b.baseAt) - durationSeconds(a.baseAt));
+          $("yard-body").innerHTML = visible.map((record) => {
+            const seconds = durationSeconds(record.baseAt);
+            const status = statusFor(seconds);
+            const baseLabel = record.baseAt ? `${record.baseAt.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })} · ${record.validationEnd ? "validation end" : record.validationStart ? "validation start" : "check-in"}` : "Sem horário base";
+            return `<tr>
+              <td><div class="driver">${escapeHtml(record.driver || "Motorista não informado")}</div><div class="secondary">${escapeHtml(record.driverId || record.modal || "ID não informado")}</div></td>
+              <td><div class="route">${escapeHtml(record.route || "Rota não informada")}</div><div class="secondary">${escapeHtml(record.company || "Transportadora não informada")}</div></td>
+              <td class="mono">${escapeHtml(baseLabel)}</td>
+              <td class="mono">${formatDuration(seconds)}</td>
+              <td><span class="pill ${status.className}">${status.label}</span></td>
+              <td class="mono">${escapeHtml(record.recordId || "—")}</td>
+            </tr>`;
+          }).join("");
+        }
+      }
+
+      function updateClock() {
+        $("clock").textContent = new Intl.DateTimeFormat("pt-BR", { timeZone: HUB_TIMEZONE, hour: "2-digit", minute: "2-digit", second: "2-digit" }).format(new Date());
+        render();
+      }
+
+      $("search").addEventListener("input", render);
+      $("refresh-button").addEventListener("click", loadData);
+      $("sound-button").addEventListener("click", () => {
+        state.sound = !state.sound;
+        localStorage.setItem("l19-sound", state.sound ? "on" : "off");
+        $("sound-button").classList.toggle("off", !state.sound);
+        $("sound-button").textContent = state.sound ? "◖" : "·";
+        $("sound-button").setAttribute("aria-label", state.sound ? "Desativar som" : "Ativar som");
       });
+      $("sound-button").classList.toggle("off", !state.sound);
+      $("sound-button").textContent = state.sound ? "◖" : "·";
 
-      document.getElementById("live-patio-count").innerText = yardItems.length;
-      document.getElementById("live-patio-crit").innerText = criticals;
-      document.getElementById("live-patio-avg").innerText = yardItems.length ? fmtMinutes(Math.round(totalTime / yardItems.length)) : "00:00";
-      document.getElementById("live-finished-count").innerText = finishedCount;
-
-      if (firstStart !== null && lastEnd !== null && lastEnd > firstStart) {
-        const spanH = (lastEnd - firstStart) / 3600;
-        document.getElementById("live-flow-rate").innerText = `Fluxo: ${(finishedCount / spanH).toFixed(1)} carros/hora`;
-      } else {
-        document.getElementById("live-flow-rate").innerText = `Fluxo: 0.0 carros/hora`;
-      }
-
-      yardItems.sort((a, b) => b.tmcSec - a.tmcSec);
-
-      const tbody = document.getElementById("yard-tbody");
-      if (!yardItems.length) {
-        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color: var(--text-muted); padding: 35px;">Pátio desocupado. Nenhum carro carregando no momento.</td></tr>`;
-        return;
-      }
-
-      let rowsHtml = "";
-      yardItems.forEach(car => {
-        const mins = car.tmcSec / 60;
-        const badge = mins >= 10 ? `<span class="status-pill status-crit">🔴 CRÍTICO (&gt;10M)</span>` :
-                      mins >= 7  ? `<span class="status-pill status-warn">🟡 ALERTA (7-10M)</span>` :
-                                   `<span class="status-pill status-ok">🟢 NO SLA (&lt;7M)</span>`;
-
-        rowsHtml += `
-          <tr>
-            <td><div class="route-tag">${car.rota || '--'}</div></td>
-            <td><strong>${car.driverNome || 'Não identificado'}</strong><br><small style="color:var(--text-muted)">ID: ${car.idDriver}</small></td>
-            <td><span class="modal-tag">${car.modal || 'OUTROS'}</span></td>
-            <td style="color:#cbd5e1">${car.transportadora || 'OF'}</td>
-            <td class="time-font" style="color:var(--text-muted)">${car.horarioExibicao}</td>
-            <td class="time-font" style="font-size:1.15rem; color:#fff">${fmtMinutes(car.tmcSec)} min</td>
-            <td style="text-align:right">${badge}</td>
-          </tr>
-        `;
-      });
-      tbody.innerHTML = rowsHtml;
-    }
-
-    setInterval(() => {
-      document.getElementById("live-clock").innerText = new Date().toLocaleTimeString('pt-BR');
-      renderLiveYard();
-    }, 1000);
-
-    loadData();
-    setInterval(loadData, 3000);
-  </script>
-</body>
+      updateClock();
+      loadData();
+      setInterval(updateClock, 1000);
+      setInterval(loadData, 3000);
+    </script>
+  </body>
 </html>
