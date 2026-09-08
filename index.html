@@ -2,9 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Shopee LRJ-19 - Yard & Operations Command Center</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+  <title>Shopee LRJ-19 - Monitor de Pátio ao Vivo</title>
   <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@700;800&family=JetBrains+Mono:wght@600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -21,93 +19,75 @@
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { background: var(--bg); color: var(--text); font-family: 'Plus Jakarta Sans', sans-serif; min-height: 100vh; padding: 14px; }
+    body { background: var(--bg); color: var(--text); font-family: 'Plus Jakarta Sans', sans-serif; min-height: 100vh; padding: 16px; }
 
     header {
       display: flex; justify-content: space-between; align-items: center;
-      background: #090e1a; border: 1px solid var(--border); padding: 10px 18px; border-radius: 12px; margin-bottom: 14px;
+      background: #090e1a; border: 1px solid var(--border); padding: 12px 20px; border-radius: 12px; margin-bottom: 16px;
     }
-    .brand-group { display: flex; align-items: center; gap: 12px; }
+    .brand-group { display: flex; align-items: center; gap: 14px; }
     .badge-hub {
       font-family: 'Chakra Petch', sans-serif; background: var(--shopee); color: #fff;
-      font-size: 1.1rem; font-weight: 800; padding: 5px 12px; border-radius: 6px;
+      font-size: 1.15rem; font-weight: 800; padding: 6px 14px; border-radius: 6px; letter-spacing: 0.5px;
     }
-    .system-title { font-size: 0.9rem; font-weight: 700; color: #cbd5e1; }
-    
-    .nav-tabs { display: flex; gap: 8px; }
-    .tab-btn {
+    .system-title { font-size: 0.95rem; font-weight: 700; color: #cbd5e1; }
+    .clock-group { display: flex; align-items: center; gap: 14px; }
+    .clock { font-family: 'JetBrains Mono', monospace; font-size: 1.35rem; font-weight: 800; color: var(--cyan); }
+    .btn-sound {
       background: #0d1527; border: 1px solid var(--border); color: #94a3b8;
-      padding: 8px 18px; border-radius: 8px; font-weight: 800; font-size: 0.82rem;
-      cursor: pointer; transition: 0.15s;
+      padding: 8px 14px; border-radius: 8px; font-weight: 800; font-size: 0.82rem; cursor: pointer;
     }
-    .tab-btn.active {
-      background: #192339; color: var(--cyan); border-color: var(--cyan);
-      box-shadow: 0 0 12px rgba(56, 189, 248, 0.2);
-    }
-    .clock { font-family: 'JetBrains Mono', monospace; font-size: 1.25rem; font-weight: 800; color: var(--cyan); }
 
-    .view-panel { display: none; }
-    .view-panel.active { display: block; }
+    /* KPI Cards */
+    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-bottom: 16px; }
+    .kpi-box { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
+    .kpi-title { font-size: 0.72rem; font-weight: 800; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px; }
+    .kpi-number { font-family: 'Chakra Petch', sans-serif; font-size: 2.3rem; font-weight: 800; margin-top: 4px; }
+    .kpi-foot { font-size: 0.75rem; color: var(--text-muted); margin-top: 4px; font-weight: 600; }
 
-    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin-bottom: 14px; }
-    .kpi-box { background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; }
-    .kpi-title { font-size: 0.68rem; font-weight: 800; text-transform: uppercase; color: var(--text-muted); }
-    .kpi-number { font-family: 'Chakra Petch', sans-serif; font-size: 1.9rem; font-weight: 800; margin-top: 2px; }
-    .kpi-foot { font-size: 0.7rem; color: var(--text-muted); margin-top: 2px; font-weight: 600; }
-
+    /* Tabela Pátio */
     .table-container { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
     .table-toolbar {
       display: flex; justify-content: space-between; align-items: center;
-      padding: 10px 16px; background: rgba(5, 8, 15, 0.6); border-bottom: 1px solid var(--border);
+      padding: 12px 18px; background: rgba(5, 8, 15, 0.6); border-bottom: 1px solid var(--border);
     }
-    .table-search, .filter-select {
+    .table-search {
       background: #040711; border: 1px solid #1f2b42; color: #fff;
-      padding: 7px 12px; border-radius: 6px; font-size: 0.82rem; outline: none;
+      padding: 8px 14px; border-radius: 6px; font-size: 0.85rem; outline: none; width: 280px;
     }
-    .filter-select { cursor: pointer; font-weight: 700; }
+    .table-search:focus { border-color: var(--cyan); }
 
     table { width: 100%; border-collapse: collapse; text-align: left; }
-    th { background: #060a12; padding: 10px 16px; font-size: 0.72rem; text-transform: uppercase; color: var(--text-muted); border-bottom: 1px solid var(--border); font-weight: 800; }
-    td { padding: 10px 16px; font-size: 0.88rem; border-bottom: 1px solid rgba(255,255,255,0.03); }
+    th {
+      background: #060a12; padding: 12px 18px; font-size: 0.75rem;
+      text-transform: uppercase; color: var(--text-muted); border-bottom: 1px solid var(--border); font-weight: 800;
+    }
+    td { padding: 12px 18px; font-size: 0.92rem; border-bottom: 1px solid rgba(255,255,255,0.03); }
     tr:hover td { background: rgba(255, 255, 255, 0.02); }
 
     .route-tag {
-      font-family: 'Chakra Petch', sans-serif; font-size: 1.15rem; font-weight: 800;
-      color: #fbbf24; background: #1c1917; padding: 4px 12px; border-radius: 6px;
+      font-family: 'Chakra Petch', sans-serif; font-size: 1.2rem; font-weight: 800;
+      color: #fbbf24; background: #1c1917; padding: 4px 14px; border-radius: 6px;
       border: 1px solid #451a03; display: inline-flex; align-items: center; justify-content: center;
       min-width: 80px; width: fit-content; white-space: nowrap;
     }
-    .modal-tag { background: #131a2e; color: #38bdf8; font-weight: 700; font-size: 0.72rem; padding: 3px 8px; border-radius: 4px; white-space: nowrap; }
+    .modal-tag { background: #131a2e; color: #38bdf8; font-weight: 700; font-size: 0.75rem; padding: 4px 10px; border-radius: 4px; white-space: nowrap; }
     .time-font { font-family: 'JetBrains Mono', monospace; font-weight: 700; }
     
-    .status-pill { font-family: 'Chakra Petch', sans-serif; font-size: 0.75rem; font-weight: 800; padding: 3px 9px; border-radius: 5px; text-transform: uppercase; white-space: nowrap; }
+    .status-pill {
+      font-family: 'Chakra Petch', sans-serif; font-size: 0.78rem; font-weight: 800;
+      padding: 4px 12px; border-radius: 6px; text-transform: uppercase; white-space: nowrap; display: inline-flex;
+    }
     .status-ok { background: rgba(16, 185, 129, 0.15); color: var(--ok); border: 1px solid var(--ok); }
     .status-warn { background: rgba(245, 158, 11, 0.15); color: var(--warn); border: 1px solid var(--warn); }
-    .status-crit { background: rgba(239, 68, 68, 0.25); color: var(--crit); border: 1px solid var(--crit); animation: flash 1s infinite alternate; }
-    @keyframes flash { 0% { opacity: 0.7; } 100% { opacity: 1; } }
-
-    .filter-panel {
-      display: flex; gap: 12px; background: var(--card-bg); border: 1px solid var(--border);
-      padding: 10px 16px; border-radius: 10px; margin-bottom: 14px; align-items: center; flex-wrap: wrap;
+    .status-crit {
+      background: rgba(239, 68, 68, 0.25); color: var(--crit); border: 1px solid var(--crit);
+      animation: beaconPulse 1s infinite alternate;
     }
-
-    .grid-charts { display: grid; grid-template-columns: repeat(12, 1fr); gap: 14px; }
-    .span-6 { grid-column: span 6; }
-    .span-12 { grid-column: span 12; }
-
-    .panel-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
-    .card-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-    .card-label { font-size: 0.78rem; font-weight: 800; color: #cbd5e1; text-transform: uppercase; }
-    .chart-box { position: relative; width: 100%; height: 230px; }
-
-    .offender-row {
-      display: flex; align-items: center; justify-content: space-between;
-      background: #050811; border: 1px solid #141d2d; padding: 8px 12px; border-radius: 6px; margin-bottom: 6px;
+    @keyframes beaconPulse {
+      0% { opacity: 0.75; box-shadow: 0 0 4px var(--crit); }
+      100% { opacity: 1; box-shadow: 0 0 12px var(--crit); }
     }
-    .offender-rank { font-family: 'Chakra Petch', sans-serif; font-size: 1rem; font-weight: 800; color: var(--warn); width: 28px; }
-    .offender-details { flex: 1; margin: 0 10px; }
-    .offender-bar-wrap { width: 100%; height: 5px; background: #131c2c; border-radius: 3px; margin-top: 4px; overflow: hidden; }
-    .offender-bar-val { height: 100%; background: var(--crit); border-radius: 3px; }
   </style>
 </head>
 <body>
@@ -115,187 +95,67 @@
   <header>
     <div class="brand-group">
       <div class="badge-hub">HUB LRJ-19</div>
-      <div class="system-title">Central de Gestão de Pátio & TMC</div>
+      <div class="system-title">Monitor de Pátio em Tempo Real</div>
     </div>
-
-    <div class="nav-tabs">
-      <button id="btn-tab-live" class="tab-btn active" onclick="switchTab('live')">🚛 Monitor de Vagas (Ao Vivo)</button>
-      <button id="btn-tab-stats" class="tab-btn" onclick="switchTab('stats')">📊 Dashboard Gerencial</button>
-    </div>
-
-    <div style="display: flex; align-items: center; gap: 14px;">
+    <div class="clock-group">
       <div class="clock" id="live-clock">--:--:--</div>
-      <button id="btn-sound" class="tab-btn" style="padding: 6px 12px;" onclick="toggleAudioEngine()">🔊 Som: Off</button>
+      <button id="btn-sound" class="btn-sound" onclick="toggleAudioEngine()">🔊 Som: Off</button>
     </div>
   </header>
 
-  <!-- ABA 1: MONITOR DE PÁTIO AO VIVO -->
-  <div id="view-live" class="view-panel active">
-    <div class="kpi-grid">
-      <div class="kpi-box">
-        <div class="kpi-title">Veículos Carregando Agora</div>
-        <div class="kpi-number" id="live-patio-count">0</div>
-        <div class="kpi-foot">Sem check-out registrado</div>
-      </div>
-      <div class="kpi-box">
-        <div class="kpi-title">TMC Médio Atual</div>
-        <div class="kpi-number" id="live-patio-avg">00:00</div>
-        <div class="kpi-foot">Meta de pátio: &le; 10 min</div>
-      </div>
-      <div class="kpi-box">
-        <div class="kpi-title">Vagas Críticas (> 10m)</div>
-        <div class="kpi-number" id="live-patio-crit" style="color: var(--crit);">0</div>
-        <div class="kpi-foot">Acima do SLA de vaga</div>
-      </div>
-      <div class="kpi-box">
-        <div class="kpi-title">Rotas Concluídas Hoje</div>
-        <div class="kpi-number" id="live-finished-count">0</div>
-        <div class="kpi-foot" id="live-flow-rate">Fluxo: 0.0 carros/hora</div>
-      </div>
+  <!-- CARDS DE METRICAS AO VIVO -->
+  <div class="kpi-grid">
+    <div class="kpi-box">
+      <div class="kpi-title">Veículos Carregando Agora</div>
+      <div class="kpi-number" id="live-patio-count">0</div>
+      <div class="kpi-foot">Em vaga de pátio (Sem saída)</div>
     </div>
-
-    <div class="table-container">
-      <div class="table-toolbar">
-        <span style="font-weight: 800; font-size: 0.8rem; color: #94a3b8; text-transform: uppercase;">Carros em Carregamento no Pátio</span>
-        <input type="text" id="live-search" class="table-search" placeholder="Buscar Rota, Motorista ou Modal..." onkeyup="renderLiveYard()">
-      </div>
-      <table>
-        <thead>
-          <tr>
-            <th style="width: 100px;">Rota</th>
-            <th>Motorista</th>
-            <th>Modal</th>
-            <th>Transportadora</th>
-            <th>Início / Término Rota</th>
-            <th>Tempo no Pátio (TMC)</th>
-            <th style="text-align: right;">Status</th>
-          </tr>
-        </thead>
-        <tbody id="yard-tbody">
-          <tr><td colspan="7" style="text-align:center; color: var(--text-muted); padding: 30px;">Carregando operação ao vivo...</td></tr>
-        </tbody>
-      </table>
+    <div class="kpi-box">
+      <div class="kpi-title">TMC Médio Pátio</div>
+      <div class="kpi-number" id="live-patio-avg">00:00</div>
+      <div class="kpi-foot">Meta estipulada: &le; 10 min</div>
+    </div>
+    <div class="kpi-box">
+      <div class="kpi-title">Vagas Críticas (> 10M)</div>
+      <div class="kpi-number" id="live-patio-crit" style="color: var(--crit);">0</div>
+      <div class="kpi-foot">Acima da tolerância de vaga</div>
+    </div>
+    <div class="kpi-box">
+      <div class="kpi-title">Rotas Concluídas Hoje</div>
+      <div class="kpi-number" id="live-finished-count" style="color: var(--ok);">0</div>
+      <div class="kpi-foot" id="live-flow-rate">Fluxo: 0.0 carros/hora</div>
     </div>
   </div>
 
-  <!-- ABA 2: ANALYTICS GERENCIAL -->
-  <div id="view-stats" class="view-panel">
-    <div class="filter-panel">
-      <span style="font-size: 0.72rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">Filtros:</span>
-      <select id="stat-data" class="filter-select" onchange="processAnalytics()"></select>
-      <select id="stat-modal" class="filter-select" onchange="processAnalytics()"></select>
-      <select id="stat-transp" class="filter-select" onchange="processAnalytics()"></select>
+  <!-- TABELA DE VAGAS EM CARREGAMENTO -->
+  <div class="table-container">
+    <div class="table-toolbar">
+      <span style="font-weight: 800; font-size: 0.82rem; color: #94a3b8; text-transform: uppercase;">Carros em Carregamento na Vaga</span>
+      <input type="text" id="live-search" class="table-search" placeholder="Buscar Rota, Motorista ou Modal..." onkeyup="renderLiveYard()">
     </div>
-
-    <div class="kpi-grid">
-      <div class="kpi-box">
-        <div class="kpi-title">Viagens Concluídas</div>
-        <div class="kpi-number" id="kpi-stat-total">0</div>
-        <div class="kpi-foot">Rotas finalizadas com check-out</div>
-      </div>
-      <div class="kpi-box">
-        <div class="kpi-title">TMC Médio Global</div>
-        <div class="kpi-number" id="kpi-stat-tmc">0.0m</div>
-        <div class="kpi-foot">Meta de pátio: &le; 10 min</div>
-      </div>
-      <div class="kpi-box">
-        <div class="kpi-title">Aderência ao SLA (&le; 10m)</div>
-        <div class="kpi-number" id="kpi-stat-sla" style="color: var(--ok);">0.0%</div>
-        <div class="kpi-foot">Carregamentos pontuais</div>
-      </div>
-      <div class="kpi-box">
-        <div class="kpi-title">Tempo Médio Bancada</div>
-        <div class="kpi-number" id="kpi-stat-bip">0.0m</div>
-        <div class="kpi-foot">Duração da separação dos pacotes</div>
-      </div>
-    </div>
-
-    <div class="grid-charts">
-      <div class="panel-card span-6">
-        <div class="card-head"><span class="card-label">Curva de Carregamento por Horário</span></div>
-        <div class="chart-box"><canvas id="chartHourly"></canvas></div>
-      </div>
-
-      <div class="panel-card span-6">
-        <div class="card-head"><span class="card-label">Distribuição de SLA de Pátio (Volume de Carros)</span></div>
-        <div class="chart-box"><canvas id="chartSla"></canvas></div>
-      </div>
-
-      <div class="panel-card span-6">
-        <div class="card-head"><span class="card-label">TMC Médio por Modal (Do maior para o menor)</span></div>
-        <div class="chart-box"><canvas id="chartModal"></canvas></div>
-      </div>
-
-      <div class="panel-card span-6">
-        <div class="card-head"><span class="card-label">TMC Médio por Transportadora (Do maior para o menor)</span></div>
-        <div class="chart-box"><canvas id="chartTransp"></canvas></div>
-      </div>
-
-      <div class="panel-card span-12">
-        <div class="card-head">
-          <span class="card-label">Top Motoristas com Maior TMC Médio (Ofensores de Vaga)</span>
-          <span style="font-size: 0.72rem; color: #f87171; font-weight: 800;">META: &le; 10 MINUTOS</span>
-        </div>
-        <div id="driver-ranking-box"></div>
-      </div>
-    </div>
+    <table>
+      <thead>
+        <tr>
+          <th style="width: 100px;">Rota</th>
+          <th>Motorista</th>
+          <th>Modal</th>
+          <th>Transportadora</th>
+          <th>Horário Início / Bipagem</th>
+          <th>Tempo no Pátio (TMC)</th>
+          <th style="text-align: right;">Status da Vaga</th>
+        </tr>
+      </thead>
+      <tbody id="yard-tbody">
+        <tr><td colspan="7" style="text-align:center; color: var(--text-muted); padding: 35px;">Sincronizando pátio da operação...</td></tr>
+      </tbody>
+    </table>
   </div>
 
   <script>
-    Chart.register(ChartDataLabels);
-
-    const API_ENDPOINT = "https://script.google.com/macros/s/AKfycbwxNpxRtzchAIgk4YGgKrWknhfAXykjPAWiTod76lidVU1ka5KI6KQtjVB1SjMqsLLp/exec";
+    const API_ENDPOINT = "https://script.google.com/macros/s/AKfycbw7lDukd-yH8OSDXavlPCUXq8wrWEEAkCH-CzjuYdAD9vOkGhzIsRJQnM9g4VMQ2RPk/exec";
 
     let rawDataset = [];
-    let activeTab = 'live';
     let audioContext = null, audioEnabled = false;
-    let chartRefs = {};
-
-    function cleanDateStr(dStr) {
-      if (!dStr) return "";
-      const s = String(dStr).trim();
-      const directMatch = s.match(/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/);
-      if (directMatch) return `${directMatch[1].padStart(2, '0')}/${directMatch[2].padStart(2, '0')}/${directMatch[3]}`;
-      const d = new Date(s);
-      if (!isNaN(d.getTime())) {
-        const dia = String(d.getDate()).padStart(2, '0');
-        const mes = String(d.getMonth() + 1).padStart(2, '0');
-        return `${dia}/${mes}/${d.getFullYear()}`;
-      }
-      return s;
-    }
-
-    function dateToTimestamp(dStr) {
-      const match = String(dStr).match(/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/);
-      if (match) return new Date(`${match[3]}-${match[2].padStart(2, '0')}-${match[1].padStart(2, '0')}T00:00:00`).getTime();
-      return 0;
-    }
-
-    function cleanModal(m) {
-      if (!m || String(m).includes("Não encontrado")) return "OUTROS";
-      const u = String(m).toUpperCase().trim();
-      if (u.includes("PASSEIO")) return "PASSEIO";
-      if (u.includes("FIORINO")) return "FIORINO";
-      if (u.includes("MOTO")) return "MOTO";
-      if (u.includes("VAN")) return "VAN";
-      if (u.includes("VUC")) return "VUC";
-      return u;
-    }
-
-    function cleanTransp(t) {
-      if (!t || String(t).includes("Não encontrado")) return "OF";
-      return String(t).trim();
-    }
-
-    function switchTab(t) {
-      activeTab = t;
-      document.getElementById("btn-tab-live").classList.toggle("active", t === 'live');
-      document.getElementById("btn-tab-stats").classList.toggle("active", t === 'stats');
-      document.getElementById("view-live").classList.toggle("active", t === 'live');
-      document.getElementById("view-stats").classList.toggle("active", t === 'stats');
-      if (t === 'stats') processAnalytics();
-      else renderLiveYard();
-    }
 
     function toggleAudioEngine() {
       if (!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -303,6 +163,19 @@
       const btn = document.getElementById("btn-sound");
       btn.innerText = audioEnabled ? "🔊 Som: On" : "🔇 Som: Off";
       btn.style.borderColor = audioEnabled ? "#10b981" : "#1a253a";
+    }
+
+    function playBeep() {
+      if (!audioEnabled) return;
+      if (!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      const osc = audioContext.createOscillator();
+      const gain = audioContext.createGain();
+      osc.frequency.setValueAtTime(820, audioContext.currentTime);
+      gain.gain.setValueAtTime(0.18, audioContext.currentTime);
+      osc.connect(gain);
+      gain.connect(audioContext.destination);
+      osc.start();
+      osc.stop(audioContext.currentTime + 0.25);
     }
 
     function parseToSec(timeStr) {
@@ -331,23 +204,17 @@
         const data = await response.json();
         
         rawDataset = data.map(item => {
-          // O checkOut só é válido se for uma hora de verdade (ex: 08:44:28)
           const rawOut = String(item.checkOut || "").trim();
           const matchOut = rawOut.match(/\d{1,2}:\d{2}/);
           const hasOut = Boolean(matchOut && !rawOut.toLowerCase().includes("carregando") && rawOut !== "00:00:00");
 
           return {
             ...item,
-            data: cleanDateStr(item.data),
-            modal: cleanModal(item.modal),
-            transportadora: cleanTransp(item.transportadora),
             isFinalizado: hasOut
           };
         });
 
-        populateFilters();
-        if (activeTab === 'live') renderLiveYard();
-        else processAnalytics();
+        renderLiveYard();
       } catch (err) {
         console.warn("Sincronizando...", err);
       } finally {
@@ -355,58 +222,25 @@
       }
     }
 
-    function populateFilters() {
-      const dates = [...new Set(rawDataset.map(d => d.data).filter(Boolean))].sort((a, b) => dateToTimestamp(b) - dateToTimestamp(a));
-      const modais = [...new Set(rawDataset.map(d => d.modal).filter(m => m !== "OUTROS"))].sort();
-      const transps = [...new Set(rawDataset.map(d => d.transportadora).filter(t => t !== "OF"))].sort();
-
-      fillSelect("stat-data", dates, "Todas as Datas");
-      fillSelect("stat-modal", modais, "Todos os Modais");
-      fillSelect("stat-transp", transps, "Todas as Transportadoras");
-    }
-
-    function fillSelect(id, values, defaultLabel) {
-      const el = document.getElementById(id);
-      const prev = el.value;
-      el.innerHTML = `<option value="ALL">${defaultLabel}</option>`;
-      values.forEach(v => {
-        const opt = document.createElement("option");
-        opt.value = v; opt.innerText = v;
-        el.appendChild(opt);
-      });
-      if (values.includes(prev)) el.value = prev;
-    }
-
     function renderLiveYard() {
       const now = getSecondsNow();
       const searchTerm = (document.getElementById("live-search").value || "").toLowerCase();
 
-      // Pega a data mais recente disponível na base
-      const sortedDates = [...new Set(rawDataset.map(d => d.data).filter(Boolean))].sort((a, b) => dateToTimestamp(b) - dateToTimestamp(a));
-      const latestDate = sortedDates[0] || "";
-
       const yardItems = [];
-      let totalTime = 0, criticals = 0, finishedToday = 0;
+      let totalTime = 0, criticals = 0, finishedCount = 0;
       let firstStart = null, lastEnd = null;
 
       rawDataset.forEach(row => {
-        const isFromLatestDay = (!latestDate || row.data === latestDate);
         const vStart = parseToSec(row.validationTi);
         const vEnd = parseToSec(row.validationEi);
         const cIn = parseToSec(row.checkIn);
         const cOut = parseToSec(row.checkOut);
 
-        if (isFromLatestDay) {
-          if (row.isFinalizado) {
-            finishedToday++;
-            if (cOut !== null) lastEnd = (lastEnd === null || cOut > lastEnd) ? cOut : lastEnd;
-          }
-          if (vStart !== null) firstStart = (firstStart === null || vStart < firstStart) ? vStart : firstStart;
-        }
-
-        // CARRO NO PÁTIO AGORA:
-        // Não deu check-out e pertence à data mais recente da operação
-        if (!row.isFinalizado && isFromLatestDay && (row.rota || row.idDriver)) {
+        if (row.isFinalizado) {
+          finishedCount++;
+          if (cOut !== null) lastEnd = (lastEnd === null || cOut > lastEnd) ? cOut : lastEnd;
+        } else if (row.rota || row.idDriver) {
+          // VEÍCULO NO PÁTIO (sem check-out efetuado)
           let baseTime = vEnd !== null ? vEnd : (vStart !== null ? vStart : cIn);
           let tmcSec = baseTime !== null ? Math.max(0, now - baseTime) : 0;
 
@@ -425,16 +259,18 @@
             if (tmcSec >= 600) criticals++;
           }
         }
+
+        if (vStart !== null) firstStart = (firstStart === null || vStart < firstStart) ? vStart : firstStart;
       });
 
       document.getElementById("live-patio-count").innerText = yardItems.length;
       document.getElementById("live-patio-crit").innerText = criticals;
       document.getElementById("live-patio-avg").innerText = yardItems.length ? fmtMinutes(Math.round(totalTime / yardItems.length)) : "00:00";
-      document.getElementById("live-finished-count").innerText = finishedToday;
+      document.getElementById("live-finished-count").innerText = finishedCount;
 
       if (firstStart !== null && lastEnd !== null && lastEnd > firstStart) {
         const spanH = (lastEnd - firstStart) / 3600;
-        document.getElementById("live-flow-rate").innerText = `Fluxo: ${(finishedToday / spanH).toFixed(1)} carros/hora`;
+        document.getElementById("live-flow-rate").innerText = `Fluxo: ${(finishedCount / spanH).toFixed(1)} carros/hora`;
       } else {
         document.getElementById("live-flow-rate").innerText = `Fluxo: 0.0 carros/hora`;
       }
@@ -443,16 +279,16 @@
 
       const tbody = document.getElementById("yard-tbody");
       if (!yardItems.length) {
-        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color: var(--text-muted); padding: 30px;">Pátio desocupado. Nenhum carro em carregamento no momento para a data ${latestDate}.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color: var(--text-muted); padding: 35px;">Pátio desocupado. Nenhum carro carregando no momento.</td></tr>`;
         return;
       }
 
       let rowsHtml = "";
       yardItems.forEach(car => {
         const mins = car.tmcSec / 60;
-        const badge = mins >= 10 ? `<span class="status-pill status-crit">🔴 CRÍTICO (&gt;10m)</span>` :
-                      mins >= 7  ? `<span class="status-pill status-warn">🟡 ALERTA (7-10m)</span>` :
-                                   `<span class="status-pill status-ok">🟢 NO SLA (&lt;7m)</span>`;
+        const badge = mins >= 10 ? `<span class="status-pill status-crit">🔴 CRÍTICO (&gt;10M)</span>` :
+                      mins >= 7  ? `<span class="status-pill status-warn">🟡 ALERTA (7-10M)</span>` :
+                                   `<span class="status-pill status-ok">🟢 NO SLA (&lt;7M)</span>`;
 
         rowsHtml += `
           <tr>
@@ -467,230 +303,18 @@
         `;
       });
       tbody.innerHTML = rowsHtml;
+      if (criticals > 0) playBeep();
     }
 
-    function processAnalytics() {
-      const dateVal = document.getElementById("stat-data").value;
-      const modalVal = document.getElementById("stat-modal").value;
-      const transpVal = document.getElementById("stat-transp").value;
-
-      const filtered = rawDataset.filter(d => {
-        return (dateVal === 'ALL' || d.data === dateVal) &&
-               (modalVal === 'ALL' || d.modal === modalVal) &&
-               (transpVal === 'ALL' || d.transportadora === transpVal);
-      });
-
-      const slaBuckets = { "< 7 min (Ideal)": 0, "7-10 min (Alerta)": 0, "10-15 min (Crítico)": 0, "> 15 min (Gargalo)": 0 };
-      const hoursMap = {}, modalMap = {}, transpMap = {}, driverMap = {};
-      let totalTmcSec = 0, validTmcCount = 0, onTimeCount = 0;
-      let totalBipSec = 0, validBipCount = 0;
-
-      filtered.forEach(item => {
-        const vStart = parseToSec(item.validationTi);
-        const vEnd = parseToSec(item.validationEi);
-        const cOut = parseToSec(item.checkOut);
-
-        if (vStart !== null && vEnd !== null && vEnd >= vStart) {
-          totalBipSec += (vEnd - vStart);
-          validBipCount++;
-        }
-
-        if (vEnd !== null && cOut !== null && cOut >= vEnd) {
-          const diffMin = (cOut - vEnd) / 60;
-          totalTmcSec += (cOut - vEnd);
-          validTmcCount++;
-
-          if (diffMin <= 10) onTimeCount++;
-
-          if (diffMin < 7) slaBuckets["< 7 min (Ideal)"]++;
-          else if (diffMin <= 10) slaBuckets["7-10 min (Alerta)"]++;
-          else if (diffMin <= 15) slaBuckets["10-15 min (Crítico)"]++;
-          else slaBuckets["> 15 min (Gargalo)"]++;
-
-          if (item.checkOut) {
-            const m = item.checkOut.match(/(\d{1,2}):/);
-            const h = m ? `${m[1]}h` : "Outros";
-            hoursMap[h] = (hoursMap[h] || 0) + 1;
-          }
-
-          if (item.modal && item.modal !== "OUTROS") {
-            if (!modalMap[item.modal]) modalMap[item.modal] = [];
-            modalMap[item.modal].push(diffMin);
-          }
-
-          if (item.transportadora && item.transportadora !== "OF") {
-            if (!transpMap[item.transportadora]) transpMap[item.transportadora] = [];
-            transpMap[item.transportadora].push(diffMin);
-          }
-
-          const dKey = `${item.driverNome} • ${item.modal || 'OUTROS'}`;
-          if (!driverMap[dKey]) driverMap[dKey] = [];
-          driverMap[dKey].push(diffMin);
-        }
-      });
-
-      document.getElementById("kpi-stat-total").innerText = validTmcCount;
-      document.getElementById("kpi-stat-tmc").innerText = validTmcCount ? `${(totalTmcSec / validTmcCount / 60).toFixed(1)}m` : "0.0m";
-      document.getElementById("kpi-stat-sla").innerText = validTmcCount ? `${((onTimeCount / validTmcCount) * 100).toFixed(1)}%` : "0.0%";
-      document.getElementById("kpi-stat-bip").innerText = validBipCount ? `${(totalBipSec / validBipCount / 60).toFixed(1)}m` : "0.0m";
-
-      renderAreaLine("chartHourly", hoursMap);
-      renderHorizontalSla("chartSla", slaBuckets);
-      renderHorizontalBar("chartModal", modalMap, '#ff5722');
-      renderHorizontalBar("chartTransp", transpMap, '#38bdf8');
-      renderDriverRanking(driverMap);
-    }
-
-    function renderAreaLine(canvasId, series) {
-      const labels = Object.keys(series).sort();
-      const values = labels.map(k => series[k]);
-
-      const ctx = document.getElementById(canvasId).getContext('2d');
-      if (chartRefs[canvasId]) chartRefs[canvasId].destroy();
-
-      const grad = ctx.createLinearGradient(0, 0, 0, 200);
-      grad.addColorStop(0, 'rgba(56, 189, 248, 0.35)');
-      grad.addColorStop(1, 'rgba(56, 189, 248, 0)');
-
-      chartRefs[canvasId] = new Chart(ctx, {
-        type: 'line',
-        data: {
-          labels: labels,
-          datasets: [{
-            data: values, borderColor: '#38bdf8', backgroundColor: grad,
-            borderWidth: 3, fill: true, tension: 0.35, pointRadius: 5, pointBackgroundColor: '#38bdf8'
-          }]
-        },
-        options: {
-          responsive: true, maintainAspectRatio: false,
-          plugins: {
-            legend: { display: false },
-            datalabels: {
-              anchor: 'end', align: 'top', color: '#38bdf8', font: { weight: '800', size: 10 },
-              formatter: v => `${v} carros`
-            }
-          },
-          scales: {
-            y: { grid: { color: '#1a253a' }, ticks: { color: '#64748b' } },
-            x: { grid: { display: false }, ticks: { color: '#94a3b8', font: { weight: 700 } } }
-          }
-        }
-      });
-    }
-
-    function renderHorizontalSla(canvasId, buckets) {
-      const labels = Object.keys(buckets);
-      const values = Object.values(buckets);
-
-      const ctx = document.getElementById(canvasId).getContext('2d');
-      if (chartRefs[canvasId]) chartRefs[canvasId].destroy();
-
-      chartRefs[canvasId] = new Chart(ctx, {
-        type: 'bar',
-        data: {
-          labels: labels,
-          datasets: [{
-            data: values,
-            backgroundColor: ['#10b981', '#f59e0b', '#ea580c', '#ef4444'],
-            borderRadius: 6, maxBarThickness: 26
-          }]
-        },
-        options: {
-          indexAxis: 'y',
-          responsive: true, maintainAspectRatio: false,
-          plugins: {
-            legend: { display: false },
-            datalabels: {
-              anchor: 'end', align: 'right', color: '#f8fafc', font: { weight: '800', size: 11 },
-              formatter: v => `${v} carros`
-            }
-          },
-          scales: {
-            x: { grid: { color: '#1a253a' }, ticks: { color: '#64748b' } },
-            y: { grid: { display: false }, ticks: { color: '#cbd5e1', font: { weight: 700 } } }
-          }
-        }
-      });
-    }
-
-    function renderHorizontalBar(canvasId, dataMap, barColor) {
-      const sorted = Object.keys(dataMap).map(k => ({
-        label: k,
-        avg: parseFloat((dataMap[k].reduce((a,b)=>a+b,0) / dataMap[k].length).toFixed(1))
-      })).sort((a, b) => b.avg - a.avg);
-
-      const labels = sorted.map(d => d.label);
-      const values = sorted.map(d => d.avg);
-
-      const ctx = document.getElementById(canvasId).getContext('2d');
-      if (chartRefs[canvasId]) chartRefs[canvasId].destroy();
-
-      chartRefs[canvasId] = new Chart(ctx, {
-        type: 'bar',
-        data: {
-          labels: labels,
-          datasets: [{ data: values, backgroundColor: barColor, borderRadius: 6, maxBarThickness: 24 }]
-        },
-        options: {
-          indexAxis: 'y',
-          responsive: true, maintainAspectRatio: false,
-          plugins: {
-            legend: { display: false },
-            datalabels: {
-              anchor: 'end', align: 'right', color: '#f8fafc', font: { weight: '800', size: 11 },
-              formatter: v => `${v} min`
-            }
-          },
-          scales: {
-            x: { grid: { color: '#1a253a' }, ticks: { color: '#64748b' } },
-            y: { grid: { display: false }, ticks: { color: '#cbd5e1', font: { weight: 700 } } }
-          }
-        }
-      });
-    }
-
-    function renderDriverRanking(drivers) {
-      const box = document.getElementById("driver-ranking-box");
-      const list = Object.keys(drivers).map(key => {
-        const arr = drivers[key];
-        const avg = arr.reduce((a, b) => a + b, 0) / arr.length;
-        return { name: key, avg: parseFloat(avg.toFixed(1)), count: arr.length };
-      }).sort((a, b) => b.avg - a.avg).slice(0, 6);
-
-      if (!list.length) {
-        box.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding:20px;">Nenhum motorista encontrado.</div>`;
-        return;
-      }
-
-      const topVal = Math.max(...list.map(d => d.avg), 30);
-      let outHtml = "";
-
-      list.forEach((item, index) => {
-        const barWidth = Math.min(100, Math.round((item.avg / topVal) * 100));
-        outHtml += `
-          <div class="offender-row">
-            <div class="offender-rank">#${index + 1}</div>
-            <div class="offender-details">
-              <div style="font-weight:700; color:#fff; font-size:0.88rem;">${item.name}</div>
-              <div style="font-size:0.72rem; color:var(--text-muted);">${item.count} viagens registradas</div>
-              <div class="offender-bar-wrap"><div class="offender-bar-val" style="width:${barWidth}%"></div></div>
-            </div>
-            <div style="font-family:'JetBrains Mono', monospace; font-size:1.1rem; font-weight:800; color:var(--crit);">
-              ${item.avg} <span style="font-size:0.75rem; color:var(--text-muted)">min</span>
-            </div>
-          </div>
-        `;
-      });
-      box.innerHTML = outHtml;
-    }
-
+    // Atualiza relógio e tempo de pátio todo segundo
     setInterval(() => {
       document.getElementById("live-clock").innerText = new Date().toLocaleTimeString('pt-BR');
-      if (activeTab === 'live') renderLiveYard();
+      renderLiveYard();
     }, 1000);
 
+    // Consulta os novos dados da API a cada 3 segundos
     loadData();
-    setInterval(loadData, 4000);
+    setInterval(loadData, 3000);
   </script>
 </body>
 </html>
