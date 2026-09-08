@@ -38,14 +38,12 @@
       padding: 8px 14px; border-radius: 8px; font-weight: 800; font-size: 0.82rem; cursor: pointer;
     }
 
-    /* KPI Cards */
     .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-bottom: 16px; }
     .kpi-box { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
     .kpi-title { font-size: 0.72rem; font-weight: 800; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px; }
     .kpi-number { font-family: 'Chakra Petch', sans-serif; font-size: 2.3rem; font-weight: 800; margin-top: 4px; }
     .kpi-foot { font-size: 0.75rem; color: var(--text-muted); margin-top: 4px; font-weight: 600; }
 
-    /* Tabela Pátio */
     .table-container { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
     .table-toolbar {
       display: flex; justify-content: space-between; align-items: center;
@@ -103,7 +101,6 @@
     </div>
   </header>
 
-  <!-- CARDS DE METRICAS AO VIVO -->
   <div class="kpi-grid">
     <div class="kpi-box">
       <div class="kpi-title">Veículos Carregando Agora</div>
@@ -127,7 +124,6 @@
     </div>
   </div>
 
-  <!-- TABELA DE VAGAS EM CARREGAMENTO -->
   <div class="table-container">
     <div class="table-toolbar">
       <span style="font-weight: 800; font-size: 0.82rem; color: #94a3b8; text-transform: uppercase;">Carros em Carregamento na Vaga</span>
@@ -152,7 +148,7 @@
   </div>
 
   <script>
-    const API_ENDPOINT = "https://script.google.com/macros/s/AKfycbxZZQVxqv9uDrcam7KKzdMjaE13A0iCgH2JAnhN9ZRpOeXrbAeVipJYvXQyzzK9ZbSn/exec";
+    const API_ENDPOINT = "https://script.google.com/macros/s/AKfycbxZrknjmwaOh6hbouB2orbU8o1r7GPR6ONaPkFEqLOyg-CUhsgCh34umQgRat26vxrS/exec";
 
     let rawDataset = [];
     let audioContext = null, audioEnabled = false;
@@ -204,7 +200,15 @@
         const data = await response.json();
         
         if (Array.isArray(data) && data.length > 0) {
-          rawDataset = data;
+          rawDataset = data.map(item => {
+            const rawOut = String(item.checkOut || "").trim();
+            const matchOut = rawOut.match(/\d{1,2}:\d{2}/);
+            const hasOut = Boolean(matchOut && !rawOut.toLowerCase().includes("carregando") && rawOut !== "00:00:00");
+            return {
+              ...item,
+              isFinalizado: hasOut
+            };
+          });
           renderLiveYard();
         }
       } catch (err) {
@@ -218,7 +222,6 @@
       const now = getSecondsNow();
       const searchTerm = (document.getElementById("live-search").value || "").toLowerCase();
 
-      // Pega a data da última linha recebida (operação atual)
       const latestDate = rawDataset.length ? rawDataset[rawDataset.length - 1].data : "";
 
       const yardItems = [];
@@ -226,7 +229,6 @@
       let firstStart = null, lastEnd = null;
 
       rawDataset.forEach(row => {
-        // Considera as viagens do dia mais recente
         if (latestDate && row.data !== latestDate) return;
 
         const vStart = parseToSec(row.validationTi);
@@ -238,7 +240,6 @@
           finishedCount++;
           if (cOut !== null) lastEnd = (lastEnd === null || cOut > lastEnd) ? cOut : lastEnd;
         } else if (row.rota || row.idDriver) {
-          // VEÍCULO NO PÁTIO AGORA
           let baseTime = vEnd !== null ? vEnd : (vStart !== null ? vStart : cIn);
           let tmcSec = baseTime !== null ? Math.max(0, now - baseTime) : 0;
 
@@ -304,13 +305,11 @@
       if (criticals > 0) playBeep();
     }
 
-    // Cronômetro em tempo real (1 segundo)
     setInterval(() => {
       document.getElementById("live-clock").innerText = new Date().toLocaleTimeString('pt-BR');
       renderLiveYard();
     }, 1000);
 
-    // Consulta à API a cada 3 segundos
     loadData();
     setInterval(loadData, 3000);
   </script>
