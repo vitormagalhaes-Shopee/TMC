@@ -148,7 +148,7 @@
         <div class="kpi-foot">Acima do SLA de vaga</div>
       </div>
       <div class="kpi-box">
-        <div class="kpi-title">Rotas Finalizadas Hoje</div>
+        <div class="kpi-title">Rotas Concluídas</div>
         <div class="kpi-number" id="live-finished-count">0</div>
         <div class="kpi-foot" id="live-flow-rate">Fluxo: 0.0 carros/hora</div>
       </div>
@@ -156,7 +156,7 @@
 
     <div class="table-container">
       <div class="table-toolbar">
-        <span style="font-weight: 800; font-size: 0.8rem; color: #94a3b8; text-transform: uppercase;">Carros na Vaga de Carregamento</span>
+        <span style="font-weight: 800; font-size: 0.8rem; color: #94a3b8; text-transform: uppercase;">Carros em Carregamento no Pátio</span>
         <input type="text" id="live-search" class="table-search" placeholder="Buscar Rota, Motorista ou Modal..." onkeyup="renderLiveYard()">
       </div>
       <table>
@@ -272,7 +272,7 @@
     }
 
     function cleanModal(m) {
-      if (!m || String(m).includes("Não encontrado")) return null;
+      if (!m || String(m).includes("Não encontrado")) return "OUTROS";
       const u = String(m).toUpperCase().trim();
       if (u.includes("PASSEIO")) return "PASSEIO";
       if (u.includes("FIORINO")) return "FIORINO";
@@ -283,7 +283,7 @@
     }
 
     function cleanTransp(t) {
-      if (!t || String(t).includes("Não encontrado")) return null;
+      if (!t || String(t).includes("Não encontrado")) return "OF";
       return String(t).trim();
     }
 
@@ -305,9 +305,11 @@
       btn.style.borderColor = audioEnabled ? "#10b981" : "#1a253a";
     }
 
+    // Extrai segundos ignorando a data se ela vier junto
     function parseToSec(timeStr) {
       if (!timeStr) return null;
-      const match = String(timeStr).trim().match(/(\d{1,2}):(\d{2})(?::(\d{2}))?/);
+      const s = String(timeStr).trim();
+      const match = s.match(/(\d{1,2}):(\d{2})(?::(\d{2}))?/);
       return match ? (parseInt(match[1], 10) * 3600) + (parseInt(match[2], 10) * 60) + (match[3] ? parseInt(match[3], 10) : 0) : null;
     }
 
@@ -332,8 +334,7 @@
         rawDataset = data.map(item => {
           const rawOut = String(item.checkOut || "").trim();
           
-          // Considera finalizado APENAS se tiver hora válida (ex: 08:33:04). 
-          // Se for vazio, traço, texto de carregamento ou "00:00:00", NÃO está finalizado!
+          // Considera finalizado APENAS se tiver hora real de saída preenchida
           const hasOut = (
             rawOut !== "" && 
             rawOut !== "00:00:00" && 
@@ -363,8 +364,8 @@
 
     function populateFilters() {
       const dates = [...new Set(rawDataset.map(d => d.data).filter(Boolean))].sort((a, b) => dateToTimestamp(b) - dateToTimestamp(a));
-      const modais = [...new Set(rawDataset.map(d => d.modal).filter(Boolean))].sort();
-      const transps = [...new Set(rawDataset.map(d => d.transportadora).filter(Boolean))].sort();
+      const modais = [...new Set(rawDataset.map(d => d.modal).filter(m => m !== "OUTROS"))].sort();
+      const transps = [...new Set(rawDataset.map(d => d.transportadora).filter(t => t !== "OF"))].sort();
 
       fillSelect("stat-data", dates, "Todas as Datas");
       fillSelect("stat-modal", modais, "Todos os Modais");
@@ -387,30 +388,21 @@
       const now = getSecondsNow();
       const searchTerm = (document.getElementById("live-search").value || "").toLowerCase();
 
-      const sortedDates = [...new Set(rawDataset.map(d => d.data).filter(Boolean))].sort((a, b) => dateToTimestamp(b) - dateToTimestamp(a));
-      const today = sortedDates[0] || "";
-
-      let yardItems = [];
-      let totalTime = 0, criticals = 0, finishedToday = 0;
+      const yardItems = [];
+      let totalTime = 0, criticals = 0, finishedCount = 0;
       let firstStart = null, lastEnd = null;
 
       rawDataset.forEach(row => {
-        const isToday = !today || row.data === today;
-        const cIn = parseToSec(row.checkIn);
         const vStart = parseToSec(row.validationTi);
         const vEnd = parseToSec(row.validationEi);
+        const cIn = parseToSec(row.checkIn);
         const cOut = parseToSec(row.checkOut);
 
-        if (isToday) {
-          if (vStart !== null) firstStart = (firstStart === null || vStart < firstStart) ? vStart : firstStart;
-          if (row.isFinalizado) {
-            finishedToday++;
-            if (cOut !== null) lastEnd = (lastEnd === null || cOut > lastEnd) ? cOut : lastEnd;
-          }
-        }
-
-        // CARRO NO PÁTIO: Qualquer linha sem check-out válido
-        if (!row.isFinalizado && (row.rota || row.idDriver)) {
+        if (row.isFinalizado) {
+          finishedCount++;
+          if (cOut !== null) lastEnd = (lastEnd === null || cOut > lastEnd) ? cOut : lastEnd;
+        } else if (row.rota || row.idDriver) {
+          // Carro carregando no pátio agora
           let baseTime = vEnd !== null ? vEnd : (vStart !== null ? vStart : cIn);
           let tmcSec = baseTime !== null ? Math.max(0, now - baseTime) : 0;
 
@@ -429,34 +421,18 @@
             if (tmcSec >= 600) criticals++;
           }
         }
+
+        if (vStart !== null) firstStart = (firstStart === null || vStart < firstStart) ? vStart : firstStart;
       });
 
-      // MODO DE SEGURANÇA: Se não achou nenhum sem check-out (ex: todos os 100 foram concluídos na planilha),
-      // exibe as últimas 15 viagens de hoje para a tabela nunca ficar num "buraco negro" vazio!
-      let isSimulated = false;
-      if (yardItems.length === 0 && rawDataset.length > 0) {
-        isSimulated = true;
-        const recentRows = rawDataset.filter(r => (!today || r.data === today) && (r.rota || r.idDriver)).slice(0, 15);
-        recentRows.forEach(row => {
-          const vEnd = parseToSec(row.validationEi);
-          const cOut = parseToSec(row.checkOut);
-          const tmcSec = (vEnd !== null && cOut !== null) ? Math.max(0, cOut - vEnd) : 0;
-          yardItems.push({
-            ...row,
-            tmcSec,
-            horarioExibicao: row.validationEi || row.validationTi || row.checkIn || '--'
-          });
-        });
-      }
-
-      document.getElementById("live-patio-count").innerText = isSimulated ? 0 : yardItems.length;
+      document.getElementById("live-patio-count").innerText = yardItems.length;
       document.getElementById("live-patio-crit").innerText = criticals;
-      document.getElementById("live-patio-avg").innerText = yardItems.length && !isSimulated ? fmtMinutes(Math.round(totalTime / yardItems.length)) : "00:00";
-      document.getElementById("live-finished-count").innerText = finishedToday;
+      document.getElementById("live-patio-avg").innerText = yardItems.length ? fmtMinutes(Math.round(totalTime / yardItems.length)) : "00:00";
+      document.getElementById("live-finished-count").innerText = finishedCount;
 
       if (firstStart !== null && lastEnd !== null && lastEnd > firstStart) {
         const spanH = (lastEnd - firstStart) / 3600;
-        document.getElementById("live-flow-rate").innerText = `Fluxo: ${(finishedToday / spanH).toFixed(1)} carros/hora`;
+        document.getElementById("live-flow-rate").innerText = `Fluxo: ${(finishedCount / spanH).toFixed(1)} carros/hora`;
       } else {
         document.getElementById("live-flow-rate").innerText = `Fluxo: 0.0 carros/hora`;
       }
@@ -472,8 +448,7 @@
       let rowsHtml = "";
       yardItems.forEach(car => {
         const mins = car.tmcSec / 60;
-        const badge = isSimulated ? `<span class="status-pill" style="background:#1e293b; color:#94a3b8;">FINALIZADO</span>` :
-                      mins >= 10 ? `<span class="status-pill status-crit">🔴 CRÍTICO (&gt;10m)</span>` :
+        const badge = mins >= 10 ? `<span class="status-pill status-crit">🔴 CRÍTICO (&gt;10m)</span>` :
                       mins >= 7  ? `<span class="status-pill status-warn">🟡 ALERTA (7-10m)</span>` :
                                    `<span class="status-pill status-ok">🟢 NO SLA (&lt;7m)</span>`;
 
@@ -531,7 +506,8 @@
           else slaBuckets["> 15 min (Gargalo)"]++;
 
           if (item.checkOut) {
-            const h = item.checkOut.split(":")[0] + "h";
+            const m = item.checkOut.match(/(\d{1,2}):/);
+            const h = m ? `${m[1]}h` : "Outros";
             hoursMap[h] = (hoursMap[h] || 0) + 1;
           }
 
