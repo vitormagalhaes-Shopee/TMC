@@ -4,6 +4,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>HUB LRJ-19 - Central de Carregamento & Gestão de Pátio</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -55,6 +57,27 @@
         letter-spacing: 0.5px;
       }
       .system-title { font-size: 0.95rem; font-weight: 700; color: #cbd5e1; }
+
+      .nav-tabs { display: flex; gap: 8px; }
+      .tab-btn {
+        background: #0d1527;
+        border: 1px solid var(--border);
+        color: #94a3b8;
+        padding: 8px 18px;
+        border-radius: 8px;
+        font-weight: 800;
+        font-size: 0.82rem;
+        cursor: pointer;
+        transition: 0.15s;
+      }
+      .tab-btn:hover { border-color: var(--cyan); color: #fff; }
+      .tab-btn.active {
+        background: #192339;
+        color: var(--cyan);
+        border-color: var(--cyan);
+        box-shadow: 0 0 12px rgba(56, 189, 248, 0.2);
+      }
+
       .top-right { display: flex; align-items: center; gap: 16px; }
       .sync-tag {
         font-family: 'JetBrains Mono', monospace;
@@ -91,8 +114,10 @@
         cursor: pointer;
         transition: 0.15s;
       }
-      .btn-sound:hover { border-color: var(--cyan); }
       .btn-sound.on { color: var(--ok); border-color: var(--ok); }
+
+      .view-panel { display: none; }
+      .view-panel.active { display: block; }
 
       /* KPIs Grid */
       .kpi-grid {
@@ -140,7 +165,7 @@
         font-weight: 600;
       }
 
-      /* Tabela Dark */
+      /* Tabela Pátio */
       .table-container {
         background: var(--card);
         border: 1px solid var(--border);
@@ -162,7 +187,7 @@
         text-transform: uppercase;
         letter-spacing: 0.5px;
       }
-      .search-box {
+      .search-box, .filter-select {
         background: #040711;
         border: 1px solid #1f2b42;
         color: #fff;
@@ -170,11 +195,11 @@
         border-radius: 6px;
         font-size: 0.85rem;
         outline: none;
-        width: 320px;
         font-family: inherit;
         transition: 0.15s;
       }
-      .search-box:focus {
+      .search-box { width: 320px; }
+      .search-box:focus, .filter-select:focus {
         border-color: var(--cyan);
         box-shadow: 0 0 10px rgba(56, 189, 248, 0.2);
       }
@@ -197,9 +222,11 @@
       }
       tr:hover td { background: rgba(255, 255, 255, 0.02); }
 
+      /* Fix da rota para nunca quebrar */
+      .col-rota { width: 110px; min-width: 110px; white-space: nowrap; }
       .route-tag {
         font-family: 'Chakra Petch', sans-serif;
-        font-size: 1.25rem;
+        font-size: 1.15rem;
         font-weight: 800;
         color: #fbbf24;
         background: #1c1917;
@@ -209,9 +236,9 @@
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        min-width: 75px;
-        width: fit-content;
+        white-space: nowrap;
       }
+
       .driver-name { font-weight: 700; color: #fff; font-size: 0.92rem; }
       .driver-sub { font-size: 0.72rem; color: var(--text-muted); margin-top: 3px; }
       .modal-tag {
@@ -223,6 +250,7 @@
         border-radius: 4px;
         text-transform: uppercase;
         display: inline-block;
+        white-space: nowrap;
       }
       .time-font { font-family: 'JetBrains Mono', monospace; font-weight: 700; }
 
@@ -249,28 +277,28 @@
         100% { opacity: 1; box-shadow: 0 0 12px var(--crit); }
       }
 
-      .diagnostic-bar {
-        display: none;
-        background: rgba(239, 68, 68, 0.15);
-        border: 1px solid var(--crit);
-        color: #fca5a5;
-        padding: 10px 18px;
-        border-radius: 8px;
-        font-size: 0.82rem;
-        margin-bottom: 14px;
-        align-items: center;
-        justify-content: space-between;
+      /* Painel de Gráficos */
+      .filter-panel {
+        display: flex; gap: 12px; background: var(--card); border: 1px solid var(--border);
+        padding: 12px 18px; border-radius: 10px; margin-bottom: 16px; align-items: center; flex-wrap: wrap;
       }
-      .diagnostic-bar.visible { display: flex; }
-      .btn-reload {
-        background: var(--crit);
-        color: #fff;
-        border: none;
-        padding: 5px 12px;
-        border-radius: 6px;
-        font-weight: 700;
-        cursor: pointer;
+      .grid-charts { display: grid; grid-template-columns: repeat(12, 1fr); gap: 14px; }
+      .span-6 { grid-column: span 6; }
+      .span-12 { grid-column: span 12; }
+
+      .panel-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 16px; }
+      .card-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+      .card-label { font-size: 0.78rem; font-weight: 800; color: #cbd5e1; text-transform: uppercase; }
+      .chart-box { position: relative; width: 100%; height: 230px; }
+
+      .offender-row {
+        display: flex; align-items: center; justify-content: space-between;
+        background: #050811; border: 1px solid #141d2d; padding: 10px 14px; border-radius: 6px; margin-bottom: 8px;
       }
+      .offender-rank { font-family: 'Chakra Petch', sans-serif; font-size: 1.1rem; font-weight: 800; color: var(--warn); width: 30px; }
+      .offender-details { flex: 1; margin: 0 14px; }
+      .offender-bar-wrap { width: 100%; height: 6px; background: #131c2c; border-radius: 3px; margin-top: 5px; overflow: hidden; }
+      .offender-bar-val { height: 100%; background: var(--crit); border-radius: 3px; }
     </style>
   </head>
   <body>
@@ -280,6 +308,12 @@
         <div class="badge-hub">HUB LRJ-19</div>
         <div class="system-title">Central de Carregamento & Gestão de Pátio</div>
       </div>
+
+      <div class="nav-tabs">
+        <button id="btn-tab-live" class="tab-btn active" onclick="switchTab('live')">🚛 Monitor de Vagas (Ao Vivo)</button>
+        <button id="btn-tab-stats" class="tab-btn" onclick="switchTab('stats')">📊 Dashboard Gerencial</button>
+      </div>
+
       <div class="top-right">
         <div class="sync-tag"><span class="live-dot"></span><span id="sync-status">AO VIVO</span></div>
         <div class="clock" id="clock">--:--:--</div>
@@ -287,76 +321,147 @@
       </div>
     </header>
 
-    <div class="diagnostic-bar" id="diagnostic">
-      <span id="diagnostic-msg">Aguardando sincronização da API...</span>
-      <button class="btn-reload" id="refresh-button" type="button">Tentar Novamente</button>
+    <!-- ABA 1: MONITOR DE PÁTIO -->
+    <div id="view-live" class="view-panel active">
+      <section class="kpi-grid">
+        <div class="kpi-box">
+          <div class="kpi-title">Vagas em Carregamento</div>
+          <div class="kpi-number" id="kpi-yard" style="color: var(--cyan);">0</div>
+          <div class="kpi-foot">Veículos no pátio agora</div>
+        </div>
+        <div class="kpi-box">
+          <div class="kpi-title">Vagas Críticas (> 10M)</div>
+          <div class="kpi-number" id="kpi-critical" style="color: var(--crit);">0</div>
+          <div class="kpi-foot">Estourando SLA de permanência</div>
+        </div>
+        <div class="kpi-box">
+          <div class="kpi-title">Vagas em Alerta (7-10M)</div>
+          <div class="kpi-number" id="kpi-alert" style="color: var(--warn);">0</div>
+          <div class="kpi-foot">Atenção ao carregamento</div>
+        </div>
+        <div class="kpi-box">
+          <div class="kpi-title">Rotas Finalizadas Hoje</div>
+          <div class="kpi-number" id="kpi-finished" style="color: var(--ok);">0</div>
+          <div class="kpi-foot">Check-out efetuado</div>
+        </div>
+      </section>
+
+      <div class="table-container">
+        <div class="table-toolbar">
+          <span class="table-heading">Fluxo de Carregamento Instantâneo</span>
+          <input class="search-box" id="search" type="search" placeholder="Filtrar por Rota, Motorista ou Modal..." />
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th class="col-rota">Rota</th>
+              <th>Motorista</th>
+              <th>Modal</th>
+              <th>Transportadora</th>
+              <th>Horário Base</th>
+              <th>Tempo no Carro (TMC)</th>
+              <th style="text-align: right;">Status da Vaga</th>
+            </tr>
+          </thead>
+          <tbody id="yard-body">
+            <tr><td colspan="7" style="text-align:center; color: var(--text-muted); padding: 40px;">Sincronizando pátio da operação...</td></tr>
+          </tbody>
+        </table>
+      </div>
     </div>
 
-    <!-- KPIs -->
-    <section class="kpi-grid">
-      <div class="kpi-box">
-        <div class="kpi-title">Vagas em Carregamento</div>
-        <div class="kpi-number" id="kpi-yard" style="color: var(--cyan);">0</div>
-        <div class="kpi-foot">Veículos no pátio agora</div>
+    <!-- ABA 2: DASHBOARD GERENCIAL -->
+    <div id="view-stats" class="view-panel">
+      <div class="filter-panel">
+        <span style="font-size: 0.72rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">Filtros:</span>
+        <select id="stat-data" class="filter-select" onchange="processAnalytics()"></select>
+        <select id="stat-modal" class="filter-select" onchange="processAnalytics()"></select>
+        <select id="stat-transp" class="filter-select" onchange="processAnalytics()"></select>
       </div>
-      <div class="kpi-box">
-        <div class="kpi-title">Vagas Críticas (> 10M)</div>
-        <div class="kpi-number" id="kpi-critical" style="color: var(--crit);">0</div>
-        <div class="kpi-foot">Estourando SLA de permanência</div>
-      </div>
-      <div class="kpi-box">
-        <div class="kpi-title">Vagas em Alerta (7-10M)</div>
-        <div class="kpi-number" id="kpi-alert" style="color: var(--warn);">0</div>
-        <div class="kpi-foot">Atenção ao carregamento</div>
-      </div>
-      <div class="kpi-box">
-        <div class="kpi-title">Rotas Finalizadas Hoje</div>
-        <div class="kpi-number" id="kpi-finished" style="color: var(--ok);">0</div>
-        <div class="kpi-foot">Check-out efetuado</div>
-      </div>
-    </section>
 
-    <!-- Tabela Principal -->
-    <div class="table-container">
-      <div class="table-toolbar">
-        <span class="table-heading">Fluxo de Carregamento Instantâneo</span>
-        <input class="search-box" id="search" type="search" placeholder="Filtrar por Rota, Motorista ou Modal..." />
+      <section class="kpi-grid">
+        <div class="kpi-box">
+          <div class="kpi-title">Total Analisado</div>
+          <div class="kpi-number" id="kpi-stat-total" style="color: var(--cyan);">0</div>
+          <div class="kpi-foot">Viagens registradas</div>
+        </div>
+        <div class="kpi-box">
+          <div class="kpi-title">TMC Médio Global</div>
+          <div class="kpi-number" id="kpi-stat-tmc" style="color: var(--crit);">0.0m</div>
+          <div class="kpi-foot">Meta de pátio: &le; 10 min</div>
+        </div>
+        <div class="kpi-box">
+          <div class="kpi-title">Aderência ao SLA (&le; 10m)</div>
+          <div class="kpi-number" id="kpi-stat-sla" style="color: var(--ok);">0.0%</div>
+          <div class="kpi-foot">Carregamentos dentro da meta</div>
+        </div>
+        <div class="kpi-box">
+          <div class="kpi-title">Tempo Médio Bancada</div>
+          <div class="kpi-number" id="kpi-stat-bip" style="color: var(--warn);">0.0m</div>
+          <div class="kpi-foot">Duração da separação/bipagem</div>
+        </div>
+      </section>
+
+      <div class="grid-charts">
+        <div class="panel-card span-6">
+          <div class="card-head"><span class="card-label">Curva de Carregamentos por Horário</span></div>
+          <div class="chart-box"><canvas id="chartHourly"></canvas></div>
+        </div>
+
+        <div class="panel-card span-6">
+          <div class="card-head"><span class="card-label">Distribuição de SLA de Pátio (Volume de Carros)</span></div>
+          <div class="chart-box"><canvas id="chartSla"></canvas></div>
+        </div>
+
+        <div class="panel-card span-6">
+          <div class="card-head"><span class="card-label">TMC Médio por Modal (Do maior para o menor)</span></div>
+          <div class="chart-box"><canvas id="chartModal"></canvas></div>
+        </div>
+
+        <div class="panel-card span-6">
+          <div class="card-head"><span class="card-label">TMC Médio por Transportadora (Do maior para o menor)</span></div>
+          <div class="chart-box"><canvas id="chartTransp"></canvas></div>
+        </div>
+
+        <div class="panel-card span-12">
+          <div class="card-head">
+            <span class="card-label">Top Motoristas com Maior Tempo de Ocupação (Ofensores de Pátio)</span>
+            <span style="font-size: 0.72rem; color: var(--crit); font-weight: 800;">META: &le; 10 MINUTOS</span>
+          </div>
+          <div id="driver-ranking-box"></div>
+        </div>
       </div>
-      <table>
-        <thead>
-          <tr>
-            <th style="width: 95px;">Rota</th>
-            <th>Motorista</th>
-            <th>Modal</th>
-            <th>Transportadora</th>
-            <th>Horário Base</th>
-            <th>Tempo no Carro (TMC)</th>
-            <th style="text-align: right;">Status da Vaga</th>
-          </tr>
-        </thead>
-        <tbody id="yard-body">
-          <tr><td colspan="7" style="text-align:center; color: var(--text-muted); padding: 40px;">Sincronizando pátio da operação...</td></tr>
-        </tbody>
-      </table>
     </div>
 
     <script>
+      Chart.register(ChartDataLabels);
+
       const API_ENDPOINT = "https://script.google.com/macros/s/AKfycbzbYloKShNZz-TaP7952HMv3Xz3uu6-BZl2wbQC_wzWq6IqSbcUwuWS0053rg2pqlk2/exec";
       const HUB_TIMEZONE = "America/Sao_Paulo";
       
       const state = {
         records: [],
-        feed: "loading",
-        message: "",
-        sound: localStorage.getItem("l19-sound") === "on"
+        sound: localStorage.getItem("l19-sound") === "on",
+        activeTab: "live"
       };
       let inFlight = false;
       let audioCtx = null;
+      let chartRefs = {};
 
       const $ = (id) => document.getElementById(id);
       const text = (v) => v === null || v === undefined ? "" : String(v).trim();
       const first = (row, keys) => keys.map((k) => row[k]).find((v) => text(v) !== "") ?? "";
       const escapeHtml = (s) => text(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" }[c]));
+
+      function switchTab(t) {
+        state.activeTab = t;
+        $("btn-tab-live").classList.toggle("active", t === "live");
+        $("btn-tab-stats").classList.toggle("active", t === "stats");
+        $("view-live").classList.toggle("active", t === "live");
+        $("view-stats").classList.toggle("active", t === "stats");
+        if (t === "stats") processAnalytics();
+        else renderLive();
+      }
 
       function datePartsInHub(date) {
         const parts = new Intl.DateTimeFormat("en-US", { timeZone: HUB_TIMEZONE, year: "numeric", month: "2-digit", day: "2-digit" }).formatToParts(date);
@@ -389,6 +494,17 @@
         return Number.isNaN(parsed.getTime()) ? null : parsed;
       }
 
+      function cleanModal(m) {
+        if (!m || m.includes("Não encontrado")) return "OUTROS";
+        const u = m.toUpperCase();
+        if (u.includes("PASSEIO")) return "PASSEIO";
+        if (u.includes("FIORINO")) return "FIORINO";
+        if (u.includes("MOTO")) return "MOTO";
+        if (u.includes("VAN")) return "VAN";
+        if (u.includes("VUC")) return "VUC";
+        return u;
+      }
+
       function normalize(row, idx) {
         const date = parseDate(first(row, ["data", "date"]));
         const checkIn = parseDate(first(row, ["checkIn", "checkin"]), date);
@@ -401,12 +517,14 @@
         const recordId = text(first(row, ["idRegistro", "id"]));
         const baseAt = validationEnd || validationStart || checkIn;
 
+        const dateStr = date ? `${String(date.getDate()).padStart(2,'0')}/${String(date.getMonth()+1).padStart(2,'0')}/${date.getFullYear()}` : "";
+
         return {
           key: recordId || driverId || `${idx}-${route}`,
-          date, checkIn, validationStart, validationEnd, checkOut, baseAt,
+          date, dateStr, checkIn, validationStart, validationEnd, checkOut, baseAt,
           route, driverId, recordId, hasCheckOut: Boolean(checkOutRaw),
           driver: text(first(row, ["driverNome", "motorista"])),
-          modal: text(first(row, ["modal", "vehicle"])) || "OUTROS",
+          modal: cleanModal(text(first(row, ["modal", "vehicle"]))),
           company: text(first(row, ["transportadora", "company"])) || "OF",
           valid: Boolean(route || driverId || recordId)
         };
@@ -434,32 +552,47 @@
         osc.stop(audioCtx.currentTime + 0.2);
       }
 
-      async function fetchRecords() {
-        const res = await fetch(`${API_ENDPOINT}?t=${Date.now()}`);
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const payload = await res.json();
-        if (Array.isArray(payload)) return payload;
-        if (payload && Array.isArray(payload.records)) return payload.records;
-        throw new Error(payload.message || "Formato de retorno inválido.");
-      }
-
       async function loadData() {
         if (inFlight) return;
         inFlight = true;
         try {
-          const payload = await fetchRecords();
-          state.records = payload.map(normalize);
-          state.feed = "live";
+          const res = await fetch(`${API_ENDPOINT}?t=${Date.now()}`);
+          const payload = await res.json();
+          const list = Array.isArray(payload) ? payload : (payload.records || []);
+          state.records = list.map(normalize);
+          populateFilters();
+          if (state.activeTab === "live") renderLive();
+          else processAnalytics();
         } catch (err) {
-          state.feed = "error";
-          state.message = err.message || "Erro ao conectar com a planilha.";
+          console.warn("Erro ao buscar dados:", err);
         } finally {
           inFlight = false;
-          render();
         }
       }
 
-      function render() {
+      function populateFilters() {
+        const dates = [...new Set(state.records.map((d) => d.dateStr).filter(Boolean))];
+        const modais = [...new Set(state.records.map((d) => d.modal).filter((m) => m !== "OUTROS"))].sort();
+        const transps = [...new Set(state.records.map((d) => d.company).filter((t) => t !== "OF"))].sort();
+
+        fillSelect("stat-data", dates, "Todas as Datas");
+        fillSelect("stat-modal", modais, "Todos os Modais");
+        fillSelect("stat-transp", transps, "Todas as Transportadoras");
+      }
+
+      function fillSelect(id, values, defaultLabel) {
+        const el = $(id);
+        const prev = el.value;
+        el.innerHTML = `<option value="ALL">${defaultLabel}</option>`;
+        values.forEach((v) => {
+          const opt = document.createElement("option");
+          opt.value = v; opt.innerText = v;
+          el.appendChild(opt);
+        });
+        if (values.includes(prev)) el.value = prev;
+      }
+
+      function renderLive() {
         const active = state.records.filter((r) => r.valid && !r.hasCheckOut);
         const query = text($("search").value).toLowerCase();
         const visible = active.filter((r) => !query || [r.route, r.driver, r.driverId, r.modal, r.company].join(" ").toLowerCase().includes(query));
@@ -480,14 +613,6 @@
         $("kpi-alert").textContent = alertCount;
         $("kpi-finished").textContent = completedToday;
 
-        const diag = $("diagnostic");
-        if (state.feed === "error") {
-          diag.classList.add("visible");
-          $("diagnostic-msg").textContent = state.message;
-        } else {
-          diag.classList.remove("visible");
-        }
-
         const tbody = $("yard-body");
         if (!visible.length) {
           tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color: var(--text-muted); padding: 50px;">Pátio livre. Nenhum veículo em carregamento no momento.</td></tr>`;
@@ -506,7 +631,7 @@
 
           return `
             <tr>
-              <td><div class="route-tag">${escapeHtml(r.route || '--')}</div></td>
+              <td class="col-rota"><div class="route-tag">${escapeHtml(r.route || '--')}</div></td>
               <td>
                 <div class="driver-name">${escapeHtml(r.driver || 'Não identificado')}</div>
                 <div class="driver-sub">ID: ${escapeHtml(r.driverId || '---')}</div>
@@ -523,15 +648,220 @@
         if (critCount > 0) playAlertBeep();
       }
 
+      function processAnalytics() {
+        const dateVal = $("stat-data").value;
+        const modalVal = $("stat-modal").value;
+        const transpVal = $("stat-transp").value;
+
+        const filtered = state.records.filter((d) => {
+          return (dateVal === "ALL" || d.dateStr === dateVal) &&
+                 (modalVal === "ALL" || d.modal === modalVal) &&
+                 (transpVal === "ALL" || d.company === transpVal);
+        });
+
+        const slaBuckets = { "< 7 min (Ideal)": 0, "7-10 min (Alerta)": 0, "10-15 min (Crítico)": 0, "> 15 min (Gargalo)": 0 };
+        const hoursMap = {}, modalMap = {}, transpMap = {}, driverMap = {};
+        let totalTmcSec = 0, validTmcCount = 0, onTimeCount = 0;
+        let totalBipSec = 0, validBipCount = 0;
+
+        filtered.forEach((item) => {
+          if (item.validationStart && item.validationEnd && item.validationEnd >= item.validationStart) {
+            totalBipSec += (item.validationEnd - item.validationStart) / 1000;
+            validBipCount++;
+          }
+
+          if (item.validationEnd && item.checkOut && item.checkOut >= item.validationEnd) {
+            const diffMin = ((item.checkOut - item.validationEnd) / 1000) / 60;
+            totalTmcSec += (item.checkOut - item.validationEnd) / 1000;
+            validTmcCount++;
+
+            if (diffMin <= 10) onTimeCount++;
+
+            if (diffMin < 7) slaBuckets["< 7 min (Ideal)"]++;
+            else if (diffMin <= 10) slaBuckets["7-10 min (Alerta)"]++;
+            else if (diffMin <= 15) slaBuckets["10-15 min (Crítico)"]++;
+            else slaBuckets["> 15 min (Gargalo)"]++;
+
+            const h = item.checkOut.getHours().toString().padStart(2, '0') + "h";
+            hoursMap[h] = (hoursMap[h] || 0) + 1;
+
+            if (item.modal && item.modal !== "OUTROS") {
+              if (!modalMap[item.modal]) modalMap[item.modal] = [];
+              modalMap[item.modal].push(diffMin);
+            }
+
+            if (item.company && item.company !== "OF") {
+              if (!transpMap[item.company]) transpMap[item.company] = [];
+              transpMap[item.company].push(diffMin);
+            }
+
+            const dKey = `${item.driver || 'Não identificado'} • ${item.modal}`;
+            if (!driverMap[dKey]) driverMap[dKey] = [];
+            driverMap[dKey].push(diffMin);
+          }
+        });
+
+        $("kpi-stat-total").innerText = validTmcCount;
+        $("kpi-stat-tmc").innerText = validTmcCount ? `${(totalTmcSec / validTmcCount / 60).toFixed(1)}m` : "0.0m";
+        $("kpi-stat-sla").innerText = validTmcCount ? `${((onTimeCount / validTmcCount) * 100).toFixed(1)}%` : "0.0%";
+        $("kpi-stat-bip").innerText = validBipCount ? `${(totalBipSec / validBipCount / 60).toFixed(1)}m` : "0.0m";
+
+        renderAreaLine("chartHourly", hoursMap);
+        renderHorizontalSla("chartSla", slaBuckets);
+        renderHorizontalBar("chartModal", modalMap, '#ff5722');
+        renderHorizontalBar("chartTransp", transpMap, '#38bdf8');
+        renderDriverRanking(driverMap);
+      }
+
+      function renderAreaLine(canvasId, series) {
+        const labels = Object.keys(series).sort();
+        const values = labels.map((k) => series[k]);
+        const ctx = $(canvasId).getContext('2d');
+        if (chartRefs[canvasId]) chartRefs[canvasId].destroy();
+
+        const grad = ctx.createLinearGradient(0, 0, 0, 200);
+        grad.addColorStop(0, 'rgba(56, 189, 248, 0.35)');
+        grad.addColorStop(1, 'rgba(56, 189, 248, 0)');
+
+        chartRefs[canvasId] = new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: labels,
+            datasets: [{
+              data: values, borderColor: '#38bdf8', backgroundColor: grad,
+              borderWidth: 3, fill: true, tension: 0.35, pointRadius: 5, pointBackgroundColor: '#38bdf8'
+            }]
+          },
+          options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false },
+              datalabels: {
+                anchor: 'end', align: 'top', color: '#38bdf8', font: { weight: '800', size: 10 },
+                formatter: (v) => `${v} carros`
+              }
+            },
+            scales: {
+              y: { grid: { color: '#1a253a' }, ticks: { color: '#64748b' } },
+              x: { grid: { display: false }, ticks: { color: '#94a3b8', font: { weight: 700 } } }
+            }
+          }
+        });
+      }
+
+      function renderHorizontalSla(canvasId, buckets) {
+        const labels = Object.keys(buckets);
+        const values = Object.values(buckets);
+        const ctx = $(canvasId).getContext('2d');
+        if (chartRefs[canvasId]) chartRefs[canvasId].destroy();
+
+        chartRefs[canvasId] = new Chart(ctx, {
+          type: 'bar',
+          data: {
+            labels: labels,
+            datasets: [{
+              data: values,
+              backgroundColor: ['#10b981', '#f59e0b', '#ea580c', '#ef4444'],
+              borderRadius: 6, maxBarThickness: 26
+            }]
+          },
+          options: {
+            indexAxis: 'y',
+            responsive: true, maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false },
+              datalabels: {
+                anchor: 'end', align: 'right', color: '#f8fafc', font: { weight: '800', size: 11 },
+                formatter: (v) => `${v} carros`
+              }
+            },
+            scales: {
+              x: { grid: { color: '#1a253a' }, ticks: { color: '#64748b' } },
+              y: { grid: { display: false }, ticks: { color: '#cbd5e1', font: { weight: 700 } } }
+            }
+          }
+        });
+      }
+
+      function renderHorizontalBar(canvasId, dataMap, barColor) {
+        const sorted = Object.keys(dataMap).map((k) => ({
+          label: k,
+          avg: parseFloat((dataMap[k].reduce((a,b)=>a+b,0) / dataMap[k].length).toFixed(1))
+        })).sort((a, b) => b.avg - a.avg);
+
+        const labels = sorted.map((d) => d.label);
+        const values = sorted.map((d) => d.avg);
+
+        const ctx = $(canvasId).getContext('2d');
+        if (chartRefs[canvasId]) chartRefs[canvasId].destroy();
+
+        chartRefs[canvasId] = new Chart(ctx, {
+          type: 'bar',
+          data: {
+            labels: labels,
+            datasets: [{ data: values, backgroundColor: barColor, borderRadius: 6, maxBarThickness: 24 }]
+          },
+          options: {
+            indexAxis: 'y',
+            responsive: true, maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false },
+              datalabels: {
+                anchor: 'end', align: 'right', color: '#f8fafc', font: { weight: '800', size: 11 },
+                formatter: (v) => `${v} min`
+              }
+            },
+            scales: {
+              x: { grid: { color: '#1a253a' }, ticks: { color: '#64748b' } },
+              y: { grid: { display: false }, ticks: { color: '#cbd5e1', font: { weight: 700 } } }
+            }
+          }
+        });
+      }
+
+      function renderDriverRanking(drivers) {
+        const box = $("driver-ranking-box");
+        const list = Object.keys(drivers).map((key) => {
+          const arr = drivers[key];
+          const avg = arr.reduce((a, b) => a + b, 0) / arr.length;
+          return { name: key, avg: parseFloat(avg.toFixed(1)), count: arr.length };
+        }).sort((a, b) => b.avg - a.avg).slice(0, 6);
+
+        if (!list.length) {
+          box.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding:20px;">Nenhum motorista encontrado.</div>`;
+          return;
+        }
+
+        const topVal = Math.max(...list.map((d) => d.avg), 30);
+        let outHtml = "";
+
+        list.forEach((item, index) => {
+          const barWidth = Math.min(100, Math.round((item.avg / topVal) * 100));
+          outHtml += `
+            <div class="offender-row">
+              <div class="offender-rank">#${index + 1}</div>
+              <div class="offender-details">
+                <div style="font-weight:700; color:#fff; font-size:0.88rem;">${escapeHtml(item.name)}</div>
+                <div style="font-size:0.72rem; color:var(--text-muted);">${item.count} viagens registradas</div>
+                <div class="offender-bar-wrap"><div class="offender-bar-val" style="width:${barWidth}%"></div></div>
+              </div>
+              <div style="font-family:'JetBrains Mono', monospace; font-size:1.1rem; font-weight:800; color:var(--crit);">
+                ${item.avg} <span style="font-size:0.75rem; color:var(--text-muted)">min</span>
+              </div>
+            </div>
+          `;
+        });
+        box.innerHTML = outHtml;
+      }
+
       function updateClock() {
         $("clock").textContent = new Intl.DateTimeFormat("pt-BR", {
           timeZone: HUB_TIMEZONE, hour: "2-digit", minute: "2-digit", second: "2-digit"
         }).format(new Date());
-        render();
+        if (state.activeTab === "live") renderLive();
       }
 
-      $("search").addEventListener("input", render);
-      $("refresh-button").addEventListener("click", loadData);
+      $("search").addEventListener("input", renderLive);
 
       const soundBtn = $("sound-button");
       soundBtn.addEventListener("click", () => {
