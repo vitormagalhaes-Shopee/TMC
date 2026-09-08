@@ -129,7 +129,7 @@
     </div>
   </header>
 
-  <!-- ==================== ABA 1: MONITOR DE PÁTIO AO VIVO ==================== -->
+  <!-- ABA 1: MONITOR DE PÁTIO AO VIVO -->
   <div id="view-live" class="view-panel active">
     <div class="kpi-grid">
       <div class="kpi-box">
@@ -148,7 +148,7 @@
         <div class="kpi-foot">Acima do SLA de vaga</div>
       </div>
       <div class="kpi-box">
-        <div class="kpi-title">Rotas Concluídas</div>
+        <div class="kpi-title">Rotas Concluídas Hoje</div>
         <div class="kpi-number" id="live-finished-count">0</div>
         <div class="kpi-foot" id="live-flow-rate">Fluxo: 0.0 carros/hora</div>
       </div>
@@ -166,7 +166,7 @@
             <th>Motorista</th>
             <th>Modal</th>
             <th>Transportadora</th>
-            <th>Horário Referência</th>
+            <th>Início / Término Rota</th>
             <th>Tempo no Pátio (TMC)</th>
             <th style="text-align: right;">Status</th>
           </tr>
@@ -178,7 +178,7 @@
     </div>
   </div>
 
-  <!-- ==================== ABA 2: ANALYTICS GERENCIAL ==================== -->
+  <!-- ABA 2: ANALYTICS GERENCIAL -->
   <div id="view-stats" class="view-panel">
     <div class="filter-panel">
       <span style="font-size: 0.72rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">Filtros:</span>
@@ -305,7 +305,6 @@
       btn.style.borderColor = audioEnabled ? "#10b981" : "#1a253a";
     }
 
-    // Extrai segundos ignorando a data se ela vier junto
     function parseToSec(timeStr) {
       if (!timeStr) return null;
       const s = String(timeStr).trim();
@@ -332,23 +331,17 @@
         const data = await response.json();
         
         rawDataset = data.map(item => {
+          // O checkOut só é válido se for uma hora de verdade (ex: 08:44:28)
           const rawOut = String(item.checkOut || "").trim();
-          
-          // Considera finalizado APENAS se tiver hora real de saída preenchida
-          const hasOut = (
-            rawOut !== "" && 
-            rawOut !== "00:00:00" && 
-            rawOut !== "-" && 
-            !rawOut.toLowerCase().includes("carregando") &&
-            rawOut.length >= 5
-          );
+          const matchOut = rawOut.match(/\d{1,2}:\d{2}/);
+          const hasOut = Boolean(matchOut && !rawOut.toLowerCase().includes("carregando") && rawOut !== "00:00:00");
 
           return {
             ...item,
             data: cleanDateStr(item.data),
             modal: cleanModal(item.modal),
             transportadora: cleanTransp(item.transportadora),
-            isFinalizado: Boolean(hasOut)
+            isFinalizado: hasOut
           };
         });
 
@@ -388,21 +381,32 @@
       const now = getSecondsNow();
       const searchTerm = (document.getElementById("live-search").value || "").toLowerCase();
 
+      // Pega a data mais recente disponível na base
+      const sortedDates = [...new Set(rawDataset.map(d => d.data).filter(Boolean))].sort((a, b) => dateToTimestamp(b) - dateToTimestamp(a));
+      const latestDate = sortedDates[0] || "";
+
       const yardItems = [];
-      let totalTime = 0, criticals = 0, finishedCount = 0;
+      let totalTime = 0, criticals = 0, finishedToday = 0;
       let firstStart = null, lastEnd = null;
 
       rawDataset.forEach(row => {
+        const isFromLatestDay = (!latestDate || row.data === latestDate);
         const vStart = parseToSec(row.validationTi);
         const vEnd = parseToSec(row.validationEi);
         const cIn = parseToSec(row.checkIn);
         const cOut = parseToSec(row.checkOut);
 
-        if (row.isFinalizado) {
-          finishedCount++;
-          if (cOut !== null) lastEnd = (lastEnd === null || cOut > lastEnd) ? cOut : lastEnd;
-        } else if (row.rota || row.idDriver) {
-          // Carro carregando no pátio agora
+        if (isFromLatestDay) {
+          if (row.isFinalizado) {
+            finishedToday++;
+            if (cOut !== null) lastEnd = (lastEnd === null || cOut > lastEnd) ? cOut : lastEnd;
+          }
+          if (vStart !== null) firstStart = (firstStart === null || vStart < firstStart) ? vStart : firstStart;
+        }
+
+        // CARRO NO PÁTIO AGORA:
+        // Não deu check-out e pertence à data mais recente da operação
+        if (!row.isFinalizado && isFromLatestDay && (row.rota || row.idDriver)) {
           let baseTime = vEnd !== null ? vEnd : (vStart !== null ? vStart : cIn);
           let tmcSec = baseTime !== null ? Math.max(0, now - baseTime) : 0;
 
@@ -421,18 +425,16 @@
             if (tmcSec >= 600) criticals++;
           }
         }
-
-        if (vStart !== null) firstStart = (firstStart === null || vStart < firstStart) ? vStart : firstStart;
       });
 
       document.getElementById("live-patio-count").innerText = yardItems.length;
       document.getElementById("live-patio-crit").innerText = criticals;
       document.getElementById("live-patio-avg").innerText = yardItems.length ? fmtMinutes(Math.round(totalTime / yardItems.length)) : "00:00";
-      document.getElementById("live-finished-count").innerText = finishedCount;
+      document.getElementById("live-finished-count").innerText = finishedToday;
 
       if (firstStart !== null && lastEnd !== null && lastEnd > firstStart) {
         const spanH = (lastEnd - firstStart) / 3600;
-        document.getElementById("live-flow-rate").innerText = `Fluxo: ${(finishedCount / spanH).toFixed(1)} carros/hora`;
+        document.getElementById("live-flow-rate").innerText = `Fluxo: ${(finishedToday / spanH).toFixed(1)} carros/hora`;
       } else {
         document.getElementById("live-flow-rate").innerText = `Fluxo: 0.0 carros/hora`;
       }
@@ -441,7 +443,7 @@
 
       const tbody = document.getElementById("yard-tbody");
       if (!yardItems.length) {
-        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color: var(--text-muted); padding: 30px;">Pátio desocupado. Nenhum carro carregando no momento.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color: var(--text-muted); padding: 30px;">Pátio desocupado. Nenhum carro em carregamento no momento para a data ${latestDate}.</td></tr>`;
         return;
       }
 
@@ -511,12 +513,12 @@
             hoursMap[h] = (hoursMap[h] || 0) + 1;
           }
 
-          if (item.modal) {
+          if (item.modal && item.modal !== "OUTROS") {
             if (!modalMap[item.modal]) modalMap[item.modal] = [];
             modalMap[item.modal].push(diffMin);
           }
 
-          if (item.transportadora) {
+          if (item.transportadora && item.transportadora !== "OF") {
             if (!transpMap[item.transportadora]) transpMap[item.transportadora] = [];
             transpMap[item.transportadora].push(diffMin);
           }
